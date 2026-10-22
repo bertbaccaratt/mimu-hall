@@ -72,7 +72,7 @@
   @keyframes flare { 0% { box-shadow: 0 0 30px rgba(217,172,92,.28); } 35% { color: #fff; background: rgba(246,220,149,.5); box-shadow: 0 0 90px 22px rgba(246,220,149,.7); transform: translateX(-50%) scale(1.08); } 100% { opacity: 0; transform: translateX(-50%) scale(1.35); filter: blur(8px); } }
   .sound { position: fixed; right: 18px; bottom: 18px; z-index: 5; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0; color: #c9a15a; background: rgba(0,0,0,.4); border: 1px solid rgba(217,172,92,.55); cursor: pointer; opacity: 0; animation: fade 1s 1.6s forwards; -webkit-tap-highlight-color: transparent; }
   .sound:hover, .sound:focus-visible { color: #fff0c4; border-color: var(--gold-hi); box-shadow: 0 0 18px rgba(232,198,115,.4); outline: none; }
-  .hint { position: fixed; right: 68px; bottom: 29px; z-index: 5; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #b9904f; text-shadow: 0 1px 6px #000; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
+  .hint { display: none !important; position: fixed; right: 68px; bottom: 29px; z-index: 5; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #b9904f; text-shadow: 0 1px 6px #000; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
   .hint.show { opacity: .85; animation: breathe 2.4s ease-in-out infinite; }
   @keyframes breathe { 50% { opacity: .4; } }
   .sound .x { display: none; } .sound.off .x { display: block; } .sound.off .w1, .sound.off .w2 { display: none; }
