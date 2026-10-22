@@ -92,6 +92,7 @@
   .tab:hover, .tab:focus-visible, .tab.active { color: #f6dc95; text-shadow: 0 0 14px rgba(232,198,115,.6), 0 1px 8px #000; outline: none; }
   .tab:hover::after, .tab:focus-visible::after, .tab.active::after { transform: scaleX(1); }
   @media (max-width: 640px) { .top { padding: 16px 10px 28px; } .brand { letter-spacing: .4em; padding-left: .4em; } .tab { letter-spacing: .18em; font-size: 9px; } .tabs { gap: 10px; } .tabs.l { padding-right: 10px; } .tabs.r { padding-left: 10px; } .top::after { bottom: 18px; } }
+  .copy { position: fixed; left: 18px; bottom: 14px; z-index: 5; font-size: 9px; letter-spacing: .32em; color: #b08a48; text-shadow: 0 1px 6px #000; opacity: 0; pointer-events: none; animation: fade 1.2s 1.8s forwards; }
   /* Apechain panel: see-through glass over the hall */
   .ashade { position: fixed; inset: 0; z-index: 2; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.30), rgba(0,0,0,.70)); opacity: 0; pointer-events: none; transition: opacity .6s ease; }
   .ashade.open { opacity: 1; pointer-events: auto; }
@@ -127,7 +128,7 @@
   .retry { font: 500 12px 'Cinzel', Georgia, serif; letter-spacing: .3em; padding: 12px 26px; color: #ecca82; background: rgba(0,0,0,.4); border: 1px solid var(--gold); cursor: pointer; }
   @keyframes turn { to { transform: rotate(360deg); } }
   @media (max-width: 700px) {
-    .apanel { top: 74px; bottom: 0; width: 100%; outline: none; border-left: 0; border-right: 0; } .apanel::before, .apanel::after { display: none; }
+    .apanel { top: 74px; bottom: 34px; width: 100%; outline: none; border-left: 0; border-right: 0; } .apanel::before, .apanel::after { display: none; }
     .ahead { padding: 18px 18px 10px; } .atitle { letter-spacing: .26em; font-size: 15px; } .asub { font-size: 8px; letter-spacing: .18em; }
     .acols { display: none; }
     .arow { grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "rk who fl" "rk who v24" "rk who vt"; row-gap: 0; padding: 0 16px; height: 78px; column-gap: 10px; }
@@ -185,6 +186,7 @@
   </nav>
 </header>
 
+<footer class="copy">&copy; 2026 MIMU ON APE</footer>
 <div class="ashade" id="apeShade"></div>
 <section class="apanel" id="apePanel" role="dialog" aria-modal="true" aria-labelledby="apeTitle" aria-hidden="true">
   <div class="ahead">
