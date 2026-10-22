@@ -120,8 +120,8 @@
 window.MIMUAudio = (function () {
   var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
   var ctx = null, master, sfx, bus, verb, started = false, muted = false, lastTick = -1;
-  var MUSIC_LEVEL = 0.025, BEEP_LEVEL = 0.5;
-  try { muted = localStorage.getItem('mimu-muted') === '1'; } catch (e) {}
+  var MUSIC_LEVEL = 0.0125, BEEP_LEVEL = 0.5;
+  try { localStorage.removeItem('mimu-muted'); } catch (e) {}   // every visit starts with sound on
   var btn = document.getElementById('sound');
   function paint() { btn.classList.toggle('off', muted); btn.setAttribute('aria-label', muted ? 'Sound off' : 'Sound on'); }
   paint();
@@ -192,7 +192,6 @@ window.MIMUAudio = (function () {
 
   btn.addEventListener('click', function (ev) {
     ev.stopPropagation(); wake(); muted = !muted; paint();
-    try { localStorage.setItem('mimu-muted', muted ? '1' : '0'); } catch (e) {}
     master.gain.setTargetAtTime(muted ? 0 : 1, ctx.currentTime, 0.12);
   });
   document.addEventListener('visibilitychange', function () {
