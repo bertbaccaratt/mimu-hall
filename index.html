@@ -1,0 +1,21 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MIMU</title>
+<meta name="theme-color" content="#000000">
+<link rel="preload" as="image" href="assets/poster.webp">
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  .bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000 url("assets/poster.webp") center / cover no-repeat; }
+  @media (prefers-reduced-motion: reduce) { .bg { display: none; } body { background: #000 url("assets/poster.webp") center / cover no-repeat; } }
+</style>
+</head>
+<body>
+<video class="bg" autoplay muted loop playsinline preload="auto" poster="assets/poster.webp" aria-hidden="true" disablepictureinpicture>
+  <source src="assets/hall.mp4" type="video/mp4">
+  <source src="assets/hall.webm" type="video/webm">
+</video>
+</body>
+</html>
