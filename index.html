@@ -120,7 +120,7 @@
 window.MIMUAudio = (function () {
   var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
   var ctx = null, master, sfx, bus, verb, started = false, muted = false, lastTick = -1;
-  var MUSIC_LEVEL = 0.05, BEEP_LEVEL = 0.5;
+  var MUSIC_LEVEL = 0.025, BEEP_LEVEL = 0.5;
   try { muted = localStorage.getItem('mimu-muted') === '1'; } catch (e) {}
   var btn = document.getElementById('sound');
   function paint() { btn.classList.toggle('off', muted); btn.setAttribute('aria-label', muted ? 'Sound off' : 'Sound on'); }
