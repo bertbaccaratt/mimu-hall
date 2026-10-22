@@ -92,6 +92,49 @@
   .tab:hover, .tab:focus-visible, .tab.active { color: #f6dc95; text-shadow: 0 0 14px rgba(232,198,115,.6), 0 1px 8px #000; outline: none; }
   .tab:hover::after, .tab:focus-visible::after, .tab.active::after { transform: scaleX(1); }
   @media (max-width: 640px) { .top { padding: 16px 10px 28px; } .brand { letter-spacing: .4em; padding-left: .4em; } .tab { letter-spacing: .18em; font-size: 9px; } .tabs { gap: 10px; } .tabs.l { padding-right: 10px; } .tabs.r { padding-left: 10px; } .top::after { bottom: 18px; } }
+  /* Apechain panel: see-through glass over the hall */
+  .ashade { position: fixed; inset: 0; z-index: 2; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.30), rgba(0,0,0,.70)); opacity: 0; pointer-events: none; transition: opacity .6s ease; }
+  .ashade.open { opacity: 1; pointer-events: auto; }
+  .apanel { position: fixed; left: 50%; top: 118px; bottom: 40px; width: min(1060px, 92vw); z-index: 3; display: flex; flex-direction: column; border: 1px solid rgba(217,172,92,.55); outline: 1px solid rgba(217,172,92,.22); outline-offset: 6px; background: linear-gradient(180deg, rgba(40,6,10,.46), rgba(8,2,3,.58)); -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1); box-shadow: 0 0 90px rgba(0,0,0,.8), 0 0 60px rgba(150,15,25,.22); opacity: 0; visibility: hidden; transform: translate(-50%, 18px) scale(.985); transition: opacity .55s ease, transform .6s cubic-bezier(.2,.8,.2,1), visibility 0s .6s; }
+  .apanel.open { opacity: 1; visibility: visible; transform: translate(-50%, 0) scale(1); transition-delay: 0s; }
+  .apanel::before, .apanel::after { content: ""; position: absolute; top: -12px; width: 20px; height: 20px; border: 2px solid #e8c673; background: #5a0d12; transform: rotate(45deg); }
+  .apanel::before { left: -12px; } .apanel::after { right: -12px; }
+  .ahead { display: flex; align-items: flex-start; justify-content: space-between; padding: 26px 34px 16px; }
+  .atitle { margin: 0; font-weight: 500; font-size: clamp(18px, 2.2vw, 28px); letter-spacing: .42em; line-height: 1.1; }
+  .asub { margin-top: 10px; font-size: 11px; letter-spacing: .3em; color: #b9904f; }
+  .aclose { width: 36px; height: 36px; flex: none; padding: 0; font: 400 22px/1 Georgia, serif; color: #d9ac5c; background: rgba(0,0,0,.3); border: 1px solid rgba(217,172,92,.6); cursor: pointer; }
+  .aclose:hover, .aclose:focus-visible { color: #fff0c4; border-color: var(--gold-hi); box-shadow: 0 0 18px rgba(232,198,115,.4); outline: none; }
+  .acols, .arow { display: grid; grid-template-columns: 56px minmax(0, 2.4fr) 1fr 1fr 1.1fr; align-items: center; column-gap: 12px; padding: 0 34px; }
+  .acols { font-size: 10px; letter-spacing: .3em; color: #9a7a45; padding-bottom: 10px; border-bottom: 1px solid rgba(217,172,92,.25); }
+  .acols span:nth-child(n+3), .arow .st { text-align: right; }
+  .alist { flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(217,172,92,.5) transparent; }
+  .alist::-webkit-scrollbar { width: 8px; } .alist::-webkit-scrollbar-thumb { background: rgba(217,172,92,.45); }
+  .arow { height: 68px; text-decoration: none; color: #d7bd86; border-bottom: 1px solid rgba(217,172,92,.1); background: rgba(255,255,255,.018); letter-spacing: .06em; font-size: 14px; transition: background .25s, box-shadow .25s; }
+  .arow:nth-child(even) { background: rgba(255,255,255,.04); }
+  .arow:hover, .arow:focus-visible { background: linear-gradient(90deg, rgba(150,20,28,.38), rgba(217,172,92,.16)); box-shadow: inset 3px 0 0 #e8c673, 0 0 30px rgba(217,172,92,.18); outline: none; }
+  .arow .rk { font-size: 16px; color: #c9a15a; }
+  .arow:nth-child(-n+3) .rk { color: #f6dc95; text-shadow: 0 0 12px rgba(232,198,115,.6); }
+  .who { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .av { width: 42px; height: 42px; flex: none; border-radius: 50%; object-fit: cover; border: 1px solid rgba(217,172,92,.7); background: #1a0508; box-shadow: 0 0 14px rgba(0,0,0,.6); }
+  .av.ph { display: flex; align-items: center; justify-content: center; font-size: 15px; color: #f6dc95; background: radial-gradient(circle at 35% 30%, #7a1118, #2a0408); }
+  .nm { font-weight: 700; letter-spacing: .12em; color: #f1d9a0; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+  .vf { flex: none; filter: drop-shadow(0 0 6px rgba(232,198,115,.55)); }
+  .st b { font-weight: 700; color: #f1d9a0; letter-spacing: .06em; } .st i { font-style: normal; font-size: 9px; letter-spacing: .2em; color: #9a7a45; margin-left: 6px; }
+  .dots { font-style: normal; color: #9a7a45; animation: breathe 1.2s ease-in-out infinite; }
+  .amsg { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 80px 20px; font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: #b9904f; text-align: center; }
+  .spin { width: 26px; height: 26px; border: 1px solid rgba(217,172,92,.35); border-top-color: var(--gold-hi); border-radius: 50%; animation: turn .9s linear infinite; }
+  .retry { font: 500 12px 'Cinzel', Georgia, serif; letter-spacing: .3em; padding: 12px 26px; color: #ecca82; background: rgba(0,0,0,.4); border: 1px solid var(--gold); cursor: pointer; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+  @media (max-width: 700px) {
+    .apanel { top: 74px; bottom: 0; width: 100%; outline: none; border-left: 0; border-right: 0; } .apanel::before, .apanel::after { display: none; }
+    .ahead { padding: 18px 18px 10px; } .atitle { letter-spacing: .26em; font-size: 15px; } .asub { font-size: 8px; letter-spacing: .18em; }
+    .acols { display: none; }
+    .arow { grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "rk who fl" "rk who v24" "rk who vt"; row-gap: 0; padding: 0 16px; height: 78px; column-gap: 10px; }
+    .arow .rk { grid-area: rk; font-size: 13px; } .arow .who { grid-area: who; } .arow .fl { grid-area: fl; } .arow .v24 { grid-area: v24; } .arow .vt { grid-area: vt; }
+    .arow .st { font-size: 10px; line-height: 1.3; } .arow .st::before { color: #7d6334; font-size: 8px; letter-spacing: .14em; margin-right: 8px; }
+    .arow .fl::before { content: "FLOOR"; } .arow .v24::before { content: "24H"; } .arow .vt::before { content: "TOTAL"; }
+    .av { width: 36px; height: 36px; } .nm { font-size: 11px; letter-spacing: .08em; }
+  }
   @keyframes rise { from { opacity: 0; transform: translateY(14px); letter-spacing: 1.3em; } to { opacity: 1; transform: none; letter-spacing: .9em; } }
   @keyframes fade { to { opacity: 1; } }
   @keyframes blink { 50% { opacity: 0; } }
@@ -119,7 +162,7 @@
   <h1 class="title gold">MIMU</h1>
   <div class="rule"></div>
   <div class="slot">
-    <button class="enter show gate" id="gate" type="button"><span class="inner">BEGIN</span></button>
+    <button class="enter show gate" id="gate" type="button"><span class="inner">CLICK TO LOAD</span></button>
     <div class="loader gated" id="loader" role="status" aria-live="polite">
       <div class="status" id="status"><span id="msg"></span><span class="cur"></span></div>
       <div class="bar"><div class="fill" id="fill"></div><div class="sheen"></div><div class="spark" id="spark"></div></div>
@@ -140,6 +183,16 @@
     <a class="tab" href="#about">About</a>
   </nav>
 </header>
+
+<div class="ashade" id="apeShade"></div>
+<section class="apanel" id="apePanel" role="dialog" aria-modal="true" aria-labelledby="apeTitle" aria-hidden="true">
+  <div class="ahead">
+    <div><h2 class="atitle gold" id="apeTitle">TOP 50 &middot; APECHAIN</h2><div class="asub" id="apeUpdated">LIVE FROM OSWIKI</div></div>
+    <button class="aclose" id="apeClose" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="acols" aria-hidden="true"><span>#</span><span>NFT COLLECTION</span><span>FLOOR</span><span>24H VOLUME</span><span>TOTAL VOLUME</span></div>
+  <div class="alist" id="apeList" role="table"></div>
+</section>
 
 <span class="hint" id="hint" aria-hidden="true">Sound &middot; tap anywhere</span>
 <button class="sound" id="sound" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path class="w1" d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path class="w2" d="M18 6.8a7.5 7.5 0 0 1 0 10.4"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
@@ -335,9 +388,87 @@ window.MIMUAudio = (function () {
     }, reduce ? 300 : 2300);
   });
 
-  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
-    t.addEventListener('click', function (ev) { ev.preventDefault(); Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (o) { o.classList.toggle('active', o === t); }); });
+  /* ---- APECHAIN: the top 50 NFT collections, live from OSWiki (read-only public data) ---- */
+  var API = 'https://api.oswiki.xyz/v1/collections', CHAIN = 33139;
+  var panel = $('apePanel'), apeShade = $('apeShade'), apeList = $('apeList'), apeUpdated = $('apeUpdated'), apeClose = $('apeClose');
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab')), apeTab = document.querySelector('a[href="#apechain"]'), hallTab = document.querySelector('a[href="#hall"]');
+  var ape = { loaded: false, loading: false, totals: {} };
+  function lsGet(k, maxAge) { try { var o = JSON.parse(localStorage.getItem(k)); if (o && Date.now() - o.t < maxAge) return o.v; } catch (e) {} return null; }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), v: v })); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function num(n) {
+    if (n == null || isNaN(n)) return '—';
+    var a = Math.abs(n);
+    if (a >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+    if (a >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (a >= 1e4) return (n / 1e3).toFixed(1) + 'K';
+    if (a >= 1000) return Math.round(n).toLocaleString('en-US');
+    if (a >= 100) return n.toFixed(1).replace(/\.0$/, '');
+    if (a >= 1) return n.toFixed(2).replace(/\.?0+$/, '');
+    return n.toFixed(3).replace(/\.?0+$/, '') || '0';
+  }
+  var CHECK = '<svg class="vf" viewBox="0 0 24 24" width="17" height="17" aria-label="Verified" role="img"><circle cx="12" cy="12" r="10.5" fill="#d9ac5c" stroke="#f6dc95"/><path d="M7.4 12.4l3.2 3.2 6-6.6" fill="none" stroke="#2b0407" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function rowHtml(c, i) {
+    var s = c.stats || {}, v = s.volume || {}, tot = ape.totals[c.slug];
+    var img = c.imageUrl ? '<img class="av" src="' + esc(c.imageUrl) + '" alt="" loading="lazy" decoding="async" width="42" height="42" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'av ph\',textContent:\'' + esc((c.name || '?').charAt(0).toUpperCase()) + '\'}))">' : '<span class="av ph">' + esc((c.name || '?').charAt(0).toUpperCase()) + '</span>';
+    return '<a class="arow" role="row" href="' + esc((c.urls && c.urls.collection) || '#') + '" target="_blank" rel="noopener noreferrer" data-slug="' + esc(c.slug) + '">' +
+      '<span class="rk">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="who">' + img + '<span class="nm">' + esc(c.name) + '</span>' + (c.verified ? CHECK : '') + '</span>' +
+      '<span class="st fl"><b>' + num(s.floorPrice) + '</b><i>APE</i></span>' +
+      '<span class="st v24"><b>' + num(v['24h']) + '</b><i>APE</i></span>' +
+      '<span class="st vt" data-tot><b>' + (tot != null ? num(tot) : '<em class="dots">···</em>') + '</b><i>APE</i></span></a>';
+  }
+  function fillTotal(slug, val) {
+    var el = apeList.querySelector('.arow[data-slug="' + slug + '"] [data-tot] b'); if (el) el.textContent = val == null ? '—' : num(val);
+  }
+  function loadTotals(items) {
+    var cache = lsGet('mimu-ape-totals', 6 * 3600 * 1000) || {}, queue = [];
+    items.forEach(function (c) { if (cache[c.slug] != null) { ape.totals[c.slug] = cache[c.slug]; fillTotal(c.slug, cache[c.slug]); } else queue.push(c.slug); });
+    // gentle on the free feed: 2 at a time, spaced out, and wait it out if it asks us to slow down (429)
+    // (the free feed allows 30 requests a minute per visitor, so the totals fill in one by one, top of the list first)
+    var workers = 1, done = 0, tries = {};
+    function next() {
+      var slug = queue.shift(); if (!slug) { if (++done === workers) lsSet('mimu-ape-totals', ape.totals); return; }
+      fetch(API + '/' + encodeURIComponent(slug) + '?chainId=' + CHAIN).then(function (r) {
+        if (r.status === 429) { tries[slug] = (tries[slug] || 0) + 1; if (tries[slug] <= 3) queue.push(slug); else fillTotal(slug, null); return 'wait'; }
+        return r.ok ? r.json() : null;
+      }).then(function (j) {
+        if (j === 'wait') return 'wait';
+        var t = j && j.data && j.data.stats && j.data.stats.volume ? j.data.stats.volume.all : null;
+        if (t != null) { ape.totals[slug] = t; lsSet('mimu-ape-totals', ape.totals); } fillTotal(slug, t);
+      }).catch(function () { fillTotal(slug, null); }).then(function (w) { setTimeout(next, w === 'wait' ? 20000 : 2300); });
+    }
+    for (var w = 0; w < workers; w++) setTimeout(next, w * 250);
+  }
+  function showList(items, when) {
+    apeList.innerHTML = items.map(rowHtml).join('');
+    apeUpdated.textContent = 'LIVE FROM OSWIKI · UPDATED ' + new Date(when).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    ape.loaded = true; loadTotals(items);
+  }
+  function loadApe(force) {
+    if (ape.loading) return;
+    var cached = !force && lsGet('mimu-ape-list', 10 * 60 * 1000);
+    if (cached) { showList(cached.items, cached.when); return; }
+    ape.loading = true; apeList.innerHTML = '<div class="amsg"><span class="spin"></span>Reading the chain</div>';
+    fetch(API + '?chainId=' + CHAIN + '&limit=50').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) {
+      var items = (j.data || []).slice(0, 50); if (!items.length) throw new Error('empty');
+      var when = Date.now(); lsSet('mimu-ape-list', { items: items, when: when }); showList(items, when);
+    }).catch(function () {
+      apeList.innerHTML = '<div class="amsg">The chain is not answering right now.<button type="button" class="retry" id="apeRetry">Try again</button></div>';
+      $('apeRetry').addEventListener('click', function () { loadApe(true); });
+    }).then(function () { ape.loading = false; });
+  }
+  function setActive(t) { tabs.forEach(function (o) { o.classList.toggle('active', o === t); }); }
+  function openApe() { setActive(apeTab); panel.classList.add('open'); apeShade.classList.add('open'); panel.setAttribute('aria-hidden', 'false'); if (!ape.loaded) loadApe(false); try { apeClose.focus({ preventScroll: true }); } catch (e) {} }
+  function closeApe() { panel.classList.remove('open'); apeShade.classList.remove('open'); panel.setAttribute('aria-hidden', 'true'); setActive(hallTab); }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      if (t === apeTab) { panel.classList.contains('open') ? closeApe() : openApe(); } else { closeApe(); setActive(t); }
+    });
   });
+  apeClose.addEventListener('click', closeApe); apeShade.addEventListener('click', closeApe);
+  window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && panel.classList.contains('open')) closeApe(); });
 
   // The loading beeps can only play after the visitor does something on the page (browser rule), so the loader waits behind one
   // BEGIN click. Set GATE to false to go back to loading straight away (the beeps are then silent until the first click).
