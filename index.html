@@ -6,10 +6,83 @@
 <title>MIMU</title>
 <meta name="theme-color" content="#000000">
 <link rel="preload" as="image" href="assets/poster.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
 <style>
+  :root { --gold-hi: #f6dc95; --gold: #d9ac5c; --gold-lo: #8f5f1d; --crimson: #6b0b11; }
+  * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  body { font-family: 'Cinzel', 'Trajan Pro', Georgia, serif; color: var(--gold); }
+
+  /* the looping hall */
   .bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000 url("assets/poster.webp") center / cover no-repeat; }
-  @media (prefers-reduced-motion: reduce) { .bg { display: none; } body { background: #000 url("assets/poster.webp") center / cover no-repeat; } }
+  .veil { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.58) 0%, rgba(0,0,0,.28) 45%, rgba(0,0,0,.68) 100%); }
+
+  /* the entrance */
+  .stage { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 16px; text-align: center; }
+  .gold { background: linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 45%, var(--gold-lo) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .title { margin: 0; font-weight: 500; font-size: clamp(38px, 5vw, 88px); letter-spacing: .9em; padding-left: .9em; line-height: 1; opacity: 0; animation: rise 1.4s .2s cubic-bezier(.2,.7,.2,1) forwards; filter: drop-shadow(0 3px 14px rgba(0,0,0,.85)); }
+  .rule { width: min(520px, 78vw); height: 1px; margin: clamp(22px, 3.2vw, 38px) 0 clamp(34px, 4.4vw, 56px); background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0; animation: fade 1.2s .8s forwards; }
+  .slot { position: relative; width: min(520px, 82vw); height: 128px; }
+
+  /* loader */
+  .loader { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: stretch; opacity: 0; animation: fade 1s 1.1s forwards; transition: opacity .55s ease, transform .55s ease, filter .55s ease; }
+  .loader.done { opacity: 0 !important; transform: translateY(8px) scale(.985); filter: blur(2px); pointer-events: none; animation: none; }
+  .status { height: 30px; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: clamp(12px, 1.25vw, 17px); letter-spacing: .42em; text-transform: uppercase; color: #e5c479; text-shadow: 0 0 12px rgba(217,172,92,.45), 0 2px 8px #000; white-space: nowrap; }
+  .status .cur { display: inline-block; width: .5em; height: 1em; margin-left: .35em; background: var(--gold); box-shadow: 0 0 10px var(--gold); animation: blink .9s steps(1) infinite; }
+  .status.flash { animation: flash .35s ease-out; }
+
+  .bar { position: relative; height: 9px; margin: 16px 0 0; border: 1px solid rgba(217,172,92,.75); background: rgba(0,0,0,.55); box-shadow: 0 0 22px rgba(160,15,25,.28), inset 0 0 8px #000; }
+  .bar::before, .bar::after { content: ""; position: absolute; top: 50%; width: 9px; height: 9px; border: 1px solid var(--gold); background: var(--crimson); transform: translateY(-50%) rotate(45deg); }
+  .bar::before { left: -17px; } .bar::after { right: -17px; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, #7a1118 0%, #b32a2f 30%, #e8c673 100%); box-shadow: 0 0 14px rgba(232,198,115,.55); overflow: hidden; }
+  .fill::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, rgba(255,255,255,0) 0 9px, rgba(255,235,170,.20) 9px 12px); animation: crawl 1.1s linear infinite; }
+  .spark { position: absolute; top: 50%; left: 0%; width: 3px; height: 26px; transform: translate(-50%, -50%); background: linear-gradient(180deg, transparent, #fff3c9, transparent); box-shadow: 0 0 18px 5px rgba(246,220,149,.75); }
+  .sheen { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .sheen::after { content: ""; position: absolute; top: 0; bottom: 0; width: 22%; left: -30%; background: linear-gradient(90deg, transparent, rgba(255,240,190,.28), transparent); animation: sweep 2.1s ease-in-out infinite; }
+
+  .meta { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; font-size: 12px; letter-spacing: .3em; color: #b9904f; text-shadow: 0 1px 6px #000; font-variant-numeric: tabular-nums; }
+  .pips { display: flex; gap: 11px; }
+  .pip { width: 8px; height: 8px; border: 1px solid rgba(217,172,92,.7); transform: rotate(45deg); background: transparent; transition: background .35s, box-shadow .35s, border-color .35s; }
+  .pip.on { background: var(--gold); border-color: var(--gold-hi); box-shadow: 0 0 10px rgba(232,198,115,.8); }
+  .pip.now { border-color: var(--gold-hi); animation: pulse .8s ease-in-out infinite; }
+  #pct { min-width: 4.5em; text-align: left; }
+  #hex { min-width: 12em; text-align: right; }
+
+  /* the button */
+  .enter { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); display: none; font: 500 clamp(18px, 1.7vw, 26px) 'Cinzel', Georgia, serif; letter-spacing: .6em; text-decoration: none; padding: 22px 70px 22px 82px; color: #ecca82; border: 1px solid var(--gold); background: rgba(0,0,0,.38); box-shadow: 0 0 30px rgba(217,172,92,.28); cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .enter.show { display: block; animation: pop .8s cubic-bezier(.2,1.3,.3,1) both; }
+  .enter .inner { display: inline-block; transform-origin: 50% 60%; }
+  .enter.show .inner { animation: wiggle 2.8s 1s ease-in-out infinite; }
+  .enter:hover, .enter:focus-visible { color: #fff0c4; border-color: var(--gold-hi); box-shadow: 0 0 46px rgba(232,198,115,.55), inset 0 0 18px rgba(217,172,92,.18); outline: none; }
+  .enter::before { content: ""; position: absolute; inset: -7px; border: 1px solid rgba(217,172,92,.35); pointer-events: none; animation: ring 2.8s 1s ease-in-out infinite; }
+
+  /* leaving: the entrance dissolves and the hall is revealed */
+  .veil { transition: opacity 1.8s ease .25s; }
+  .stage.leaving .enter { animation: flare .55s ease-out forwards; pointer-events: none; }
+  .stage.leaving .title { animation: none; opacity: 0; letter-spacing: 1.9em; filter: blur(16px) brightness(1.8); transform: translateY(-18px) scale(1.06); transition: opacity 1.3s ease .3s, letter-spacing 1.7s cubic-bezier(.2,.6,.2,1), filter 1.3s ease .2s, transform 1.7s ease; }
+  .stage.leaving .rule { animation: none; opacity: 0; transform: scaleX(2.4); transition: opacity .9s ease .2s, transform 1.4s ease; }
+  .stage.leaving ~ .veil, body.leaving .veil { opacity: 0; }
+  .embers { position: fixed; inset: 0; pointer-events: none; opacity: 0; }
+  body.leaving .embers { opacity: 1; }
+  .ember { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #f6dc95; box-shadow: 0 0 8px 2px rgba(232,170,80,.8); opacity: 0; }
+  body.leaving .ember { animation: drift var(--d) ease-out var(--w) forwards; }
+  @keyframes drift { 0% { opacity: 0; transform: translate(0,0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1.4); } }
+  @keyframes flare { 0% { box-shadow: 0 0 30px rgba(217,172,92,.28); } 35% { color: #fff; background: rgba(246,220,149,.5); box-shadow: 0 0 90px 22px rgba(246,220,149,.7); transform: translateX(-50%) scale(1.08); } 100% { opacity: 0; transform: translateX(-50%) scale(1.35); filter: blur(8px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); letter-spacing: 1.3em; } to { opacity: 1; transform: none; letter-spacing: .9em; } }
+  @keyframes fade { to { opacity: 1; } }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes flash { 0% { filter: brightness(2.2); } 100% { filter: none; } }
+  @keyframes crawl { to { background-position: 24px 0; } }
+  @keyframes sweep { to { left: 120%; } }
+  @keyframes pulse { 50% { box-shadow: 0 0 14px rgba(232,198,115,.9); } }
+  @keyframes pop { 0% { opacity: 0; transform: translateX(-50%) scale(.82); filter: blur(4px); } 60% { opacity: 1; transform: translateX(-50%) scale(1.07); filter: none; } 100% { opacity: 1; transform: translateX(-50%) scale(1); } }
+  @keyframes wiggle { 0%, 34%, 100% { transform: rotate(0); } 6% { transform: rotate(-3.2deg) translateX(-2px); } 12% { transform: rotate(3.2deg) translateX(2px); } 18% { transform: rotate(-2.4deg) translateX(-1px); } 24% { transform: rotate(2.4deg) translateX(1px); } 29% { transform: rotate(-1deg); } }
+  @keyframes ring { 0%, 34%, 100% { opacity: .35; transform: scale(1); } 12% { opacity: .9; transform: scale(1.04); } }
+
+  @media (max-width: 520px) { .enter { padding: 20px 40px 20px 52px; letter-spacing: .45em; } .status { letter-spacing: .26em; } .bar::before { left: -13px; } .bar::after { right: -13px; } #hex { min-width: 0; } }
+  @media (prefers-reduced-motion: reduce) { .bg { display: none; } body { background: #000 url("assets/poster.webp") center / cover no-repeat; } .enter.show .inner, .enter::before, .fill::after, .sheen::after { animation: none; } }
 </style>
 </head>
 <body>
@@ -17,5 +90,117 @@
   <source src="assets/hall.mp4" type="video/mp4">
   <source src="assets/hall.webm" type="video/webm">
 </video>
+<div class="veil"></div>
+<div class="embers" id="embers" aria-hidden="true"></div>
+
+<main class="stage">
+  <h1 class="title gold">MIMU</h1>
+  <div class="rule"></div>
+  <div class="slot">
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <div class="status" id="status"><span id="msg"></span><span class="cur"></span></div>
+      <div class="bar"><div class="fill" id="fill"></div><div class="sheen"></div><div class="spark" id="spark"></div></div>
+      <div class="meta"><span id="pct">000%</span><span class="pips" id="pips"></span><span id="hex">SEAL 0000-0000</span></div>
+    </div>
+    <a class="enter" id="enter" href="#"><span class="inner">ENTER</span></a>
+  </div>
+</main>
+
+<script>
+(function () {
+  var STAGES = [
+    { text: 'Loading you in',           ms: 1500, to: 20 },
+    { text: 'Running algorithm',        ms: 1900, to: 46 },
+    { text: 'Checking for extra packs', ms: 1900, to: 71 },
+    { text: 'Lighting the candles',     ms: 1400, to: 90 },
+    { text: 'Opening the hall',         ms: 1500, to: 100 }
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  var msg = $('msg'), statusEl = $('status'), fill = $('fill'), spark = $('spark'), pct = $('pct'), hex = $('hex'), pipsEl = $('pips'), loader = $('loader'), enter = $('enter'), video = document.querySelector('video');
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var speed = reduce ? 0.35 : 1;
+
+  var pips = STAGES.map(function () { var p = document.createElement('i'); p.className = 'pip'; pipsEl.appendChild(p); return p; });
+
+  // the last stretch of the bar waits (up to 4 s) for the hall video to be ready to play
+  var videoReady = reduce || !video || video.readyState >= 3;
+  if (!videoReady) video.addEventListener('canplay', function () { videoReady = true; });
+
+  var HEX = '0123456789ABCDEF';
+  function scramble(n) { var s = ''; for (var i = 0; i < n; i++) s += HEX[(Math.random() * 16) | 0]; return s; }
+  var hexTimer = setInterval(function () { hex.textContent = 'SEAL ' + scramble(4) + '-' + scramble(4); }, 85);
+
+  var typeTimer, typed = false, dotsN = 0, cur = 0, from = 0, t0 = 0, value = 0, finishing = false;
+  function say(text) {
+    clearInterval(typeTimer); typed = false;
+    statusEl.classList.remove('flash'); void statusEl.offsetWidth; statusEl.classList.add('flash');
+    var i = 0;
+    typeTimer = setInterval(function () {
+      i++; msg.textContent = text.slice(0, i);
+      if (i >= text.length) { clearInterval(typeTimer); typed = true; }
+    }, 26);
+  }
+  setInterval(function () { dotsN = (dotsN + 1) % 4; if (typed && !finishing) msg.textContent = STAGES[cur].text + '...'.slice(0, dotsN); }, 330);
+
+  function show(v) {
+    value = v;
+    fill.style.width = v + '%'; spark.style.left = v + '%';
+    pct.textContent = ('00' + Math.min(100, Math.floor(v))).slice(-3) + '%';
+  }
+  function ease(x) { return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+  function startStage(i) {
+    cur = i; from = value; t0 = performance.now();
+    say(STAGES[i].text);
+    pips.forEach(function (p, k) { p.classList.toggle('on', k < i); p.classList.toggle('now', k === i); });
+  }
+
+  function finish() {
+    finishing = true; clearInterval(hexTimer); clearInterval(typeTimer);
+    hex.textContent = 'SEAL OK'; show(100); msg.textContent = 'The hall is open';
+    pips.forEach(function (p) { p.classList.add('on'); p.classList.remove('now'); });
+    setTimeout(function () {
+      loader.classList.add('done');
+      setTimeout(function () {
+        loader.style.display = 'none';
+        enter.classList.add('show');
+        try { enter.focus({ preventScroll: true }); } catch (e) {}
+      }, 560);
+    }, 700);
+  }
+
+  function frame(now) {
+    var s = STAGES[cur], dur = s.ms * speed, k = Math.min(1, (now - t0) / dur);
+    var target = from + (s.to - from) * ease(k), last = cur === STAGES.length - 1;
+    if (last && !videoReady && target > 97) target = 97;
+    show(target);
+    if (k >= 1) {
+      if (!last) startStage(cur + 1);
+      else if (videoReady || now - t0 > dur + 4000) return finish();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ENTER: the entrance dissolves in gold embers and the hall is revealed, then we move on to NEXT_URL (set it when the main page exists)
+  var NEXT_URL = '';
+  var stageEl = document.querySelector('.stage'), embers = $('embers'), leaving = false;
+  for (var e = 0; e < 70; e++) {
+    var em = document.createElement('i'); em.className = 'ember';
+    em.style.cssText = 'left:' + (30 + Math.random() * 40) + '%;top:' + (38 + Math.random() * 30) + '%;--x:' + ((Math.random() - .5) * 700) + 'px;--y:' + (-80 - Math.random() * 420) + 'px;--d:' + (1.4 + Math.random() * 1.6) + 's;--w:' + (Math.random() * .6) + 's';
+    embers.appendChild(em);
+  }
+  enter.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    if (leaving) return; leaving = true;
+    stageEl.classList.add('leaving'); document.body.classList.add('leaving');
+    setTimeout(function () {
+      stageEl.style.display = 'none';
+      if (NEXT_URL) location.href = NEXT_URL;
+    }, reduce ? 300 : 2300);
+  });
+
+  setTimeout(function () { startStage(0); requestAnimationFrame(frame); }, 1100);
+})();
+</script>
 </body>
 </html>
