@@ -72,6 +72,9 @@
   @keyframes flare { 0% { box-shadow: 0 0 30px rgba(217,172,92,.28); } 35% { color: #fff; background: rgba(246,220,149,.5); box-shadow: 0 0 90px 22px rgba(246,220,149,.7); transform: translateX(-50%) scale(1.08); } 100% { opacity: 0; transform: translateX(-50%) scale(1.35); filter: blur(8px); } }
   .sound { position: fixed; right: 18px; bottom: 18px; z-index: 5; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; padding: 0; color: #c9a15a; background: rgba(0,0,0,.4); border: 1px solid rgba(217,172,92,.55); cursor: pointer; opacity: 0; animation: fade 1s 1.6s forwards; -webkit-tap-highlight-color: transparent; }
   .sound:hover, .sound:focus-visible { color: #fff0c4; border-color: var(--gold-hi); box-shadow: 0 0 18px rgba(232,198,115,.4); outline: none; }
+  .hint { position: fixed; right: 68px; bottom: 29px; z-index: 5; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #b9904f; text-shadow: 0 1px 6px #000; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
+  .hint.show { opacity: .85; animation: breathe 2.4s ease-in-out infinite; }
+  @keyframes breathe { 50% { opacity: .4; } }
   .sound .x { display: none; } .sound.off .x { display: block; } .sound.off .w1, .sound.off .w2 { display: none; }
   @keyframes rise { from { opacity: 0; transform: translateY(14px); letter-spacing: 1.3em; } to { opacity: 1; transform: none; letter-spacing: .9em; } }
   @keyframes fade { to { opacity: 1; } }
@@ -109,6 +112,7 @@
   </div>
 </main>
 
+<span class="hint" id="hint" aria-hidden="true">Sound &middot; tap anywhere</span>
 <button class="sound" id="sound" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path class="w1" d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path class="w2" d="M18 6.8a7.5 7.5 0 0 1 0 10.4"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
 
 <script>
@@ -157,7 +161,7 @@ window.MIMUAudio = (function () {
     bus.gain.setValueAtTime(0, now); bus.gain.linearRampToValueAtTime(MUSIC_LEVEL, now + 9);
     var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 520; lp.Q.value = 0.7; lp.connect(bus); lp.connect(verb);
     var lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.045; lg.gain.value = 220; lfo.connect(lg); lg.connect(lp.frequency); lfo.start();
-    [[55, 'sine', 0.34], [82.4, 'sine', 0.2], [110.4, 'triangle', 0.07]].forEach(function (d) {
+    [[55, 'sine', 0.204], [82.4, 'sine', 0.12], [110.4, 'triangle', 0.042]].forEach(function (d) {
       var o = ctx.createOscillator(), g = ctx.createGain(); o.type = d[1]; o.frequency.value = d[0]; g.gain.value = d[2]; o.connect(g); g.connect(lp); o.start();
     });
     var pad = CHORDS[0].map(function (f, i) {
@@ -180,8 +184,11 @@ window.MIMUAudio = (function () {
 
   // browsers only allow sound after the visitor does something, so the first tap/click/key wakes it
   function unlock() { wake(); }
-  ['pointerdown', 'keydown', 'touchend'].forEach(function (e) { window.addEventListener(e, unlock, { once: false, passive: true }); });
-  try { init(); if (ctx.state === 'running') startMusic(); } catch (e) {}
+  ['pointerdown', 'pointerup', 'mousedown', 'click', 'touchstart', 'touchend', 'keydown'].forEach(function (e) { window.addEventListener(e, unlock, { capture: true, passive: true }); });
+  var hint = document.getElementById('hint');
+  function paintHint() { hint.classList.toggle('show', !muted && !(ctx && ctx.state === 'running')); }
+  try { init(); var prev = ctx.onstatechange; ctx.onstatechange = function () { prev(); paintHint(); }; if (ctx.state === 'running') startMusic(); } catch (e) {}
+  paintHint(); setInterval(paintHint, 500);
 
   btn.addEventListener('click', function (ev) {
     ev.stopPropagation(); wake(); muted = !muted; paint();
