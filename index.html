@@ -439,7 +439,7 @@ window.MIMUAudio = (function () {
     setTimeout(function () { $('top').classList.add('on'); }, reduce ? 100 : 1500);
     setTimeout(function () {
       stageEl.style.display = 'none';
-      if (NEXT_URL) location.href = NEXT_URL;
+      if (NEXT_URL) location.href = NEXT_URL; else openGames();   // ENTER lands on the Games page (the phone)
     }, reduce ? 300 : 2300);
   });
 
