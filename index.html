@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -132,7 +132,7 @@
     .arow { grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "rk who fl" "rk who v24" "rk who vt"; row-gap: 0; padding: 0 16px; height: 78px; column-gap: 10px; }
     .arow .rk { grid-area: rk; font-size: 13px; } .arow .who { grid-area: who; } .arow .fl { grid-area: fl; } .arow .v24 { grid-area: v24; } .arow .vt { grid-area: vt; }
     .arow .st { font-size: 10px; line-height: 1.3; } .arow .st::before { color: #7d6334; font-size: 8px; letter-spacing: .14em; margin-right: 8px; }
-    .arow .fl::before { content: "FLOOR"; } .arow .v24::before { content: "24H"; } .arow .vt::before { content: "TOTAL"; }
+    .arow .fl::before { content: "FLOOR"; } .arow .v24::before { content: "7D"; } .arow .vt::before { content: "TOTAL"; }
     .av { width: 36px; height: 36px; } .nm { font-size: 11px; letter-spacing: .08em; }
   }
   @keyframes rise { from { opacity: 0; transform: translateY(14px); letter-spacing: 1.3em; } to { opacity: 1; transform: none; letter-spacing: .9em; } }
@@ -190,7 +190,7 @@
     <div><h2 class="atitle gold" id="apeTitle">TOP 50 &middot; APECHAIN</h2><div class="asub" id="apeUpdated">LIVE FROM OSWIKI</div></div>
     <button class="aclose" id="apeClose" type="button" aria-label="Close">&times;</button>
   </div>
-  <div class="acols" aria-hidden="true"><span>#</span><span>NFT COLLECTION</span><span>FLOOR</span><span>24H VOLUME</span><span>TOTAL VOLUME</span></div>
+  <div class="acols" aria-hidden="true"><span>#</span><span>NFT COLLECTION</span><span>FLOOR</span><span>7D VOLUME</span><span>TOTAL VOLUME</span></div>
   <div class="alist" id="apeList" role="table"></div>
 </section>
 
@@ -415,7 +415,7 @@ window.MIMUAudio = (function () {
       '<span class="rk">' + String(i + 1).padStart(2, '0') + '</span>' +
       '<span class="who">' + img + '<span class="nm">' + esc(c.name) + '</span>' + (c.verified ? CHECK : '') + '</span>' +
       '<span class="st fl"><b>' + num(s.floorPrice) + '</b><i>APE</i></span>' +
-      '<span class="st v24"><b>' + num(v['24h']) + '</b><i>APE</i></span>' +
+      '<span class="st v24"><b>' + num(v['7d']) + '</b><i>APE</i></span>' +
       '<span class="st vt" data-tot><b>' + (tot != null ? num(tot) : '<em class="dots">···</em>') + '</b><i>APE</i></span></a>';
   }
   function fillTotal(slug, val) {
@@ -447,12 +447,12 @@ window.MIMUAudio = (function () {
   }
   function loadApe(force) {
     if (ape.loading) return;
-    var cached = !force && lsGet('mimu-ape-list', 10 * 60 * 1000);
+    var cached = !force && lsGet('mimu-ape-list7', 10 * 60 * 1000);
     if (cached) { showList(cached.items, cached.when); return; }
     ape.loading = true; apeList.innerHTML = '<div class="amsg"><span class="spin"></span>Reading the chain</div>';
-    fetch(API + '?chainId=' + CHAIN + '&limit=50').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) {
+    fetch(API + '?chainId=' + CHAIN + '&limit=50&period=7d').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (j) {
       var items = (j.data || []).slice(0, 50); if (!items.length) throw new Error('empty');
-      var when = Date.now(); lsSet('mimu-ape-list', { items: items, when: when }); showList(items, when);
+      var when = Date.now(); lsSet('mimu-ape-list7', { items: items, when: when }); showList(items, when);
     }).catch(function () {
       apeList.innerHTML = '<div class="amsg">The chain is not answering right now.<button type="button" class="retry" id="apeRetry">Try again</button></div>';
       $('apeRetry').addEventListener('click', function () { loadApe(true); });
