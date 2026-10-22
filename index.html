@@ -101,7 +101,8 @@
   .apanel::before { left: -12px; } .apanel::after { right: -12px; }
   .ahead { display: flex; align-items: flex-start; justify-content: space-between; padding: 26px 34px 16px; }
   .atitle { margin: 0; font-weight: 500; font-size: clamp(18px, 2.2vw, 28px); letter-spacing: .42em; line-height: 1.1; }
-  .asub { margin-top: 10px; font-size: 11px; letter-spacing: .3em; color: #b9904f; }
+  .asub { margin-top: 10px; font-size: 11px; letter-spacing: .3em; color: #8d6f3e; display: flex; flex-direction: column; gap: 6px; }
+  .asub .arank { color: #d9ac5c; font-size: 12px; text-shadow: 0 0 12px rgba(217,172,92,.35); }
   .aclose { width: 36px; height: 36px; flex: none; padding: 0; font: 400 22px/1 Georgia, serif; color: #d9ac5c; background: rgba(0,0,0,.3); border: 1px solid rgba(217,172,92,.6); cursor: pointer; }
   .aclose:hover, .aclose:focus-visible { color: #fff0c4; border-color: var(--gold-hi); box-shadow: 0 0 18px rgba(232,198,115,.4); outline: none; }
   .acols, .arow { display: grid; grid-template-columns: 56px minmax(0, 2.4fr) 1fr 1fr 1.1fr; align-items: center; column-gap: 12px; padding: 0 34px; }
@@ -187,7 +188,7 @@
 <div class="ashade" id="apeShade"></div>
 <section class="apanel" id="apePanel" role="dialog" aria-modal="true" aria-labelledby="apeTitle" aria-hidden="true">
   <div class="ahead">
-    <div><h2 class="atitle gold" id="apeTitle">TOP 50 &middot; APECHAIN</h2><div class="asub" id="apeUpdated">LIVE FROM OSWIKI</div></div>
+    <div><h2 class="atitle gold" id="apeTitle">TOP 50 &middot; APECHAIN</h2><div class="asub"><span class="arank">RANKED BY WEEKLY VOLUME</span><span id="apeUpdated">LIVE FROM OSWIKI</span></div></div>
     <button class="aclose" id="apeClose" type="button" aria-label="Close">&times;</button>
   </div>
   <div class="acols" aria-hidden="true"><span>#</span><span>NFT COLLECTION</span><span>FLOOR</span><span>7D VOLUME</span><span>TOTAL VOLUME</span></div>
