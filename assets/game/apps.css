@@ -141,3 +141,6 @@ button.srow { cursor: pointer; } button.srow:hover { background: rgba(217,172,92
 .srow input[type=range] { flex: 1; margin: 0 calc(var(--h) * .008); accent-color: #e8c673; min-width: 0; }
 .srow input[type=range] + .v { margin-left: 0; min-width: calc(var(--h) * .016); text-align: right; }
 .sfoot { margin: calc(var(--h) * .03) 6% 0; text-align: center; font-size: calc(var(--h) * .0092); letter-spacing: .24em; color: #6e5630; }
+.srow { text-decoration: none; }
+a.srow { cursor: pointer; } a.srow:hover { background: rgba(217,172,92,.08); }
+.srow .v.xlink { color: #4aa3ff; letter-spacing: .12em; font-size: calc(var(--h) * .0115); text-shadow: 0 0 10px rgba(74,163,255,.35); } a.srow:hover .xlink, a.srow:focus-visible .xlink { color: #7cc0ff; text-decoration: underline; }

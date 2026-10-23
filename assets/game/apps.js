@@ -102,13 +102,13 @@
       '</div>' +
       '<div class="sgl">ABOUT</div><div class="sgrp">' +
         row('hall', 'THE HALL', '<span class="v">v1.0</span>') +
-        row('pen', 'Created by', '<span class="v">BERT</span>') +
+        '<a class="srow" href="https://x.com/bert_baccaratt" target="_blank" rel="noopener noreferrer"><span class="si">' + IC.pen + '</span><span class="sl">Created by</span><span class="v xlink">@BERT_BACCARATT</span></a>' +
         row('crown', 'Company', '<span class="v">MIMU ON APE</span>') +
         row('help', 'How to play', '<span class="v">&rsaquo;</span>', 'sRules', 'button') +
         row('doc', 'Terms of Service', '<span class="v">&rsaquo;</span>', 'sTos', 'button') +
       '</div>' +
       '<div class="sgl">ACCOUNT</div><div class="sgrp">' + row('link', 'Disconnect Glyph', '<span class="v">' + (signed ? 'SIGN OUT' : 'NOT CONNECTED') + '</span>', 'sDisc', 'button') + '</div>' +
-      '<div class="sfoot">THE HALL &middot; MIMU ON APE &middot; CREATED BY BERT</div></div>';
+      '<div class="sfoot">THE HALL &middot; MIMU ON APE &middot; CREATED BY @BERT_BACCARATT</div></div>';
     $('sSound').addEventListener('click', function () { if (A) A.toggleMute(); silentSwitch(); drawSettings(); });
     var rng = $('sVol'); rng.addEventListener('input', function () { var v = parseInt(rng.value, 10); $('sVolV').textContent = v; if (A) { A.setVolume(v / 8); } silentSwitch(); var sw = sEl.querySelector('.sw2'); if (sw && A) sw.classList.toggle('on', !A.isMuted()); });
     $('sRules').addEventListener('click', function () { var a = document.querySelector('a[href="#hall"]'); if (a) a.click(); });
