@@ -108,6 +108,7 @@
   function pickCard() {
     var P = HallProfile, cfg = P.config.sight, list = P.cards(); if (!list.length) return null;
     var test = S.rc.test, own = P.owned(), byTier = [[], [], [], [], [], []], i, t;
+    if (cfg.demoAny && !P.isSignedIn() && !test) { var pool = list.filter(function (c) { return !S.runOwned.has(c.n); }); if (!pool.length) pool = list; return pool[(Math.random() * pool.length) | 0]; }   // TEMPORARY demo: any card from the deck
     function have(c) { return own.has(c.n) || S.runOwned.has(c.n); }
     list.forEach(function (c) { byTier[c.tier].push(c); });
     function owns(tr) { var n = 0; byTier[tr].forEach(function (c) { if (have(c)) n++; }); return n; }
@@ -164,7 +165,7 @@
     S = fresh(); S.mode = 'run'; S.v = 4.6; showHp();
     // this run's timetable (admin test mode makes the card sightings and the pack come quickly)
     var cf = HallProfile.config, test = HallProfile.isTest();
-    S.rc = { test: test, sightEvery: test ? HallProfile.testConfig.sight.everySec : cf.sight.everySec, packEvery: test ? HallProfile.testConfig.pack.everySec : cf.pack.everySec };
+    S.rc = { test: test, sightEvery: test ? HallProfile.testConfig.sight.everySec : (cf.sight.demoAny && !HallProfile.isSignedIn() ? cf.sight.demoEverySec : cf.sight.everySec), packEvery: test ? HallProfile.testConfig.pack.everySec : cf.pack.everySec };
     S.nextSight = S.rc.sightEvery; S.nextPack = test ? HallProfile.testConfig.pack.firstSec : cf.pack.firstSec;
     ovStart.style.display = 'none'; ovDead.style.display = 'none';
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
