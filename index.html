@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261023r"><link rel="stylesheet" href="assets/game/comms.css?v=20261023r"><link rel="stylesheet" href="assets/game/admin.css?v=20261023r">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261023s"><link rel="stylesheet" href="assets/game/comms.css?v=20261023s"><link rel="stylesheet" href="assets/game/admin.css?v=20261023s">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -480,10 +480,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261023r" defer></script>
-<script src="assets/game/hall-runner.js?v=20261023r" defer></script>
-<script src="assets/game/comms.js?v=20261023r" defer></script> <script src="assets/game/net.js?v=20261023r" defer></script> <script src="assets/game/badges.js?v=20261023r" defer></script> <script src="assets/game/apps.js?v=20261023r" defer></script>
-<script src="assets/game/admin-docs.js?v=20261023r" defer></script> <script src="assets/game/admin.js?v=20261023r" defer></script>
+<script src="assets/game/profile.js?v=20261023s" defer></script>
+<script src="assets/game/hall-runner.js?v=20261023s" defer></script>
+<script src="assets/game/comms.js?v=20261023s" defer></script> <script src="assets/game/net.js?v=20261023s" defer></script> <script src="assets/game/badges.js?v=20261023s" defer></script> <script src="assets/game/apps.js?v=20261023s" defer></script>
+<script src="assets/game/admin-docs.js?v=20261023s" defer></script> <script src="assets/game/admin.js?v=20261023s" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -597,7 +597,7 @@ window.MIMUAudio = (function () {
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), v: v })); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function num(n) {
-    if (n == null || isNaN(n)) return '—';
+    if (n == null || isNaN(n)) return 'â€”';
     var a = Math.abs(n);
     if (a >= 1e9) return (n / 1e9).toFixed(2) + 'B';
     if (a >= 1e6) return (n / 1e6).toFixed(2) + 'M';
@@ -616,10 +616,10 @@ window.MIMUAudio = (function () {
       '<span class="who">' + img + '<span class="nm">' + esc(c.name) + '</span>' + (c.verified ? CHECK : '') + '</span>' +
       '<span class="st fl"><b>' + num(s.floorPrice) + '</b><i>APE</i></span>' +
       '<span class="st v24"><b>' + num(v['7d']) + '</b><i>APE</i></span>' +
-      '<span class="st vt" data-tot><b>' + (tot != null ? num(tot) : '<em class="dots">···</em>') + '</b><i>APE</i></span></a>';
+      '<span class="st vt" data-tot><b>' + (tot != null ? num(tot) : '<em class="dots">Â·Â·Â·</em>') + '</b><i>APE</i></span></a>';
   }
   function fillTotal(slug, val) {
-    var el = apeList.querySelector('.arow[data-slug="' + slug + '"] [data-tot] b'); if (el) el.textContent = val == null ? '—' : num(val);
+    var el = apeList.querySelector('.arow[data-slug="' + slug + '"] [data-tot] b'); if (el) el.textContent = val == null ? 'â€”' : num(val);
   }
   function loadTotals(items) {
     var cache = lsGet('mimu-ape-totals', 6 * 3600 * 1000) || {}, queue = [];
@@ -642,7 +642,7 @@ window.MIMUAudio = (function () {
   }
   function showList(items, when) {
     apeList.innerHTML = items.map(rowHtml).join('');
-    apeUpdated.textContent = 'LIVE FROM OSWIKI · UPDATED ' + new Date(when).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    apeUpdated.textContent = 'LIVE FROM OSWIKI Â· UPDATED ' + new Date(when).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     ape.loaded = true; loadTotals(items);
   }
   function loadApe(force) {
