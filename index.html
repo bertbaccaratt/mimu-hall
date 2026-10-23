@@ -121,7 +121,7 @@
   .pstatus { position: absolute; left: 0; right: 0; top: 2.5%; display: flex; justify-content: space-between; align-items: center; padding: 0 9%; font-size: calc(var(--h) * .0165); letter-spacing: .24em; color: #d9ac5c; }
   .pright { display: flex; align-items: center; gap: calc(var(--h) * .012); }
   .bars { display: flex; align-items: flex-end; gap: 2px; height: calc(var(--h) * .016); } .bars b { width: calc(var(--h) * .004); background: #d9ac5c; } .bars b:nth-child(1) { height: 35%; } .bars b:nth-child(2) { height: 55%; } .bars b:nth-child(3) { height: 78%; } .bars b:nth-child(4) { height: 100%; }
-  .batt { width: calc(var(--h) * .03); height: calc(var(--h) * .0145); border: 1px solid #d9ac5c; border-radius: 3px; position: relative; } .batt::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: 70%; background: #d9ac5c; border-radius: 1px; }
+  .batt { width: calc(var(--h) * .03); height: calc(var(--h) * .0145); border: 1px solid #d9ac5c; border-radius: 3px; position: relative; } .batt::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: calc(69% - 1px); background: #d9ac5c; border-radius: 1px; } .bpct { letter-spacing: .06em; }
   .plock { position: absolute; left: 50%; top: 11.5%; transform: translateX(-50%); width: calc(var(--h) * .036); height: calc(var(--h) * .036); color: #d9ac5c; filter: drop-shadow(0 0 8px rgba(217,172,92,.5)); }
   .pdate { position: absolute; left: 0; right: 0; top: 17%; text-align: center; font-size: calc(var(--h) * .0175); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
   .pclock small, .hclock small { font-size: .26em; letter-spacing: .12em; margin-left: .3em; vertical-align: .5em; }
@@ -318,7 +318,7 @@
   <div class="pscreen" id="pScreen">
     <div class="pwall"></div><div class="pwall pwall-h"></div>
     <div class="island"></div>
-    <div class="pstatus"><span>MIMU</span><span class="pright"><i class="bars"><b></b><b></b><b></b><b></b></i><i class="batt"></i></span></div>
+    <div class="pstatus"><span>MIMU</span><span class="pright"><i class="bars"><b></b><b></b><b></b><b></b></i><span class="bpct">69%</span><i class="batt"></i></span></div>
     <div class="lk" id="pLock">
       <svg class="plock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/></svg>
       <div class="pdate" id="pDate"></div>
