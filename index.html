@@ -123,6 +123,47 @@
   .pquick i { width: calc(var(--h) * .068); height: calc(var(--h) * .068); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d9ac5c; background: rgba(0,0,0,.45); border: 1px solid rgba(217,172,92,.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); } .pquick svg { width: 46%; height: 46%; }
   .phome { position: absolute; left: 50%; bottom: 1.8%; transform: translateX(-50%); width: 34%; height: calc(var(--h) * .0065); border-radius: 99px; background: rgba(217,172,92,.7); }
   @media (max-width: 700px) { .phone { top: calc(50% + 30px); } }
+  /* the phone: lock screen -> home screen -> THE HALL (the game) */
+  .pscreen { cursor: default; touch-action: none; }
+  .pscreen > .island, .pscreen > .pstatus, .pscreen > .phome { z-index: 7; }
+  .pwall { transition: filter .6s ease; z-index: 0; }
+  .pscreen.unlocked .pwall { filter: blur(calc(var(--h) * .004)) brightness(.5) saturate(.9); }
+  .lk { position: absolute; inset: 0; z-index: 2; transition: transform .6s cubic-bezier(.4,0,.2,1), opacity .5s ease; }
+  .pscreen.unlocked .lk { transform: translateY(-12%); opacity: 0; pointer-events: none; }
+  .pswipe { position: absolute; left: 0; right: 0; bottom: 13.5%; display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .004); font-size: calc(var(--h) * .0135); letter-spacing: .3em; color: #f1d9a0; text-shadow: 0 2px 8px #000; animation: swipehint 2.2s ease-in-out infinite; }
+  .pswipe.nudge { animation: swipenudge .5s ease; }
+  @keyframes swipehint { 0%, 100% { transform: translateY(0); opacity: .75; } 50% { transform: translateY(calc(var(--h) * -.008)); opacity: 1; } }
+  @keyframes swipenudge { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(calc(var(--h) * -.03)); } 70% { transform: translateY(calc(var(--h) * -.012)); } }
+  .phome { cursor: pointer; } .phome::before { content: ""; position: absolute; left: -16%; right: -16%; top: -140%; bottom: -140%; }
+  .hm { position: absolute; inset: 0; z-index: 1; opacity: 0; transform: scale(1.05); pointer-events: none; transition: opacity .55s ease .12s, transform .55s ease .12s; }
+  .pscreen.unlocked .hm { opacity: 1; transform: none; pointer-events: auto; }
+  .pscreen.inapp .hm { opacity: 0; transform: scale(.9); pointer-events: none; transition-delay: 0s; }
+  .agrid { position: absolute; left: 7%; right: 7%; top: 13%; display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--h) * .03) calc(var(--h) * .012); }
+  .aic { display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .009); padding: 0; background: none; border: 0; color: #f1d9a0; font: 500 calc(var(--h) * .0118) 'Cinzel', Georgia, serif; letter-spacing: .1em; text-shadow: 0 1px 6px #000; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .aic img { width: 100%; max-width: calc(var(--h) * .082); aspect-ratio: 1; border-radius: 22%; border: 1px solid rgba(217,172,92,.55); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 14px rgba(217,172,92,.18); transition: transform .2s ease, box-shadow .2s; }
+  .aic:hover img, .aic:focus-visible img { transform: scale(1.06); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 22px rgba(232,198,115,.5); }
+  .aic:focus-visible { outline: none; }
+  .app { position: absolute; inset: 0; z-index: 3; background: #030102; opacity: 0; visibility: hidden; transform: scale(.9); transform-origin: 14% 20%; transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s .45s; }
+  .pscreen.inapp .app { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .hcv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .hhud { position: absolute; left: 0; right: 0; top: 8.4%; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 7%; color: #f6dc95; font-family: 'Cinzel', Georgia, serif; text-shadow: 0 2px 6px #000, 0 0 14px rgba(0,0,0,.8); pointer-events: none; z-index: 3; }
+  .hhud .hs small { display: block; font-size: calc(var(--h) * .0118); letter-spacing: .3em; color: #d9ac5c; }
+  .hhud .hs b { font-size: calc(var(--h) * .034); letter-spacing: .08em; font-weight: 700; }
+  .hhud .hc { display: flex; align-items: center; gap: calc(var(--h) * .009); font-size: calc(var(--h) * .03); font-weight: 700; }
+  .hcoin { width: calc(var(--h) * .03); height: calc(var(--h) * .03); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b8, #e0a93f 55%, #8f5f1d); box-shadow: 0 0 10px rgba(246,220,149,.6); border: 1px solid #6a4510; }
+  .hpause { pointer-events: auto; width: calc(var(--h) * .05); height: calc(var(--h) * .05); display: flex; gap: calc(var(--h) * .007); align-items: center; justify-content: center; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); border: 1px solid rgba(217,172,92,.7); cursor: pointer; }
+  .hpause i { width: calc(var(--h) * .006); height: calc(var(--h) * .019); background: #f6dc95; border-radius: 2px; }
+  .hov { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--h) * .02); padding: 0 8%; text-align: center; font-family: 'Cinzel', Georgia, serif; color: #d9ac5c; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.42), rgba(0,0,0,.78)); }
+  .hov .ht { font-size: calc(var(--h) * .056); font-weight: 500; letter-spacing: .26em; padding-left: .26em; line-height: 1.1; filter: drop-shadow(0 3px 14px rgba(0,0,0,.9)); }
+  .hov .hline { width: 62%; height: 1px; background: linear-gradient(90deg, transparent, #d9ac5c, transparent); }
+  .hov .hsub { font-size: calc(var(--h) * .0122); letter-spacing: .24em; line-height: 1.8; color: #c9a15a; text-shadow: 0 2px 8px #000; }
+  .hov .hbest { font-size: calc(var(--h) * .0165); letter-spacing: .3em; color: #f1d9a0; } .hov .hbest b { font-weight: 700; }
+  .hov .htap { margin-top: calc(var(--h) * .01); font-size: calc(var(--h) * .0185); letter-spacing: .5em; padding-left: .5em; color: #f6dc95; text-shadow: 0 0 16px rgba(232,198,115,.6); animation: breathe 1.8s ease-in-out infinite; }
+  .hov .hkeys { font-size: calc(var(--h) * .0108); letter-spacing: .2em; line-height: 1.7; color: #9a7a45; }
+  .hdead { background: radial-gradient(ellipse at 50% 55%, rgba(60,6,10,.55), rgba(20,2,4,.85)); }
+  .hdead .hres { display: flex; justify-content: space-between; width: 70%; font-size: calc(var(--h) * .0165); letter-spacing: .24em; color: #b9904f; } .hdead .hres b { color: #f6dc95; font-weight: 700; }
+  .hagain { margin-top: calc(var(--h) * .02); font: 500 calc(var(--h) * .0185) 'Cinzel', Georgia, serif; letter-spacing: .4em; padding: calc(var(--h) * .02) calc(var(--h) * .04) calc(var(--h) * .02) calc(var(--h) * .044); color: #ecca82; border: 1px solid #d9ac5c; background: rgba(0,0,0,.45); box-shadow: 0 0 24px rgba(217,172,92,.28); cursor: pointer; }
+  .hagain:hover { color: #fff0c4; border-color: #f6dc95; }
   /* Apechain panel: see-through glass over the hall */
   .ashade { position: fixed; inset: 0; z-index: 2; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.30), rgba(0,0,0,.70)); opacity: 0; pointer-events: none; transition: opacity .6s ease; }
   .ashade.open { opacity: 1; pointer-events: auto; }
@@ -226,17 +267,24 @@
   <div class="isoon" id="infoSoon">COMING SOON</div>
 </section>
 <div class="ashade" id="gamesShade"></div>
-<section class="phone" id="phone" role="dialog" aria-label="Games (locked)" aria-hidden="true">
+<section class="phone" id="phone" role="dialog" aria-label="Games" aria-hidden="true">
   <i class="pbtn pb1"></i><i class="pbtn pb2"></i><i class="pbtn pb3"></i><i class="pbtn pb4"></i>
   <div class="pscreen" id="pScreen">
     <div class="pwall"></div>
     <div class="island"></div>
     <div class="pstatus"><span>MIMU</span><span class="pright"><i class="bars"><b></b><b></b><b></b><b></b></i><i class="batt"></i></span></div>
-    <svg class="plock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/></svg>
-    <div class="pdate" id="pDate"></div>
-    <div class="pclock gold" id="pClock">0:00</div>
-    <div class="pquick"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 6 2.5 3v2h-9v-2L10 9z"/><path d="M12 14v7"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.4h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg></i></div>
-    <div class="phome"></div>
+    <div class="lk" id="pLock">
+      <svg class="plock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/></svg>
+      <div class="pdate" id="pDate"></div>
+      <div class="pclock gold" id="pClock">0:00</div>
+      <div class="pswipe" id="pSwipe"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg><span>SWIPE UP TO UNLOCK</span></div>
+      <div class="pquick"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 6 2.5 3v2h-9v-2L10 9z"/><path d="M12 14v7"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.4h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg></i></div>
+    </div>
+    <div class="hm" id="pHomeScr">
+      <div class="agrid"><button type="button" class="aic" id="hallIcon" aria-label="Open The Hall"><img src="assets/game/hall-icon.webp" alt="" width="256" height="256"><span>THE HALL</span></button></div>
+    </div>
+    <div class="app" id="hallApp"></div>
+    <div class="phome" id="pHome" role="button" aria-label="Home"></div>
   </div>
 </section>
 <div class="ashade" id="apeShade"></div>
@@ -344,6 +392,7 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
+<script src="assets/game/hall-runner.js" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -517,8 +566,8 @@ window.MIMUAudio = (function () {
   var gamesTab = document.querySelector('a[href="#games"]'), phoneEl = $('phone'), gShade = $('gamesShade'), clockEl = $('pClock'), dateEl = $('pDate');
   function tickClock() { var d = new Date(); clockEl.textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false }).replace(/^(\d):/, '$1:'); dateEl.textContent = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase(); }
   setInterval(tickClock, 15000); tickClock();
-  function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); }
-  function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); phoneEl.setAttribute('aria-hidden', 'true'); if (!keepTab) setActive(null); }
+  function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp')) HallRunner.open(); }
+  function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
   // Hall Rules and About are placeholders for now ("coming soon")
   var INFO = { '#hall': ['HALL RULES', 'HALL RULES', 'COMING SOON'], '#about': ['ABOUT', 'MIMU ON APE INFO · TERMS OF SERVICE', 'COMING SOON'] };
   var infoEl = $('infoPanel'), infoShade = $('infoShade');
@@ -528,8 +577,26 @@ window.MIMUAudio = (function () {
     $('infoTitle').textContent = d[0]; $('infoLine').textContent = d[1]; $('infoSoon').textContent = d[2];
     setActive(t); infoEl.classList.add('open'); infoShade.classList.add('open'); infoEl.setAttribute('aria-hidden', 'false');
   }
-  // the phone is locked on purpose (placeholder): pressing the screen only makes it nudge
-  $('pScreen').addEventListener('click', function () { phoneEl.classList.remove('nope'); void phoneEl.offsetWidth; phoneEl.classList.add('nope'); });
+  // the phone: swipe up (or press the bar at the bottom) to unlock, then open the app THE HALL; the bar at the bottom goes home
+  var pscreen = $('pScreen'), pswipe = $('pSwipe'), swipeStart = null;
+  function isLocked() { return !pscreen.classList.contains('unlocked'); }
+  function unlockPhone() { if (isLocked()) pscreen.classList.add('unlocked'); }
+  function openHall() { pscreen.classList.add('inapp'); if (window.HallRunner) HallRunner.open(); }
+  function leaveHall() { pscreen.classList.remove('inapp'); if (window.HallRunner) HallRunner.close(); }
+  function nudge() { pswipe.classList.remove('nudge'); void pswipe.offsetWidth; pswipe.classList.add('nudge'); }
+  pscreen.addEventListener('pointerdown', function (ev) { if (isLocked() && !ev.target.closest('#pHome')) swipeStart = { x: ev.clientX, y: ev.clientY }; });
+  pscreen.addEventListener('pointerup', function (ev) {
+    if (!swipeStart) return; var s = swipeStart; swipeStart = null;
+    if (!isLocked()) return;
+    if (s.y - ev.clientY > 36) unlockPhone(); else nudge();
+  });
+  pscreen.addEventListener('pointercancel', function () { swipeStart = null; });
+  $('pHome').addEventListener('click', function () { if (isLocked()) unlockPhone(); else if (pscreen.classList.contains('inapp')) leaveHall(); });
+  $('hallIcon').addEventListener('click', openHall);
+  window.addEventListener('keydown', function (ev) {
+    if (!phoneEl.classList.contains('open') || !isLocked()) return;
+    if (ev.key === 'ArrowUp' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); unlockPhone(); }
+  });
   function openApe() { closeGames(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(apeTab); panel.classList.add('open'); apeShade.classList.add('open'); panel.setAttribute('aria-hidden', 'false'); if (!ape.loaded) loadApe(false); try { apeClose.focus({ preventScroll: true }); } catch (e) {} }
   function closeApe(keepTab) { panel.classList.remove('open'); apeShade.classList.remove('open'); panel.setAttribute('aria-hidden', 'true'); if (!keepTab) setActive(null); }
   tabs.forEach(function (t) {
