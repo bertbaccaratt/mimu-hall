@@ -75,16 +75,59 @@
     });
   }
 
+  /* ---------- SETTINGS (the dock's gear) ---------- */
+  var sBuilt = false, sEl;
+  var IC = {
+    sound: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.5 7.5 0 0 1 0 10.4"/></svg>',
+    vol: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8h14M5 16h14"/><circle cx="9" cy="8" r="2.2" fill="currentColor"/><circle cx="15" cy="16" r="2.2" fill="currentColor"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    hall: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l7 9-7 9-7-9z"/></svg>',
+    pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19z"/></svg>',
+    crown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 18h16l1-10-5 4-4-7-4 7-5-4z"/></svg>',
+    help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.6 2.6 0 1 1 3.6 2.4c-.8.4-1.2.9-1.2 1.8M12 16.8v.01"/></svg>',
+    doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20.5H7z"/><path d="M14 3.5V8h4M9.5 12.5h5M9.5 16h5"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>'
+  };
+  function row(icon, label, right, id, tag) { return '<' + (tag || 'div') + ' class="srow"' + (id ? ' id="' + id + '"' : '') + '><span class="si">' + IC[icon] + '</span><span class="sl">' + label + '</span>' + (right || '') + '</' + (tag || 'div') + '>'; }
+  function silentSwitch() { var b = $('bMute'), A = window.MIMUAudio; if (b && A) b.classList.toggle('silent', A.isMuted()); }
+  function drawSettings() {
+    if (!sEl) return;
+    var A = window.MIMUAudio, muted = A ? A.isMuted() : false, vol = A ? Math.round(A.getVolume() * 8) : 8, signed = P.isSignedIn(), name = signed ? (P.username() || 'Runner') : 'Guest';
+    sEl.innerHTML = '<div class="pg"><div class="pgh"><h2 class="gold">SETTINGS</h2></div>' +
+      '<div class="sgrp prof"><img src="assets/game/hall-icon.webp" alt=""><div><b>' + esc(name) + '</b><span>' + (signed ? 'GLYPH CONNECTED' : 'DEMO MODE &middot; NOT SIGNED IN') + '</span></div></div>' +
+      '<div class="sgl">GENERAL</div><div class="sgrp">' +
+        row('sound', 'Sound', '<i class="sw2' + (muted ? '' : ' on') + '"></i>', 'sSound', 'button') +
+        row('vol', 'Volume', '<input id="sVol" type="range" min="0" max="8" step="1" value="' + vol + '"><span class="v" id="sVolV">' + vol + '</span>') +
+        row('clock', 'Clock', '<span class="v">12-HOUR &middot; LOS ANGELES</span>') +
+      '</div>' +
+      '<div class="sgl">ABOUT</div><div class="sgrp">' +
+        row('hall', 'THE HALL', '<span class="v">v1.0</span>') +
+        row('pen', 'Created by', '<span class="v">BERT</span>') +
+        row('crown', 'Company', '<span class="v">MIMU ON APE</span>') +
+        row('help', 'How to play', '<span class="v">&rsaquo;</span>', 'sRules', 'button') +
+        row('doc', 'Terms of Service', '<span class="v">&rsaquo;</span>', 'sTos', 'button') +
+      '</div>' +
+      '<div class="sgl">ACCOUNT</div><div class="sgrp">' + row('link', 'Disconnect Glyph', '<span class="v">' + (signed ? 'SIGN OUT' : 'NOT CONNECTED') + '</span>', 'sDisc', 'button') + '</div>' +
+      '<div class="sfoot">THE HALL &middot; MIMU ON APE &middot; CREATED BY BERT</div></div>';
+    $('sSound').addEventListener('click', function () { if (A) A.toggleMute(); silentSwitch(); drawSettings(); });
+    var rng = $('sVol'); rng.addEventListener('input', function () { var v = parseInt(rng.value, 10); $('sVolV').textContent = v; if (A) { A.setVolume(v / 8); } silentSwitch(); var sw = sEl.querySelector('.sw2'); if (sw && A) sw.classList.toggle('on', !A.isMuted()); });
+    $('sRules').addEventListener('click', function () { var a = document.querySelector('a[href="#hall"]'); if (a) a.click(); });
+    $('sTos').addEventListener('click', function () { var a = document.querySelector('a[href="#about"]'); if (a) a.click(); });
+    var d = $('sDisc'); if (!signed) d.classList.add('off'); d.addEventListener('click', function () { if (P.isSignedIn()) { P.disconnect(); drawSettings(); } });
+  }
+  function buildSettings() { sEl = $('setApp'); if (!sEl) return; sEl.classList.add('page'); sBuilt = true; drawSettings(); }
   /* ---------- the phone asks for an app ---------- */
   window.HallApps = {
     open: function (name) {
       if (name === 'collected') { buildCollected(); refreshCollected(false); var s = $('cScroll'); if (s) s.scrollTop = 0; }
       if (name === 'leaders') { buildLeaderboard(); refreshLeaderboard(); }
+      if (name === 'settings') { if (!sBuilt) buildSettings(); else drawSettings(); }
     }
   };
   P.onChange(function (what) {
     if (cBuilt && (what === 'cards' || what === 'connect')) refreshCollected(what === 'cards');
     if (lBuilt && (what === 'scores' || what === 'connect')) refreshLeaderboard();
+    if (sBuilt && what === 'connect') drawSettings();
   });
   P.whenReady(function () { /* the card list is here: the Collected grid is built the first time the app opens */ });
 })();

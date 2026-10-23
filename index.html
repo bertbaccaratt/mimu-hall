@@ -330,12 +330,13 @@
         <button type="button" class="dic" aria-label="Phone" title="Phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>
         <button type="button" class="dic" aria-label="Messages" title="Messages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3.5 20.5l1.4-4.6A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01" stroke-width="2.2"/></svg></button>
         <button type="button" class="dic" aria-label="Camera" title="Camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8h3.2l1.6-2.4h7.4L17.3 8h3.2v11.5h-17z"/><circle cx="12" cy="13.4" r="3.6"/></svg></button>
-        <button type="button" class="dic" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button type="button" class="dic" id="setIcon" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
     </div>
     <div class="app on" id="hallApp"></div>
     <div class="app" id="collApp"></div>
     <div class="app" id="lbApp"></div>
+    <div class="app" id="setApp"></div>
     <div class="phome" id="pHome" role="button" aria-label="Home"></div>
     <div class="osd" id="osd" aria-hidden="true"><span id="osdTxt">VOLUME</span><div class="osdbar"><i id="osdFill"></i></div></div>
     <div class="psleep" id="pSleep"></div>
@@ -719,7 +720,7 @@ window.MIMUAudio = (function () {
   var pscreen = $('pScreen'), pswipe = $('pSwipe'), swipeStart = null;
   function isLocked() { return !pscreen.classList.contains('unlocked'); }
   function unlockPhone() { if (isLocked()) pscreen.classList.add('unlocked'); }
-  var APPS = { hall: $('hallApp'), collected: $('collApp'), leaders: $('lbApp') };
+  var APPS = { hall: $('hallApp'), collected: $('collApp'), leaders: $('lbApp'), settings: $('setApp') };
   function openApp(name) {
     Object.keys(APPS).forEach(function (k) { APPS[k].classList.toggle('on', k === name); });
     pscreen.dataset.app = name; pscreen.classList.add('inapp');
@@ -739,6 +740,7 @@ window.MIMUAudio = (function () {
   $('hallIcon').addEventListener('click', openHall);
   $('collIcon').addEventListener('click', function () { openApp('collected'); });
   $('lbIcon').addEventListener('click', function () { openApp('leaders'); });
+  $('setIcon').addEventListener('click', function () { openApp('settings'); });
   // the phone's side buttons
   var osd = $('osd'), osdFill = $('osdFill'), osdTxt = $('osdTxt'), osdT = 0, bMute = $('bMute'), bUp = $('bUp'), bDown = $('bDown'), bPower = $('bPower'), pSleep = $('pSleep');
   function showOsd(text, frac) { osdTxt.textContent = text; osdFill.style.width = Math.round(frac * 100) + '%'; osd.classList.add('on'); clearTimeout(osdT); osdT = setTimeout(function () { osd.classList.remove('on'); }, 1500); }
