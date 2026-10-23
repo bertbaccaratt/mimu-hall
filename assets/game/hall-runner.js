@@ -498,7 +498,8 @@
 
   /* the big coin hanging in the smoke at the far end keeps spinning (frames from the rotating-coin video, blended so it turns smoothly) */
   /* The coin is drawn in device pixels from a pre-scaled strip of its frames, away from the camera sway and tilt, so it never re-samples a little differently every frame (that was the shimmer during a run). */
-  var coinAtlas = null, coinAtlasD = 0;
+  var coinAtlas = null, coinAtlasD = 0, coinOff = null, coinOffD = 0, coinMask = null, coinVid = null;
+  function bgVideo() { if (coinVid === null) coinVid = document.querySelector('video.bg') || false; var v = coinVid; return v && v.videoWidth && v.readyState >= 2 && !v.paused && v.offsetWidth > 0 ? v : null; }
   function drawFarCoin(bx, bw, bh) {
     var ci = imgs.coin; if (!ci.naturalWidth) return;
     var x = bx + 375 / 752 * bw, y = 298 / 500 * bh + Math.sin(S.t * 0.9) * 2, D = 176 / 752 * bw / 0.80, ph = (S.t / 8) * 20, i0 = Math.floor(ph) % 20, f = ph - Math.floor(ph), i1 = (i0 + 1) % 20;
@@ -509,7 +510,18 @@
       ctx.globalAlpha = f; ctx.drawImage(ci, (i1 % 5) * 192, ((i1 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
       ctx.restore(); return;
     }
-    var Dd = Math.max(8, Math.round(D * dpr));
+    var Dd = Math.max(8, Math.round(D * dpr)), vv = bgVideo();
+    if (vv) {   // the page's own background video is playing: borrow the coin from it (it turns at the full video frame rate, so it is smooth); the sprite strip below is the fallback
+      if (!coinOff || coinOffD !== Dd) {
+        coinOff = document.createElement('canvas'); coinOff.width = coinOff.height = Dd; coinOffD = Dd;
+        coinMask = coinOff.getContext('2d').createRadialGradient(Dd / 2, Dd / 2, Dd * 0.40, Dd / 2, Dd / 2, Dd * 0.47); coinMask.addColorStop(0, 'rgba(0,0,0,1)'); coinMask.addColorStop(1, 'rgba(0,0,0,0)');
+      }
+      var og = coinOff.getContext('2d'), kk = vv.videoWidth / 1920, cc = 290 * kk, q = m.transformPoint({ x: x, y: y });
+      og.globalCompositeOperation = 'source-over'; og.clearRect(0, 0, Dd, Dd);
+      og.drawImage(vv, (947 - 145) * kk, (525 - 145) * kk, cc, cc, 0, 0, Dd, Dd);
+      og.globalCompositeOperation = 'destination-in'; og.fillStyle = coinMask; og.fillRect(0, 0, Dd, Dd);
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(coinOff, Math.round(q.x - Dd / 2), Math.round(q.y - Dd / 2)); ctx.restore(); return;
+    }
     if (!coinAtlas || coinAtlasD !== Dd) {
       coinAtlas = document.createElement('canvas'); coinAtlas.width = Dd * 5; coinAtlas.height = Dd * 4; coinAtlasD = Dd;
       var g = coinAtlas.getContext('2d'); g.imageSmoothingEnabled = true; if ('imageSmoothingQuality' in g) g.imageSmoothingQuality = 'high';
