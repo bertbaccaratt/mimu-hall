@@ -82,16 +82,17 @@
   if (window.ResizeObserver) new ResizeObserver(resize).observe(root); window.addEventListener('resize', resize);
 
   /* ---------- spawning: boxes (obstacles) and coins ---------- */
-  function box(z, lane) { S.ents.push({ k: 'box', z: z, lane: lane, sc: 0.78 + Math.random() * 0.34 }); }
-  function coin(z, lane) { S.ents.push({ k: 'coin', z: z, lane: lane, ph: Math.random() * 20, got: false }); }
+  function box(z, lane) { var r = Math.random(); S.ents.push({ k: 'box', z: z, lane: lane - 1, sc: 0.94 + Math.random() * 0.12, tier: r < 0.55 ? 0 : r < 0.8 ? 1 : 2 }); }
+  function coin(z, lane) { S.ents.push({ k: 'coin', z: z, lane: lane - 1, ph: Math.random() * 20, got: false }); }
   function pattern() {
-    var z = S.lastZ + 3.0 + Math.random() * 2.2 - Math.min(1.2, S.dist / 900), r = Math.random(), l = (Math.random() * 3) | 0, o = (l + 1 + ((Math.random() * 2) | 0)) % 3, i, len = 1.2;
-    if (r < 0.30) { box(z, l); }
-    else if (r < 0.50) { box(z, l); box(z + 0.25, o); }
-    else if (r < 0.66) { box(z, l); for (i = 0; i < 4; i++) coin(z - 0.3 + i * 0.5, o); len = 1.8; }
-    else if (r < 0.80) { for (i = 0; i < 5; i++) coin(z + i * 0.5, l); len = 2.2; }
-    else if (r < 0.90) { var seq = l === 1 ? [1, 0, 1, 2, 1] : l === 0 ? [0, 1, 2, 1, 0] : [2, 1, 0, 1, 2]; for (i = 0; i < 5; i++) coin(z + i * 0.55, seq[i]); len = 2.4; }
-    else { box(z, l); box(z + 1.6, o); for (i = 0; i < 3; i++) coin(z + 0.4 + i * 0.5, 3 - l - o); len = 2.2; }
+    var z = S.lastZ + 2.3 + Math.random() * 1.6 - Math.min(0.9, S.dist / 1400), r = Math.random(), l = (Math.random() * 3) | 0, o = (l + 1 + ((Math.random() * 2) | 0)) % 3, i, len = 1.2, l3 = 3 - l - o;
+    if (r < 0.16) { box(z, l); for (i = 0; i < 5; i++) coin(z - 0.4 + i * 0.5, o); len = 2.2; }
+    else if (r < 0.28) { box(z, l); box(z + 0.25, o); for (i = 0; i < 5; i++) coin(z + 0.1 + i * 0.5, l3); len = 2.4; }
+    else if (r < 0.46) { box(z, l); for (i = 0; i < 6; i++) coin(z - 0.4 + i * 0.5, o); for (i = 0; i < 3; i++) coin(z + 1.6 + i * 0.5, l3); len = 3.2; }
+    else if (r < 0.66) { for (i = 0; i < 7; i++) coin(z + i * 0.5, l); len = 3.4; }
+    else if (r < 0.82) { var seq = l === 1 ? [1, 0, 0, 1, 2, 2, 1] : l === 0 ? [0, 1, 1, 2, 2, 1, 0] : [2, 1, 1, 0, 0, 1, 2]; for (i = 0; i < 7; i++) coin(z + i * 0.5, seq[i]); len = 3.4; }
+    else if (r < 0.92) { for (i = 0; i < 6; i++) { coin(z + i * 0.5, l); coin(z + i * 0.5, o); } len = 3; }
+    else { box(z, l); box(z + 1.7, o); for (i = 0; i < 4; i++) coin(z + 0.5 + i * 0.4, l3); for (i = 0; i < 4; i++) coin(z + 2.2 + i * 0.4, l); len = 3.6; }
     S.lastZ = z + len;
   }
 
@@ -101,7 +102,7 @@
     ovStart.style.display = 'none'; ovDead.style.display = 'none'; ovPause.style.display = 'none';
   }
   function die() {
-    S.mode = 'dead'; S.flash = 1; S.shake = 1;
+    S.mode = 'dead'; S.flash = 1; S.shake = 1; if (window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
     var sc = Math.floor(S.score), isBest = sc > bestScore;
     if (isBest) { bestScore = sc; try { localStorage.setItem(BEST_KEY, String(bestScore)); } catch (e) {} }
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
@@ -135,7 +136,7 @@
         if (e.lane === Math.round(S.px) && Math.abs(S.px - e.lane) < 0.62) {
           var cross = pz >= PZ - 0.10 && e.z <= PZ + 0.10;
           if (cross) {
-            if (e.k === 'coin' && !e.got) { e.got = true; S.coins++; S.score += 25; S.shake = 0; }
+            if (e.k === 'coin' && !e.got) { e.got = true; S.coins++; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
             else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42) { die(); break; } }
           }
         }
@@ -171,11 +172,11 @@
     }
     // haze where the floor runs into the far end of the hall, and a soft dark at the bottom
     var g = ctx.createLinearGradient(0, y0 - 2, 0, y0 + hh * 0.28);
-    g.addColorStop(0, 'rgba(24,10,8,.7)'); g.addColorStop(1, 'rgba(10,4,4,0)'); ctx.fillStyle = g; ctx.fillRect(0, y0 - 2, W, hh * 0.28 + 2);
+    g.addColorStop(0, 'rgba(8,10,22,.7)'); g.addColorStop(1, 'rgba(6,8,18,0)'); ctx.fillStyle = g; ctx.fillRect(0, y0 - 2, W, hh * 0.28 + 2);
     var g2 = ctx.createLinearGradient(0, H * 0.78, 0, H); g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = g2; ctx.fillRect(0, H * 0.78, W, H * 0.22);
     // warm light from the hall lying on the polished stone
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    var sh = ctx.createLinearGradient(0, y0, 0, H); sh.addColorStop(0, 'rgba(150,80,40,.16)'); sh.addColorStop(.5, 'rgba(110,55,30,.12)'); sh.addColorStop(1, 'rgba(70,35,22,.06)');
+    var sh = ctx.createLinearGradient(0, y0, 0, H); sh.addColorStop(0, 'rgba(80,100,170,.14)'); sh.addColorStop(.5, 'rgba(60,80,150,.08)'); sh.addColorStop(1, 'rgba(40,55,110,.04)');
     ctx.fillStyle = sh; ctx.fillRect(0, y0, W, hh);
     ctx.restore();
     // lamp light pooling on the floor
@@ -246,15 +247,26 @@
   }
   function shadow(x, y, w) { ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.ellipse(x, y, w, w * 0.22, 0, 0, 6.3); ctx.fill(); ctx.restore(); }
 
+  var AURA = [null, { c: 'rgba(255,36,48,', rim: 'rgba(255,70,80,' }, { c: 'rgba(70,140,255,', rim: 'rgba(110,170,255,' }];
   function drawBox(e) {
-    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (!im.naturalWidth || y > H + 80) return;
-    var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.36 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (!im.naturalWidth || y > H + 90) return;
+    var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.42 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth, au = AURA[e.tier], pulse = 0.82 + 0.18 * Math.sin(S.t * 5 + e.z * 2);
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, bw * 0.55);
+    if (au) {
+      // the glow lights the floor around the box, then a soft coloured edge light hugs the box itself
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      var gy = y - bh * 0.35, gr = bw * 1.15, g = ctx.createRadialGradient(x, gy, bw * 0.1, x, gy, gr);
+      g.addColorStop(0, au.c + (0.85 * pulse) + ')'); g.addColorStop(0.55, au.c + (0.34 * pulse) + ')'); g.addColorStop(1, au.c + '0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, gy + bh * 0.1, gr, gr * 0.78, 0, 0, 6.3); ctx.fill(); ctx.restore();
+      ctx.shadowColor = au.rim + (0.95 * pulse) + ')'; ctx.shadowBlur = Math.max(4, bw * 0.46 * pulse);
+      ctx.drawImage(im, x - bw / 2, y - bh * 0.9, bw, bh);
+      ctx.shadowBlur = Math.max(3, bw * 0.2); ctx.drawImage(im, x - bw / 2, y - bh * 0.9, bw, bh);
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    }
     ctx.drawImage(im, x - bw / 2, y - bh * 0.9, bw, bh);
     ctx.restore();
   }
-
   function drawCoin(e) {
     if (e.got) return;
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (!im.naturalWidth || y > H + 60) return;
