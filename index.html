@@ -164,8 +164,6 @@
   .hhud .hs b { font-size: calc(var(--h) * .034); letter-spacing: .08em; font-weight: 700; }
   .hhud .hc { display: flex; align-items: center; gap: calc(var(--h) * .009); font-size: calc(var(--h) * .03); font-weight: 700; }
   .hcoin { width: calc(var(--h) * .03); height: calc(var(--h) * .03); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b8, #e0a93f 55%, #8f5f1d); box-shadow: 0 0 10px rgba(246,220,149,.6); border: 1px solid #6a4510; }
-  .hpause { pointer-events: auto; width: calc(var(--h) * .05); height: calc(var(--h) * .05); display: flex; gap: calc(var(--h) * .007); align-items: center; justify-content: center; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); border: 1px solid rgba(217,172,92,.7); cursor: pointer; }
-  .hpause i { width: calc(var(--h) * .006); height: calc(var(--h) * .019); background: #f6dc95; border-radius: 2px; }
   .hov { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--h) * .02); padding: 0 8%; text-align: center; font-family: 'Cinzel', Georgia, serif; color: #d9ac5c; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.42), rgba(0,0,0,.78)); }
   .hov .ht { font-size: calc(var(--h) * .056); font-weight: 500; letter-spacing: .26em; padding-left: .26em; line-height: 1.1; filter: drop-shadow(0 3px 14px rgba(0,0,0,.9)); }
   .hov .hline { width: 62%; height: 1px; background: linear-gradient(90deg, transparent, #d9ac5c, transparent); }
@@ -631,7 +629,10 @@ window.MIMUAudio = (function () {
     '<div class="rk">Change lane</div><div>Swipe left or right</div><div>&larr; &rarr; or A D</div>',
     '<div class="rk">Jump</div><div>Swipe up</div><div>&uarr;, W or Space</div>',
     '<div class="rk">Slide</div><div>Swipe down</div><div>&darr; or S</div>',
-    '<div class="rk">Pause</div><div>The pause button (tap the screen to keep going)</div><div>P</div></div>',
+    '</div>',
+    '<h3>No pause</h3>',
+    '<ul><li>There is <strong>no pause</strong>, anywhere. The run ends the moment you leave the game: pressing the home bar on the phone, pressing the lock button, closing the phone, switching to another browser tab, or anything that freezes the page for more than half a second.</li>',
+    '<li>Coming back later starts a fresh run, so a run cannot be saved for later.</li></ul>',
     '<h3>The road</h3>',
     '<ul><li>There are <strong>three lanes</strong>. Everything you meet, boxes and coins alike, stays inside them.</li>',
     '<li>The hall is alive: the road <strong>sways</strong> all the time and every few seconds swings into a <strong>curve</strong> and straightens out again. The lanes bend with it, so keep to your lane.</li>',

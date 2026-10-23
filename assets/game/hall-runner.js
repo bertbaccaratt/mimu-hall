@@ -17,17 +17,16 @@
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function pad(n, l) { n = String(Math.floor(n)); while (n.length < l) n = '0' + n; return n; }
 
-  /* ---------- screen furniture (score, pause, start / pause / game over cards) ---------- */
+  /* ---------- screen furniture (score, start / game over cards) ---------- */
   var cv = el('canvas', 'hcv'); root.appendChild(cv);
   var ctx = cv.getContext('2d');
-  var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b></div><button type="button" class="hpause" aria-label="Pause"><i></i><i></i></button><div class="hc"><span class="hcoin"></span><b>0</b></div>');
+  var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b></div><div class="hc"><span class="hcoin"></span><b>0</b></div>');
   root.appendChild(hud);
-  var elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b'), btnPause = hud.querySelector('.hpause');
+  var elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b');
   var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
-  var ovPause = el('div', 'hov hpaused', '<div class="ht gold">PAUSED</div><div class="htap">TAP TO KEEP RUNNING</div>');
   var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
-  root.appendChild(ovStart); root.appendChild(ovPause); root.appendChild(ovDead);
-  [ovPause, ovDead].forEach(function (o) { o.style.display = 'none'; });
+  root.appendChild(ovStart); root.appendChild(ovDead);
+  ovDead.style.display = 'none';
 
   /* ---------- artwork ---------- */
   var imgs = {}, pending = 0;
@@ -67,7 +66,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', paused: false, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
+    return { mode: 'idle', t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -100,22 +99,23 @@
   /* ---------- update ---------- */
   function start() {
     S = fresh(); S.mode = 'run'; S.v = 4.6;
-    ovStart.style.display = 'none'; ovDead.style.display = 'none'; ovPause.style.display = 'none';
+    ovStart.style.display = 'none'; ovDead.style.display = 'none';
   }
-  function die() {
-    S.mode = 'dead'; S.flash = 1; S.shake = 1; if (window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
+  function die(silent) {
+    S.mode = 'dead'; S.flash = 1; S.shake = 1; if (!silent && window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
     var sc = Math.floor(S.score), isBest = sc > bestScore;
     if (isBest) { bestScore = sc; try { localStorage.setItem(BEST_KEY, String(bestScore)); } catch (e) {} }
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
     showBest();
     setTimeout(function () { if (S.mode === 'dead') ovDead.style.display = 'flex'; }, 650);
   }
-  function setPaused(p) { if (S.mode !== 'run') return; S.paused = p; ovPause.style.display = p ? 'flex' : 'none'; }
+  // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
+  function forfeit() { if (S.mode === 'run') die(true); }
 
   function update(dt) {
     S.t += dt;
-    var running = S.mode === 'run' && !S.paused;
-    var v = S.mode === 'run' ? (S.paused ? 0 : 4.6 + 4.2 * (1 - Math.exp(-S.dist / 650))) : S.mode === 'dead' ? Math.max(0, S.v - dt * 14) : 1.3;
+    var running = S.mode === 'run';
+    var v = S.mode === 'run' ? (4.6 + 4.2 * (1 - Math.exp(-S.dist / 650))) : S.mode === 'dead' ? Math.max(0, S.v - dt * 14) : 1.3;
     S.v = v;
     var step = v * dt;
     S.scrollZ += step;
@@ -354,16 +354,17 @@
   function frame(now) {
     if (!active) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
-    var dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
+    var raw = (now - last) / 1000 || 0.016, dt = Math.min(0.05, raw); last = now;
+    if (raw > 0.5 && S.mode === 'run') forfeit();   // the page stalled or was frozen: no pausing by freezing it
     if (!W) { resize(); if (!W) return; }
     if (pending > 0) return;
     update(dt); render();
   }
 
   /* ---------- controls ---------- */
-  function lane(d) { if (S.mode !== 'run' || S.paused) return; S.lane = clamp(S.lane + d, -1, 1); }
-  function jump() { if (S.mode !== 'run' || S.paused || S.jt >= 0) return; S.sl = -1; S.jt = 0; }
-  function slide() { if (S.mode !== 'run' || S.paused || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; }
+  function lane(d) { if (S.mode !== 'run') return; S.lane = clamp(S.lane + d, -1, 1); }
+  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; }
+  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; }
   var down = null;
   root.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; down = { x: e.clientX, y: e.clientY, t: Date.now(), used: false }; });
   root.addEventListener('pointermove', function (e) {
@@ -376,10 +377,9 @@
   function up() {
     if (!down) return; var d = down; down = null;
     if (d.used) return;
-    if (S.mode === 'idle') start(); else if (S.mode === 'run' && S.paused) setPaused(false);
+    if (S.mode === 'idle') start();
   }
   root.addEventListener('pointerup', up); root.addEventListener('pointercancel', function () { down = null; });
-  btnPause.addEventListener('click', function () { setPaused(!S.paused); });
   ovDead.querySelector('.hagain').addEventListener('click', function () { start(); });
   window.addEventListener('keydown', function (e) {
     if (!active) return; var k = e.key;
@@ -387,13 +387,14 @@
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { lane(1); e.preventDefault(); }
     else if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { if (S.mode === 'idle' || S.mode === 'dead') { start(); } else jump(); e.preventDefault(); }
     else if (k === 'ArrowDown' || k === 's' || k === 'S') { slide(); e.preventDefault(); }
-    else if (k === 'p' || k === 'P') { setPaused(!S.paused); }
   });
 
   /* ---------- the phone calls these ---------- */
+  document.addEventListener('visibilitychange', function () { if (document.hidden) forfeit(); });
+  window.addEventListener('pagehide', forfeit);
   window.HallRunner = {
-    open: function () { active = true; resize(); if (S.mode === 'run') setPaused(true); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
-    close: function () { active = false; if (S.mode === 'run') setPaused(true); },
+    open: function () { forfeit(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
+    close: function () { forfeit(); active = false; },
     state: function () { return S; }
   };
 })();
