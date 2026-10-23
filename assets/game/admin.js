@@ -140,10 +140,10 @@
   function buildPanel() {
     shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
-      '<div class="ad-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="ad-right"><div class="ad-clock" id="admClock"></div><div class="ad-pills" id="admPills"></div></div></div>' +
-      '<div class="ad-body"><nav class="ad-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '</nav>' +
-      '<main class="ad-main">' +
-      '<section data-p="ov">' + (feed ? '' : '<div class="banner">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK BELOW IS REAL</div>') + '<div class="box" style="margin-bottom:16px"><h4>SYSTEM CHECK</h4><div class="sys" id="admSys"></div></div><div class="tiles" id="admTiles"></div><div class="cols2"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9"></div></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></div></section>' +
+      '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
+      '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '</nav>' +
+      '<main class="cr-main">' +
+      '<section data-p="ov">' + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK BELOW IS REAL</div>') + '<div class="box" style="margin-bottom:16px"><h4>SYSTEM CHECK</h4><div class="sys" id="admSys"></div></div><div class="tiles" id="admTiles"></div><div class="cols2"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9"></div></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></div></section>' +
       '<section data-p="live"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9b"></div></div></section>' +
       '<section data-p="msg"><div class="box"><h4>TEXT AS HYPE</h4><div class="hint" style="margin-bottom:12px">A one-on-one text from the HYPE account to a signed-in player. Players cannot reply to HYPE.</div><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><textarea id="admHBody" maxlength="280" rows="4" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div><div class="box" style="margin-top:16px"><h4>RECENTLY SENT</h4><div class="sent" id="admHList"></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
@@ -154,13 +154,13 @@
       '<section data-p="tools"><div class="box"><h4>TOOLS</h4><div class="tools"><button type="button" class="sw' + (P.isTest() ? ' on' : '') + '" id="admTest"><i></i>TEST MODE</button><div class="hint">Test mode makes card sightings come every few seconds, opens every tier, and brings the pack after 40 seconds, so you can see every rarity and the slowdown without playing for hours. Nothing is saved while it is on. It only changes this browser.</div></div>' +
       '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admSnap">DOWNLOAD SNAPSHOT</button><div class="hint">Saves the numbers on this page (and the current game settings) as a file on this computer.</div></div>' +
       '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admOut">LOCK THE CONTROL ROOM</button><div class="hint">Forgets this login on this browser, so the password is asked again.</div></div></div></section>' +
-      '</main></div><div class="ad-foot">KEYS &nbsp; 1&ndash;8 SWITCH PAGE &nbsp;&middot;&nbsp; ESC CLOSES</div></div>';
+      '</main></div><div class="cr-foot">KEYS &nbsp; 1&ndash;8 SWITCH PAGE &nbsp;&middot;&nbsp; ESC CLOSES</div></div>';
     var root = shade.querySelector('.adm');
     function show(t) {
       curTab = t;
-      Array.prototype.forEach.call(root.querySelectorAll('.ad-nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
+      Array.prototype.forEach.call(root.querySelectorAll('.cr-nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
       Array.prototype.forEach.call(root.querySelectorAll('section[data-p]'), function (s) { s.style.display = s.getAttribute('data-p') === t ? '' : 'none'; s.classList.toggle('in', s.getAttribute('data-p') === t); });
-      root.querySelector('.ad-main').scrollTop = 0;
+      root.querySelector('.cr-main').scrollTop = 0;
     }
     show(curTab);
     shade.querySelector('.adm-x').addEventListener('click', close);
