@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261022zk"><link rel="stylesheet" href="assets/game/comms.css?v=20261022zk"><link rel="stylesheet" href="assets/game/admin.css?v=20261022zk">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261022zl"><link rel="stylesheet" href="assets/game/comms.css?v=20261022zl"><link rel="stylesheet" href="assets/game/admin.css?v=20261022zl">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -479,10 +479,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261022zk" defer></script>
-<script src="assets/game/hall-runner.js?v=20261022zk" defer></script>
-<script src="assets/game/comms.js?v=20261022zk" defer></script> <script src="assets/game/apps.js?v=20261022zk" defer></script>
-<script src="assets/game/admin-docs.js?v=20261022zk" defer></script> <script src="assets/game/admin.js?v=20261022zk" defer></script>
+<script src="assets/game/profile.js?v=20261022zl" defer></script>
+<script src="assets/game/hall-runner.js?v=20261022zl" defer></script>
+<script src="assets/game/comms.js?v=20261022zl" defer></script> <script src="assets/game/apps.js?v=20261022zl" defer></script>
+<script src="assets/game/admin-docs.js?v=20261022zl" defer></script> <script src="assets/game/admin.js?v=20261022zl" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -698,16 +698,16 @@ window.MIMUAudio = (function () {
     '<li>When the 60 seconds are over you are back at the speed you had when you grabbed it. The speed climb waits while you are slowed, so you lose no progress.</li></ul>',
     '<h3>Cards</h3>',
     '<div class="rnote" style="margin:0 0 12px">In-game cards only. They are pictures that stand for real cards, not the real cards, and they are not real-world assets. THE HALL is a mini game and a friendly competition made by the community. It has no affiliation with the makers of the real cards. A real version of each card exists and may have monetary value, but those real cards are not being given away or collected here, and nothing you collect in this game is a real-world asset.</div>',
-    '<p>There are <strong>120 cards</strong> to find. Every <strong>30 minutes</strong> you stay alive in a run, a card floats into one lane, a little higher than the boxes. <strong>Jump to collect it.</strong> Nothing interrupts the run: no pop-up, no flip, no slowdown, only a soft chime and the card count on your screen.</p>',
-    '<ul><li><strong>Dying resets the 30-minute clock,</strong> but you keep every card you have already collected.</li>',
-    '<li>A card you miss scrolls past and is gone. The next one comes 30 minutes after the last.</li>',
+    '<p>There are <strong>120 cards</strong> to find. Every so often as you stay alive in a run, a card floats into one lane, a little higher than the boxes. <strong>Jump to collect it.</strong> Nothing interrupts the run: no pop-up, no flip, no slowdown, only a soft chime and the card count on your screen.</p>',
+    '<ul><li><strong>Dying starts the timer over,</strong> but you keep every card you have already collected.</li>',
+    '<li>A card you miss scrolls past and is gone. The next one comes a while after the last.</li>',
     '<li>The glow around a card tells you how rare it is, so you know what you are jumping for:</li></ul>',
     '<div class="rtab rcol"><div class="rh">RARITY</div><div class="rh">GLOW</div><div class="rh">CARDS</div><div class="rh">OPENS</div>',
     '<div class="rk">Common</div><div><span class="swatch" style="background:#fff"></span>White</div><div>55</div><div>from the start</div>',
-    '<div class="rk">Uncommon</div><div><span class="swatch" style="background:#5fd37a"></span>Green</div><div>30</div><div>30 min alive</div>',
-    '<div class="rk">Rare</div><div><span class="swatch" style="background:#4aa3ff"></span>Blue</div><div>13</div><div>1 hour alive</div>',
-    '<div class="rk">Prestige</div><div><span class="swatch" style="background:#f0c24a"></span>Gold</div><div>14</div><div>2 hours alive</div>',
-    '<div class="rk">Legendary</div><div><span class="swatch" style="background:linear-gradient(90deg,#47d1ff,#c358d1)"></span>Cyan to magenta</div><div>8</div><div>3 hours alive</div></div>',
+    '<div class="rk">Uncommon</div><div><span class="swatch" style="background:#5fd37a"></span>Green</div><div>30</div><div>early in the run</div>',
+    '<div class="rk">Rare</div><div><span class="swatch" style="background:#4aa3ff"></span>Blue</div><div>13</div><div>later in the run</div>',
+    '<div class="rk">Prestige</div><div><span class="swatch" style="background:#f0c24a"></span>Gold</div><div>14</div><div>way later in the run</div>',
+    '<div class="rk">Legendary</div><div><span class="swatch" style="background:linear-gradient(90deg,#47d1ff,#c358d1)"></span>Cyan to magenta</div><div>8</div><div>very far away (don&rsquo;t worry about this one)</div></div>',
     '<div class="rex">',
     '<figure class="t1" style="--c:#fff;--g:rgba(255,255,255,.4)"><div class="fr"><img src="assets/game/cards/ex/001.webp" alt="Bottle Rocket" loading="lazy"></div><figcaption><b>COMMON</b>Bottle Rocket<br>#001</figcaption></figure>',
     '<figure class="t2" style="--c:#5fd37a;--g:rgba(95,211,122,.45)"><div class="fr"><img src="assets/game/cards/ex/005.webp" alt="Dead Calm" loading="lazy"></div><figcaption><b>UNCOMMON</b>Dead Calm<br>#005</figcaption></figure>',
@@ -716,11 +716,11 @@ window.MIMUAudio = (function () {
     '<figure class="t5" style="--c:#8aa8ff;--g:rgba(120,170,255,.55)"><div class="fr"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary" loading="lazy"></div><figcaption><b>LEGENDARY</b>Good Boy Gary<br>#049</figcaption></figure></div>',
     '<p>On every card, the diamonds at the top show the rarity (one to five), the badge in the corner shows the family, and the number at the bottom is its place from 1 to 120. The four families are <strong>Club</strong> (62 cards), <strong>Mutant</strong> (22), <strong>Cosmic</strong> (16) and <strong>Arcana</strong> (20).</p>',
     '<h3>Which cards appear</h3>',
-    '<ul><li><strong>Rare cards are hard to get.</strong> The higher tiers only open after you have stayed alive long enough in one run: Uncommon after 30 minutes, Rare after 1 hour, Prestige after 2 hours and Legendary after 3 hours. Dying starts the clock over.</li>',
+    '<ul><li><strong>Rare cards are hard to get.</strong> The higher tiers only open after you have stayed alive long enough in one run: Uncommon early in the run, Rare later in the run, Prestige way later in the run, and Legendary very far away, so do not worry about that one yet. Dying starts the timer over.</li>',
     '<li><strong>A tier opens once you have collected 60% of the tier below it:</strong> 33 Commons for Uncommon, 18 Uncommons for Rare, 8 Rares for Prestige and 9 Prestige for Legendary. Nobody skips ahead.</li>',
     '<li>When several tiers are open, the common ones come up most often, and the Legendary tier is the thinnest slice.</li>',
     '<li>Most sightings are a card you have not collected yet. About one in five can be a card you already have.</li>',
-    '<li>There is also a very small lucky chance in shorter runs: after 1 hour alive, a sighting has a tiny chance of being a Prestige or a Legendary even if it has not opened for you yet.</li>',
+    '<li>There is also a very small lucky chance in shorter runs: later in a run, a sighting has a tiny chance of being a Prestige or a Legendary even if it has not opened for you yet.</li>',
     '<li>The whole set is meant to take a long time, and the Legendaries come last.</li></ul>',
     '<h3>The Collected app</h3>',
     '<p>Collected shows your in-game cards. They are not real cards and not real-world assets.</p>',
