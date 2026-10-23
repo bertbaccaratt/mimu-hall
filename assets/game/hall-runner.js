@@ -39,6 +39,7 @@
   load('coin', 'assets/game/coin-sheet.webp');
   load('wall', 'assets/game/wall.webp');
   load('floor', 'assets/game/floor.webp');
+  load('slide', 'assets/game/slide.webp');
 
   /* the marble floor, painted once: black stone with fine gold veins */
   var tex = document.createElement('canvas'); tex.width = TEX_W; tex.height = TEX_H;
@@ -290,13 +291,27 @@
     var sh = H * 0.25, sw = sh * im.naturalWidth / im.naturalHeight, bob = (S.mode === 'dead' ? 0 : Math.abs(Math.sin(S.run * Math.PI)) * sh * 0.025);
     var lift = jh * H * 0.11 + bob, tilt = clamp(S.vx * 0.012, -0.16, 0.16);
     shadow(x, y, sw * 0.34 * (1 - jh * 0.35));
-    // sliding: the runner drops low, stretches out and leans into it, then springs back up
-    var env = S.sl < 0 ? 0 : (S.sl < 0.12 ? S.sl / 0.12 : S.sl > 0.8 ? (1 - S.sl) / 0.2 : 1);
-    ctx.save(); ctx.translate(x, y - lift); ctx.rotate(tilt + env * 0.16); ctx.scale(1 + env * 0.16, 1 - env * 0.45);
-    if (S.mode === 'dead') ctx.globalAlpha = 0.9;
-    // a soft gold edge light so the runner sits in the hall's light
+    // sliding: the runner throws himself down on his side and skims along on one hand and one foot (his own sliding picture),
+    // blending in from the running frame and springing back up at the end
+    var env = S.sl < 0 ? 0 : (S.sl < 0.14 ? S.sl / 0.14 : S.sl > 0.8 ? (1 - S.sl) / 0.2 : 1), sim = imgs.slide;
+    ctx.save(); if (S.mode === 'dead') ctx.globalAlpha = 0.9;
+    if (env > 0 && sim.naturalWidth) {
+      var ssw = sw * 1.36, ssh = ssw * sim.naturalHeight / sim.naturalWidth, a = env * env * (3 - 2 * env);
+      // dust kicked up behind the slide
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      for (var q = 0; q < 6; q++) {
+        var ph = (S.t * 2.2 + q / 6) % 1, dx = x + (q % 2 ? 1 : -1) * ssw * (0.12 + 0.34 * ph), dy = y - ssh * 0.12 + ph * H * 0.012, dr = ssh * (0.12 + 0.2 * ph);
+        var dg = ctx.createRadialGradient(dx, dy, 0, dx, dy, dr); dg.addColorStop(0, 'rgba(255,210,150,' + (0.22 * a * (1 - ph)) + ')'); dg.addColorStop(1, 'rgba(255,190,120,0)');
+        ctx.fillStyle = dg; ctx.beginPath(); ctx.arc(dx, dy, dr, 0, 6.3); ctx.fill();
+      }
+      ctx.restore();
+      if (a < 1) { ctx.save(); ctx.translate(x, y - lift); ctx.rotate(tilt); ctx.globalAlpha *= (1 - a); ctx.drawImage(im, -sw / 2, -sh * 0.97, sw, sh); ctx.restore(); }
+      ctx.save(); ctx.translate(x, y); ctx.rotate(tilt * 0.5); ctx.globalAlpha *= a; ctx.drawImage(sim, -ssw / 2, -ssh * 0.96, ssw, ssh); ctx.restore();
+      ctx.restore(); return;
+    }
+    ctx.save(); ctx.translate(x, y - lift); ctx.rotate(tilt);
     ctx.drawImage(im, -sw / 2, -sh * 0.97, sw, sh);
-    ctx.restore();
+    ctx.restore(); ctx.restore();
   }
 
   /* the big coin hanging in the smoke at the far end keeps spinning (frames from the rotating-coin video, blended so it turns smoothly) */
