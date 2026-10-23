@@ -168,6 +168,32 @@
     el.innerHTML = '<div class="xapp"><div class="xh">' + s.logo + '<div style="flex:1;min-width:0"><b>' + esc(s.name) + '</b><span>' + esc(s.sub) + '</span></div><a class="xopen" href="' + s.url + '" target="_blank" rel="noopener noreferrer">' + s.btn + '</a></div><div class="xbody"><div class="' + s.cls + '"><img src="' + s.img + '" alt="' + esc(s.alt) + '" width="750" height="1624" decoding="async"></div></div></div>';
   }
 
+  /* ---------- HOME WIDGETS: my ranking and my deck, under the app icons ---------- */
+  function short(n) { n = Math.floor(n || 0); return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : n.toLocaleString('en-US'); }
+  var CIRC = 2 * Math.PI * 18;
+  function buildWidgets() {
+    var g = document.querySelector('.agrid'); if (!g || $('wLb')) return;
+    g.insertAdjacentHTML('beforeend',
+      '<button type="button" class="wid wlb" id="wLb" aria-label="My ranking"><span class="wt">MY RANKING</span><span class="wrk"><i id="wRk">&mdash;</i><small id="wRkOf">SIGN IN TO RANK</small></span><span class="wst"><span><small>TOTAL</small><b id="wTot">0</b></span><span><small>BEST</small><b id="wBest">0</b></span><span><small>LAST</small><b id="wLast">0</b></span></span></button>' +
+      '<button type="button" class="wid wdk" id="wDk" aria-label="My deck"><span class="wt">THE FULL DECK</span><span class="wmid"><svg viewBox="0 0 44 44" class="wring"><circle cx="22" cy="22" r="18" class="rb"/><circle cx="22" cy="22" r="18" class="rf" id="wRf" stroke-dasharray="' + CIRC.toFixed(2) + '" stroke-dashoffset="' + CIRC.toFixed(2) + '"/></svg><span class="wpc" id="wPc">0%</span><span class="wcn"><b id="wCn">0<small>/120</small></b><small id="wLeft">120 TO GO</small></span></span><span class="wtb" id="wTb"></span></button>');
+    $('wLb').addEventListener('click', function () { var b = $('lbIcon'); if (b) b.click(); });
+    $('wDk').addEventListener('click', function () { var b = $('collIcon'); if (b) b.click(); });
+    paintWidgets();
+  }
+  function paintWidgets() {
+    if (!$('wLb')) return;
+    var t = P.totals ? P.totals() : {}, own = P.owned ? P.owned() : new Set(), cards = P.cards ? P.cards() : [], total = cards.length || 120, n = 0, byT = {}, i;
+    cards.forEach(function (c) { if (own.has && own.has(c.n)) { n++; byT[c.tier] = (byT[c.tier] || 0) + 1; } });
+    var pct = total ? n / total : 0, signed = P.isSignedIn();
+    $('wRk').innerHTML = signed && t.rank ? '#' + fmt(t.rank) : '&mdash;'; $('wRkOf').textContent = !signed ? 'SIGN IN TO RANK' : t.rank ? 'OF ' + fmt(t.players || t.rank) + ' PLAYERS' : 'NO RANKED RUN YET';
+    $('wTot').textContent = short(t.lifetime); $('wBest').textContent = short(t.best); $('wLast').textContent = short(t.last);
+    $('wRf').setAttribute('stroke-dashoffset', (CIRC * (1 - pct)).toFixed(2)); $('wPc').textContent = Math.round(pct * 100) + '%';
+    $('wCn').innerHTML = n + '<small>/' + total + '</small>'; $('wLeft').textContent = (total - n) + ' TO GO';
+    $('wTb').innerHTML = (P.tiers || []).map(function (tr) { var c = byT[tr.n] || 0, w = tr.count ? Math.round(c / tr.count * 100) : 0; return '<span title="' + esc(tr.name) + ' ' + c + '/' + tr.count + '"><i style="width:' + w + '%;background:' + (tr.grad || tr.color) + '"></i></span>'; }).join('');
+  }
+  P.whenReady(function () { buildWidgets(); paintWidgets(); });
+  buildWidgets();
+
   /* ---------- the phone asks for an app ---------- */
   window.HallComms = {
     open: function (name) {
@@ -182,6 +208,7 @@
   var scr = $('pScreen'); if (scr && window.MutationObserver) new MutationObserver(function () { if (current() !== 'phone' && ph.st !== 'dial') { clearTimers(); ph.st = 'dial'; paintPhone(); } }).observe(scr, { attributes: true, attributeFilter: ['class'] });
   P.onChange(function (what) {
     if (what !== 'connect' && what !== 'scores' && what !== 'cards') return;
+    paintWidgets();
     var a = current();
     if (a === 'messages') drawMessages(); else if (a === 'mail') drawMail(); else if (a === 'market') drawMarket();
   });
