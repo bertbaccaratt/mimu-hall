@@ -69,9 +69,12 @@
     track: function (metric, n) { if (adapter && adapter.track) adapter.track(metric, n || 1); },   // small actions the page reports (photos, calls)
     deckBoard: function () { return adapter && adapter.deckBoard ? adapter.deckBoard() : Promise.resolve([]); },   // top 10 by deck progress: [{ username, owned, rarest, family, runs, best }]
     leaderboard: function (kind) { return adapter && adapter.leaderboard ? adapter.leaderboard(kind) : Promise.resolve([]); },   // kind: 'lifetime' | 'best' | 'last'
+    counts: function () { return adapter && adapter.counts ? adapter.counts() : {}; },   // { cardNumber: copies } for the signed-in player
+    netRun: function () { return adapter && adapter.run ? adapter.run : null; },        // the server side of a run: start, beat, drop, collect
+    notify: function (what) { emit(what); },
     onChange: function (fn) { listeners.push(fn); },
     connect: function (a) { adapter = a; emit('connect'); },
-    disconnect: function () { adapter = null; emit('connect'); }
+    disconnect: function () { var a = adapter; adapter = null; try { if (a && a.onDisconnect) a.onDisconnect(); } catch (e) {} emit('connect'); }
   };
   window.HallProfile = P;
 })();

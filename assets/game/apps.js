@@ -17,7 +17,7 @@
     '<li><b>WATCH THE BARS</b> THE TOP BAR IS YOUR WHOLE DECK. THE BARS BELOW SHOW HOW CLOSE YOU ARE IN EVERY RARITY TIER AND EVERY FAMILY.</li>' +
     '<li><b>FILTER</b> USE THE BUTTONS TO SHOW ONE TIER, ONE FAMILY, ONLY CARDS YOU HAVE COLLECTED, OR ONLY THE ONES YOU ARE MISSING.</li>' +
     '<li><b>GET CARDS</b> JUMP THE FLOATING CARD IN THE HALL. OR USE THE MARKETPLACE: FACE DOWN CARDS FROM THE HALL COST COINS, AND FACE UP CARDS FROM OTHER PLAYERS COST POINTS.</li>' +
-    '<li><b>EXTRA COPIES</b> ANY CARD YOU HAVE COLLECTED CAN BE SOLD OR LISTED IN THE MARKETPLACE.</li>' +
+    '<li><b>DUPLICATES</b> A GOLD ×2, ×3 SHOWS WHEN YOU HAVE EXTRA COPIES. TAP SELL 1 TWICE TO SELL ONE COPY TO THE HALL FOR POINTS.</li>' +
     '<li>UNTIL SIGN-IN OPENS THE HALL RUNS AS A DEMO, SO NOTHING IS SAVED HERE YET.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>';
   var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set();
   function tierDot(t) { return t.grad ? '<i class="dm" style="background:' + t.grad + '"></i>' : '<i class="dm" style="background:' + t.color + '"></i>'; }
@@ -38,11 +38,20 @@
       '<div class="sec"><div class="sech">FILTERS</div><div class="fl"><div class="chips">' + tierChips + '</div><div class="chips">' + famChips + '</div><div class="chips">' + viewChips + '</div></div></div>' +
       '<div class="sec"><div class="sech"><span id="cShow">SHOWING 120</span></div></div>' +
       '<div class="cgrid" id="cGrid">' + cards + '</div></div>';
-    cEl.addEventListener('click', function (ev) { var b = ev.target.closest('.chip'); if (!b) return; var k = b.getAttribute('data-k'), v = b.getAttribute('data-v'); f[k] = k === 'tier' ? parseInt(v, 10) : v; Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); applyFilters(); });
+    cEl.addEventListener('click', function (ev) {
+      var sb = ev.target.closest('.csell');
+      if (sb) {   // selling an extra copy to the Hall: two taps, so it is never an accident
+        var card = sb.closest('.cc'), n = parseInt(card.getAttribute('data-n'), 10), note = $('cNote');
+        if (sellArm !== n) { sellArm = n; Array.prototype.forEach.call(cEl.querySelectorAll('.csell'), function (x) { x.textContent = 'SELL 1'; x.classList.remove('arm'); }); sb.textContent = 'SELL +' + (sellVals[n] != null ? sellVals[n].toLocaleString('en-US') : '?') + ' PTS?'; sb.classList.add('arm'); setTimeout(function () { if (sellArm === n) { sellArm = null; sb.textContent = 'SELL 1'; sb.classList.remove('arm'); } }, 4000); return; }
+        sellArm = null; sb.disabled = true; P.market().sell(n).then(function (r) { note.textContent = 'SOLD ONE COPY OF CARD ' + pad3(n) + ' TO THE HALL'; sellFetched = false; refreshCollected(false); }, function (e) { sb.disabled = false; note.textContent = String((e && e.message) || 'COULD NOT SELL').toUpperCase(); });
+        return;
+      }
+      var b = ev.target.closest('.chip'); if (!b) return; var k = b.getAttribute('data-k'), v = b.getAttribute('data-v'); f[k] = k === 'tier' ? parseInt(v, 10) : v; Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); applyFilters(); });
   }
+  var sellVals = {}, sellFetched = false, sellArm = null;
   function refreshCollected(animate) {
     if (!cBuilt) return;
-    var own = P.owned(), cards = P.cards(), total = 0, byT = {}, byF = {};
+    var own = P.owned(), counts = P.counts ? P.counts() : {}, mk = P.market ? P.market() : null, canSell = !!(P.isSignedIn() && mk && mk.sell), cards = P.cards(), total = 0, byT = {}, byF = {};
     cards.forEach(function (c) { if (own.has(c.n)) { total++; byT[c.tier] = (byT[c.tier] || 0) + 1; byF[c.family] = (byF[c.family] || 0) + 1; } });
     $('cSub').textContent = total + ' / ' + cards.length; $('cTotalCt').textContent = total + '/' + cards.length; $('cTotalBar').style.width = (total / cards.length * 100) + '%';
     P.tiers.forEach(function (t) { var row = cEl.querySelector('.pb[data-t="' + t.n + '"]'); var n = byT[t.n] || 0; row.querySelector('i').style.width = (n / t.count * 100) + '%'; row.querySelector('.ct').textContent = n + '/' + t.count; });
@@ -52,7 +61,11 @@
       var n = parseInt(el.getAttribute('data-n'), 10), has = own.has(n), was = el.classList.contains('owned');
       if (has && !was) { var img = el.querySelector('.cfr img'); if (!img.getAttribute('src')) img.setAttribute('src', img.getAttribute('data-src')); if (animate) { el.classList.add('fresh'); setTimeout(function () { el.classList.remove('fresh'); }, 1300); } el.classList.add('owned'); }
       else if (!has && was) el.classList.remove('owned');
+      var cnt = counts[n] || 0, cx = el.querySelector('.cx'), cs = el.querySelector('.csell');
+      if (cnt > 1) { if (!cx) { cx = document.createElement('span'); cx.className = 'cx'; el.appendChild(cx); } cx.textContent = '\u00d7' + cnt; } else if (cx) cx.remove();
+      if (cnt > 1 && canSell) { if (!cs) { cs = document.createElement('button'); cs.type = 'button'; cs.className = 'csell'; cs.textContent = 'SELL 1'; el.appendChild(cs); } } else if (cs) cs.remove();
     });
+    if (canSell && !sellFetched) { sellFetched = true; mk.sellable().then(function (rows) { rows.forEach(function (r) { sellVals[r.n] = r.value; }); }, function () {}); setTimeout(function () { sellFetched = false; }, 30000); }
     applyFilters();
   }
   function applyFilters() {

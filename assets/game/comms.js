@@ -114,6 +114,10 @@
 
   /* ---------- MAIL ---------- */
   var ml = { open: null };
+  function wantedBlock(w) {
+    var res = w.live ? 'LIVE' : w.result === 'collected' ? 'FOUND BY A PLAYER' : w.result === 'expired' ? 'ENDED, NOBODY FOUND IT' : 'ENDED';
+    return '<div class="wanted"><div class="wcard"><img src="' + esc(w.file) + '" alt="' + esc(w.name) + '"></div><div class="wmeta"><small>WANTED CARD</small><b>' + esc(w.name) + '</b><em>#' + String(w.card).padStart(3, '0') + ' &middot; ' + esc((w.tier || '').toUpperCase()) + '</em><small style="margin-top:10px">' + (w.live ? 'TIME LEFT' : 'STATUS') + '</small><strong id="wantedTimer">' + (w.live ? '' : res) + '</strong></div></div>';
+  }
   function drawMail() {
     var el = $('mailApp'); if (!el) return; el.classList.add('page');
     var A = P.mail ? P.mail() : null;
@@ -126,9 +130,11 @@
       box.addEventListener('click', function (ev) { var b = ev.target.closest('.cmrow'); if (!b) return; var id = b.getAttribute('data-id'), m = rows.filter(function (x) { return String(x.id) === id; })[0]; if (!m) return; openMail(m); if (A.read) A.read(m.id); });
     }, function () { var box = $('mlList'); if (box) box.innerHTML = '<div class="empty">COULD NOT LOAD MAIL</div>'; });
   }
+  var mailTick = 0;
   function openMail(m) {
-    var el = $('mailApp');
-    el.innerHTML = '<div class="pg cm"><div class="cmhead"><button type="button" class="cmback" id="mlBack" aria-label="Back">&lsaquo;</button><h3>MAIL</h3><span></span></div><div class="mlmsg"><h4>' + esc(m.subject) + '</h4><div class="mlfrom">FROM MIMU &middot; ' + when(m.ts) + '</div><div class="mlbody">' + lines(m.body) + '</div></div></div>';
+    var el = $('mailApp'); clearInterval(mailTick);
+    el.innerHTML = '<div class="pg cm"><div class="cmhead"><button type="button" class="cmback" id="mlBack" aria-label="Back">&lsaquo;</button><h3>MAIL</h3><span></span></div><div class="mlmsg"><h4>' + esc(m.subject) + '</h4><div class="mlfrom">FROM MIMU &middot; ' + when(m.ts) + '</div><div class="mlbody">' + lines(m.body) + '</div>' + (m.wanted ? wantedBlock(m.wanted) : '') + '</div></div>';
+    if (m.wanted && m.wanted.live) { var tk = function () { var t = $('wantedTimer'); if (!t) { clearInterval(mailTick); return; } var s = Math.max(0, Math.floor((m.wanted.endsAt - Date.now()) / 1000)); t.textContent = s ? (Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2)) : 'ENDED'; }; tk(); mailTick = setInterval(tk, 1000); }
     $('mlBack').addEventListener('click', drawMail);
   }
 
@@ -144,7 +150,7 @@
       '<div class="howto"><div class="hth"><b>HOW TO USE THE MARKETPLACE</b></div>' +
       '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card you do not have yet, face down"></div><figcaption>FACE DOWN<br>FROM THE HALL<br>COSTS COINS</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a collected card, face up"></div><figcaption>FACE UP &middot; #049<br>FROM A PLAYER<br>COSTS POINTS</figcaption></figure></div>' +
       '<div class="hsub">THIS IS HOW EVERY CARD LOOKS IN <b>COLLECTED</b>: FACE DOWN UNTIL YOU HAVE IT, THEN IT FLIPS OVER. THE DIAMONDS SHOW HOW RARE IT IS AND THE NUMBER IS ITS PLACE FROM 1 TO 120.</div>' +
-      '<ol class="hsteps"><li><b>FACE DOWN CARDS COME FROM THE HALL.</b> THEY ARE CARDS YOU DO NOT HAVE YET, AND THEY COST <b>COINS</b>. THEY ARE PRICED HIGH ON PURPOSE, SO RUNNING STAYS THE BEST WAY TO BUILD A DECK.</li>' +
+      '<ol class="hsteps"><li><b>FACE DOWN CARDS COME FROM THE HALL.</b> THEY ARE CARDS YOU DO NOT HAVE YET, AND THEY COST <b>COINS</b>. THE HALL ONLY SELLS COMMON, UNCOMMON AND RARE CARDS FACE DOWN. THEY ARE PRICED HIGH ON PURPOSE, SO RUNNING STAYS THE BEST WAY TO BUILD A DECK.</li>' +
       '<li><b>FACE UP CARDS COME FROM PLAYERS.</b> THESE ARE CARDS OTHER PLAYERS HAVE ALREADY COLLECTED, AND THEY COST <b>POINTS</b>, DRAMATICALLY MORE THAN A FACE DOWN CARD. THE SELLER SETS THE PRICE. POINTS YOU SPEND COME OFF YOUR LEADERBOARD SCORE AND GO TO THE SELLER.</li>' +
       '<li><b>NEGOTIATE.</b> PRESS TEXT ON A FACE UP LISTING TO MESSAGE THE SELLER. ASK THEM TO LOWER THE PRICE OR MAKE AN OFFER. IF THEY AGREE, THEY CHANGE THE PRICE AND YOU BUY IT.</li>' +
       '<li><b>SELL.</b> ANY CARD YOU HAVE COLLECTED, EARNED OR BOUGHT, CAN GO TO THE HALL FOR A SET NUMBER OF POINTS, OR BE LISTED FACE UP FOR YOUR OWN PRICE IN POINTS WHILE BUYERS TEXT YOU.</li>' +

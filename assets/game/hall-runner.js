@@ -70,7 +70,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netEchoAt: 900, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -145,6 +145,11 @@
     var spot = freeLane(16.5, S.packLane); S.packLane = spot.lane; S.ents.push({ k: 'pack', z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false });
   }
   function collectCard(e) {
+    if (e.drop) {   // a card the server dropped: the server decides, we just show it
+      var nr = HallProfile.netRun && HallProfile.netRun(), cur = S; S.dropGot++; S.cardPulse = 1; if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card();
+      if (nr) nr.collect(e.drop.id).then(function (r) { if (S === cur || true) hint(r.already ? '' : (r.wasNew ? 'NEW CARD ADDED TO YOUR DECK!' : 'DUPLICATE ADDED: YOU NOW HAVE ' + r.count), 4); }, function (er) { hint(String((er && er.message) || 'THAT CARD FLOATED AWAY').toUpperCase(), 3); });
+      return;
+    }
     S.cards.push(e.n); S.runOwned.add(e.n); S.cardPulse = 1;
     HallProfile.addCard(e.n);                                  // does nothing until somebody is signed in
     if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card();
@@ -161,6 +166,29 @@
     S.rc = { test: test, sightEvery: test ? HallProfile.testConfig.sight.everySec : cf.sight.everySec, packEvery: test ? HallProfile.testConfig.pack.everySec : cf.pack.everySec };
     S.nextSight = S.rc.sightEvery; S.nextPack = test ? HallProfile.testConfig.pack.firstSec : cf.pack.firstSec;
     ovStart.style.display = 'none'; ovDead.style.display = 'none';
+    /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
+    var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
+    if (window.HallNet && HallNet.ev) HallNet.ev('played');
+    if (nr) nr.start().then(function (info) { if (S === cur) S.net = info; }, function () { if (S === cur) S.net = null; });
+  }
+  /* ---------- cards the server puts in a run: the new-player card, echoes and the wanted card ---------- */
+  var elHint = el('div', 'hhint', ''); root.appendChild(elHint);
+  function hint(text, secs) { elHint.textContent = text; elHint.classList.add('on'); S.hintUntil = S.t + (secs || 4); }
+  function spawnDrop(kind, r) {
+    if (!r || !r.dropId || S.dropSeen[r.dropId]) return; S.dropSeen[r.dropId] = 1;
+    var c = HallProfile.card(r.card); if (!c) return; cardImg(c.n);
+    var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, drop: { id: r.dropId, kind: kind } });
+    hint(kind === 'wanted' ? 'THE WANTED CARD! JUMP IT!' : kind === 'echo' ? 'AN ECHO OF YOUR DECK! JUMP IT!' : 'YOUR FIRST CARD! JUMP TO COLLECT IT!', 5);
+    if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
+  }
+  function netTick() {
+    var nr = HallProfile.netRun && HallProfile.netRun(), cur = S; if (!nr || !S.net) return;
+    if (S.alive >= S.netBeat) {
+      S.netBeat = S.alive + 10;
+      nr.beat({ score: Math.floor(S.score), alive: Math.floor(S.alive), coins: S.coins, hp: S.hp, cards: S.cards.length + S.dropGot, speed: Math.round(S.v * MPH * 10) }).then(function (r) { if (S === cur && r && r.wanted) spawnDrop('wanted', r.wanted); }, function () {});
+    }
+    if (S.net.offerFirst) for (var i = 0; i < 2; i++) if (!S.firstReq[i] && S.alive >= S.net.firstOffers[i]) { S.firstReq[i] = true; nr.drop('first').then(function (r) { if (S === cur && r && r.dropId) spawnDrop('first', r); }, function () {}); }
+    if (S.alive >= S.netEchoAt) { S.netEchoAt = S.alive + 60; nr.drop('echo').then(function (r) { if (S === cur && r && r.dropId) { S.netEchoAt = S.alive + (S.net.echoEvery || 900); spawnDrop('echo', r); } }, function () {}); }
   }
   function die(silent) {
     S.mode = 'dead'; S.flash = 1; S.shake = 1; if (!silent && window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
@@ -231,6 +259,7 @@
       S.run += dt * (6 + v);
       if (S.alive >= S.nextSight) { S.nextSight += S.rc.sightEvery; spawnCard(); }
       if (S.alive >= S.nextPack) { S.nextPack += S.rc.packEvery; spawnPack(); }
+      netTick();
       // the road: now and then it swings and curves, and it always drifts a little
       S.curveNext -= dt;
       if (S.curveNext <= 0) { var r = Math.random(); S.curveT = r < 0.36 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.5); S.curveNext = 3 + Math.random() * 5; }
@@ -268,7 +297,8 @@
     // hud
     var sc2 = pad(S.score, 5); if (elScore.textContent !== sc2) elScore.textContent = sc2;
     if (elCoins.textContent !== String(S.coins)) elCoins.textContent = S.coins;
-    if (elCards.textContent !== String(S.cards.length)) elCards.textContent = S.cards.length;
+    var ncards = S.cards.length + S.dropGot; if (elCards.textContent !== String(ncards)) elCards.textContent = ncards;
+    if (S.hintUntil && S.t > S.hintUntil) { S.hintUntil = 0; elHint.classList.remove('on'); }
     if (S.mode === 'idle') hbot.style.display = 'none'; else { hbot.style.display = '';
       var mph = Math.round(S.v * MPH), dd = (S.dist * MILES).toFixed(2), slow = S.slowT > 0;
       if (mph !== lastMph) { lastMph = mph; elMph.textContent = mph; var f = Math.min(mph / 90, 1); elNeedle.style.transform = 'rotate(' + (-90 + f * 180).toFixed(1) + 'deg)'; elArc.setAttribute('stroke-dashoffset', (75.4 * (1 - f)).toFixed(1)); }
@@ -409,16 +439,18 @@
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh; if (e.z < 0.62 || y > H + 120) return;
     var tr = HallProfile.tiers[e.tier - 1], im = cardImg(e.n), x = cxAt(s) + e.lane * LANE * W * s, cw = 0.24 * W * s, ch = cw * 1.386;
     var cy = y - 0.70 * W * s + Math.sin(S.t * 2.6 + e.ph) * 0.02 * W * s, pulse = 0.8 + 0.2 * Math.sin(S.t * 4 + e.ph), g, gr = ch * 0.95;
-    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
+    var dk = e.drop ? e.drop.kind : '';
+    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1) * (dk === 'echo' ? 0.62 : 1);
     shadow(x, y, cw * 0.5);
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    var cols = e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; if (dk === 'wanted') pulse = 0.9 + 0.3 * Math.sin(S.t * 7);
+    var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'echo' ? [['170,240,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
     cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
     ctx.restore();
     ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5);
     if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * 0.025); ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
+    ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'echo' ? 'rgba(190,245,255,0.9)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
+    if (dk === 'wanted' || dk === 'first') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' ? '#ffd45a' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
   /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */
@@ -465,12 +497,28 @@
   }
 
   /* the big coin hanging in the smoke at the far end keeps spinning (frames from the rotating-coin video, blended so it turns smoothly) */
+  /* The coin is drawn in device pixels from a pre-scaled strip of its frames, away from the camera sway and tilt, so it never re-samples a little differently every frame (that was the shimmer during a run). */
+  var coinAtlas = null, coinAtlasD = 0;
   function drawFarCoin(bx, bw, bh) {
     var ci = imgs.coin; if (!ci.naturalWidth) return;
     var x = bx + 375 / 752 * bw, y = 298 / 500 * bh + Math.sin(S.t * 0.9) * 2, D = 176 / 752 * bw / 0.80, ph = (S.t / 8) * 20, i0 = Math.floor(ph) % 20, f = ph - Math.floor(ph), i1 = (i0 + 1) % 20;
-    ctx.save();
-    ctx.drawImage(ci, (i0 % 5) * 192, ((i0 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
-    ctx.globalAlpha = f; ctx.drawImage(ci, (i1 % 5) * 192, ((i1 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
+    var m = ctx.getTransform ? ctx.getTransform() : null;
+    if (!m || !m.transformPoint) {
+      ctx.save();
+      ctx.drawImage(ci, (i0 % 5) * 192, ((i0 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
+      ctx.globalAlpha = f; ctx.drawImage(ci, (i1 % 5) * 192, ((i1 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
+      ctx.restore(); return;
+    }
+    var Dd = Math.max(8, Math.round(D * dpr));
+    if (!coinAtlas || coinAtlasD !== Dd) {
+      coinAtlas = document.createElement('canvas'); coinAtlas.width = Dd * 5; coinAtlas.height = Dd * 4; coinAtlasD = Dd;
+      var g = coinAtlas.getContext('2d'); g.imageSmoothingEnabled = true; if ('imageSmoothingQuality' in g) g.imageSmoothingQuality = 'high';
+      for (var k = 0; k < 20; k++) g.drawImage(ci, (k % 5) * 192, ((k / 5) | 0) * 192, 192, 192, (k % 5) * Dd, ((k / 5) | 0) * Dd, Dd, Dd);
+    }
+    var p = m.transformPoint({ x: x, y: y }), px = Math.round(p.x - Dd / 2), py = Math.round(p.y - Dd / 2);
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(coinAtlas, (i0 % 5) * Dd, ((i0 / 5) | 0) * Dd, Dd, Dd, px, py, Dd, Dd);
+    ctx.globalAlpha = f; ctx.drawImage(coinAtlas, (i1 % 5) * Dd, ((i1 / 5) | 0) * Dd, Dd, Dd, px, py, Dd, Dd);
     ctx.restore();
   }
   function render() {

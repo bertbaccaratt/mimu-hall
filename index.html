@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261023j"><link rel="stylesheet" href="assets/game/comms.css?v=20261023j"><link rel="stylesheet" href="assets/game/admin.css?v=20261023j">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261023q"><link rel="stylesheet" href="assets/game/comms.css?v=20261023q"><link rel="stylesheet" href="assets/game/admin.css?v=20261023q">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -480,10 +480,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261023j" defer></script>
-<script src="assets/game/hall-runner.js?v=20261023j" defer></script>
-<script src="assets/game/comms.js?v=20261023j" defer></script> <script src="assets/game/badges.js?v=20261023j" defer></script> <script src="assets/game/apps.js?v=20261023j" defer></script>
-<script src="assets/game/admin-docs.js?v=20261023j" defer></script> <script src="assets/game/admin.js?v=20261023j" defer></script>
+<script src="assets/game/profile.js?v=20261023q" defer></script>
+<script src="assets/game/hall-runner.js?v=20261023q" defer></script>
+<script src="assets/game/comms.js?v=20261023q" defer></script> <script src="assets/game/net.js?v=20261023q" defer></script> <script src="assets/game/badges.js?v=20261023q" defer></script> <script src="assets/game/apps.js?v=20261023q" defer></script>
+<script src="assets/game/admin-docs.js?v=20261023q" defer></script> <script src="assets/game/admin.js?v=20261023q" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -571,16 +571,21 @@ window.MIMUAudio = (function () {
     em.style.cssText = 'left:' + (30 + Math.random() * 40) + '%;top:' + (38 + Math.random() * 30) + '%;--x:' + ((Math.random() - .5) * 700) + 'px;--y:' + (-80 - Math.random() * 420) + 'px;--d:' + (1.4 + Math.random() * 1.6) + 's;--w:' + (Math.random() * .6) + 's';
     embers.appendChild(em);
   }
+  var connecting = false;
   enter.addEventListener('click', function (ev) {
     ev.preventDefault();
-    if (leaving) return; leaving = true;
-    if (A) A.start();
-    stageEl.classList.add('leaving'); document.body.classList.add('leaving');
-    setTimeout(function () { $('top').classList.add('on'); }, reduce ? 100 : 1500);
-    setTimeout(function () {
-      stageEl.style.display = 'none';
-      if (NEXT_URL) location.href = NEXT_URL; else openGames();   // ENTER lands on the Games page (the phone)
-    }, reduce ? 300 : 2300);
+    if (leaving || connecting) return;
+    var go = function () {
+      connecting = false; if (leaving) return; leaving = true;
+      if (A) A.start();
+      stageEl.classList.add('leaving'); document.body.classList.add('leaving');
+      setTimeout(function () { $('top').classList.add('on'); }, reduce ? 100 : 1500);
+      setTimeout(function () {
+        stageEl.style.display = 'none';
+        if (NEXT_URL) location.href = NEXT_URL; else openGames();   // ENTER lands on the Games page (the phone)
+      }, reduce ? 300 : 2300);
+    };
+    if (window.HallNet && HallNet.connectThen) { connecting = true; HallNet.connectThen(go); } else go();   // CONNECT GLYPH signs the player in first; a guest can still look around
   });
 
   /* ---- APECHAIN: the top 50 NFT collections, live from OSWiki (read-only public data) ---- */
@@ -719,6 +724,12 @@ window.MIMUAudio = (function () {
     '<figure class="t4" style="--c:#f0c24a;--g:rgba(240,194,74,.5)"><div class="fr"><img src="assets/game/cards/ex/008.webp" alt="Lofi on the Dock" loading="lazy"></div><figcaption><b>PRESTIGE</b>Lofi on the Dock<br>#008</figcaption></figure>',
     '<figure class="t5" style="--c:#8aa8ff;--g:rgba(120,170,255,.55)"><div class="fr"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary" loading="lazy"></div><figcaption><b>LEGENDARY</b>Good Boy Gary<br>#049</figcaption></figure></div>',
     '<p>On every card, the diamonds at the top show the rarity (one to five), the badge in the corner shows the family, and the number at the bottom is its place from 1 to 120. The four families are <strong>Club</strong> (62 cards), <strong>Mutant</strong> (22), <strong>Cosmic</strong> (16) and <strong>Arcana</strong> (20).</p>',
+    '<h3>Ways to get cards in a run</h3>',
+    '<ul><li><strong>Sightings.</strong> The slow, rare way: a card floats down the road every so often as you stay alive, and the rarity depends on how long you have survived. This is how new cards come into your deck.</li>',
+    '<li><strong>Your first card.</strong> A brand-new player gets one starter card early in their very first run, <strong>once ever</strong>. Jump it when it floats in. It never comes again.</li>',
+    '<li><strong>Echo cards.</strong> About every 15 minutes you stay alive, a faint, see-through copy of a card <strong>you already have</strong> floats by. Jump it and you get a <strong>duplicate</strong>. Echoes are only ever Common, Uncommon or Rare, with Common coming up most and Rare least. They can never be Prestige or Legendary, and they never give you a new card.</li>',
+    '<li><strong>The wanted card.</strong> Now and then MIMU launches a <strong>wanted card</strong> and emails every player about it, with a live countdown. For as long as it runs, the card is up for grabs: at a random moment it drops into the run of one player who is running right then. If that player jumps it, it goes straight into their deck. If it is missed it can drop again for someone else before the time runs out. Only one wanted card is live at a time.</li>',
+    '<li><strong>The Marketplace.</strong> You can also buy certain cards, below.</li></ul>',
     '<h3>Which cards appear</h3>',
     '<ul><li><strong>Rare cards are hard to get.</strong> The higher tiers only open after you have stayed alive long enough in one run: Uncommon early in the run, Rare later in the run, Prestige way later in the run, and Legendary very far away, so do not worry about that one yet. Dying starts the timer over.</li>',
     '<li><strong>A tier opens once you have collected 60% of the tier below it:</strong> 33 Commons for Uncommon, 18 Uncommons for Rare, 8 Rares for Prestige and 9 Prestige for Legendary. Nobody skips ahead.</li>',
@@ -728,6 +739,8 @@ window.MIMUAudio = (function () {
     '<li>The whole set is meant to take a long time, and the Legendaries come last.</li></ul>',
     '<h3>The Collected app</h3>',
     '<p>Collected shows your in-game cards. They are not real cards and not real-world assets.</p>',
+    '<ul><li>If you have more than one copy of a card, it shows a gold <strong>&times;2</strong>, <strong>&times;3</strong> and so on. Duplicates come from echo cards, the wanted card and the starter card.</li>',
+    '<li>A card you have extra copies of also shows a small <strong>SELL 1</strong> button. Tap it once to see what the Hall will pay in points, and tap again to sell one copy. It never sells your last copy by accident, because the button only appears while you have more than one.</li></ul>',
     '<p>The top of the COLLECTED app has a short how-to of its own with an example card, face down and flipped.</p>',
     '<ul><li>Open <strong>COLLECTED</strong> on the phone home screen to see all 120 cards laid out <strong>face down</strong>. When you earn a card it flips over and shows its picture.</li>',
     '<li>You can filter by tier, by family, and by collected or missing, and the progress bars show how far you are in every tier and family.</li></ul>',
@@ -744,7 +757,7 @@ window.MIMUAudio = (function () {
     '<h3>The Marketplace</h3>',
     '<p>The Marketplace trades in-game cards only, using in-game coins and points. In-game cards only. They are pictures that stand for real cards, not the real cards, and they are not real-world assets.</p>',
     '<ul><li>Open <strong>MARKETPLACE</strong> on the phone home screen. It has two tabs: <strong>BUY</strong> and <strong>SELL</strong>. The top shows your coin balance and your coins earned.</li>',
-    '<li><strong>Face down cards come from the Hall.</strong> They are cards you do not have yet and they cost <strong>coins</strong>. The price is high on purpose, so running stays the best way to build a deck. Buy one and it flips into your Collected.</li>',
+    '<li><strong>Face down cards come from the Hall.</strong> They are cards you do not have yet and they cost <strong>coins</strong>. The Hall only ever sells <strong>Common, Uncommon and Rare</strong> cards face down, never Prestige or Legendary. The price is high on purpose, so running stays the best way to build a deck. Buy one and it flips into your Collected.</li>',
     '<li><strong>Face up cards come from players.</strong> They are cards other players have already collected, and they cost <strong>points</strong>, dramatically more than a face down card. The seller sets the price. The points you spend come off your leaderboard score and go to the seller.</li>',
     '<li><strong>Negotiating:</strong> press <strong>TEXT</strong> on a face up listing to message the seller. Ask them to lower the price or make an offer. If they agree, they change their price and you buy it. It is a good reason to make friends in the Hall.</li>',
     '<li><strong>Selling:</strong> you can sell <strong>any card you have collected</strong>, whether you earned it in a run or bought it. Sell it to the Hall for a set number of <strong>points</strong>, which go straight onto your leaderboard score, or <strong>list it face up</strong> at your own price in points and let buyers text you. The card leaves your collection when it is sold.</li>',
@@ -776,8 +789,10 @@ window.MIMUAudio = (function () {
     '<div class="rk">BADGES (purple)</div><div>Your milestones and how close you are to each one</div><div>needs sign-in</div>',
     '<div class="rk">CAMERA (gray)</div><div>A camera: press the round shutter to take a photo (with a flash and a sound), or open the thumbnail to browse the 7-photo gallery, view one full screen, and swipe or use the arrows to move between them</div><div>open</div>',
     '<div class="rk">SETTINGS (gray)</div><div>Sound, volume, the clock, About, How to play, sign out</div><div>open</div></div>',
-    '<h3>Saving</h3>',
-    '<p>Cards, coins, scores, texts, mail and Marketplace trades are only kept for signed-in players. Until sign-in opens, every run is a demo run: it plays exactly the same, but nothing is saved and nothing is ranked, and the Marketplace, Messages and Mail stay locked.</p>',
+    '<h3>Saving, fair play and memory</h3>',
+    '<ul><li>Sign in with Glyph (the CONNECT GLYPH button on the entrance) and everything is saved on our server: your cards, coins, points, stats, texts and mail. A guest can look around and play demo runs, but nothing is saved, ranked or sent.</li>',
+    '<li><strong>Every run is checked by the server.</strong> It knows when a run started, how long it lasted, and what could possibly have been collected in that time. A run that does not add up is <strong>held for review</strong> and does not count toward points, cards or badges until the team approves it. Cheating gets runs removed and players banned.</li>',
+    '<li><strong>Texts and mail are remembered.</strong> If you get a text or an email on Monday, it is still there on Tuesday, even if you were asleep and signed out. Everything waits for you the next time you sign in.</li></ul>',
     '<div class="rnote">These rules are updated as the game changes. If something here does not match the game, the game wins and the rules will be corrected.</div>'
   ].join('');
   var ABOUT = [
@@ -813,14 +828,14 @@ window.MIMUAudio = (function () {
     '<li>If any prize or recognition is ever offered, it will be announced separately, and whether it exists, what it is, how many there are, who is considered and when it is given are decided solely by us, at our discretion, and may change or end at any time. We may require eligibility checks and may disqualify anyone.</li>',
     '<li><strong>Prizes are provided by us alone, if at all. Yuga Labs and its affiliates are not sponsors or providers of any prize and are not responsible for any prize, its delivery, its value, its availability, or any dispute about it.</strong> Recipients are responsible for any taxes, fees, gas costs and legal obligations that come with a prize.</li></ul>',
     '<h3>9 &middot; Cards, scores and virtual items</h3>',
-    '<p>Every card in the Site is a fake, in-game representation of a real card. It is not the real card and has no real-world value or legal standing. THE HALL is a mini game and a competition between players, and what players collect in it stays inside the game.</p>',
+    '<p>Cards reach a player in a run through sightings, a one-time starter card for new players, echo cards that duplicate cards the player already has, and wanted cards that MIMU may launch for a limited time and that drop at a random moment into the run of one player who is running then; the server decides every card. Every card in the Site is a fake, in-game representation of a real card. It is not the real card and has no real-world value or legal standing. THE HALL is a mini game and a competition between players, and what players collect in it stays inside the game.</p>',
     '<p>The 120 cards, the packs, the coins, the points and every other item in THE HALL are virtual items for gameplay only. They have no cash value, cannot be redeemed, are not tokens or digital assets, and are not a claim to anything in the real world. Signed-in players may use the Marketplace inside the Site: coins collected in runs can be spent to buy face down cards offered by us, and points can be spent to buy face up cards that other players have listed for sale at the price each seller sets. Points spent on a purchase are deducted from the buyer&rsquo;s score and credited to the seller, and buyers and sellers may text each other to ask questions or to negotiate a lower price. Any card a player has collected, whether earned in a run or bought, can be sold to us for points that count on the leaderboard or listed face up at a price in points that the player chooses. Coins and points can be exchanged only through the Marketplace as it is offered, never for money. Face down cards are priced in coins by us and are priced high on purpose; prices of face up player listings are set by the sellers; sale values, limits and availability are set by us and may change at any time. We are not a party to deals between players and do not guarantee any seller, price or outcome, and you must never offer or accept money or anything outside the Site in a negotiation. Purchases and sales are final, and a sold card leaves your collection. During a run, a player who crashes may spend 10% of their points (not coins) on one extra life per run; crashing again ends the run, and the points spent are final. Badges are milestones that track what a player has done in the Site; they are not ranked, are not rewards, and have no value of any kind. Every coin you collect is added to your lifetime coins earned, and your coin balance is your coins earned minus your coins spent. Your score is calculated from the runs you finish, plus any points from cards you sell, and each finished run is added to your lifetime total. Features that are shown as unavailable, such as The Giving, are not offered at this time and may never be. Your best run and your last run are shown as well. Rarity, drop rates, unlock conditions, speed, health, scoring and every other rule of the game may be changed, reset or removed at any time, and the game as it behaves on the Site always takes priority over any description of it.</p>',
     '<h3>10 &middot; Fair play</h3>',
-    '<p>Do not use bots, scripts, automation, modified code, exploits, multiple identities or any other method to gain an unfair advantage, to interfere with the Site, or to affect other players. This includes abusing the Marketplace, for example by exploiting a price or pricing error, moving cards or points between your own accounts, or using any trick to create coins, cards or points that were not earned. The game has no pause: a run ends the moment you leave it, and an interrupted run does not count. We may review, adjust or remove scores, cards, rankings and accounts, and restrict access, wherever we reasonably suspect cheating, error or misuse.</p>',
+    '<p>Do not use bots, scripts, automation, modified code, exploits, multiple identities or any other method to gain an unfair advantage, to interfere with the Site, or to affect other players. This includes abusing the Marketplace, for example by exploiting a price or pricing error, moving cards or points between your own accounts, or using any trick to create coins, cards or points that were not earned. The game has no pause: a run ends the moment you leave it, and an interrupted run does not count. Every run is checked by our server, and a run that cannot be explained by the game&rsquo;s rules is held and does not count until we review it. We may review, adjust or remove scores, cards, rankings and accounts, and restrict access, wherever we reasonably suspect cheating, error or misuse.</p>',
     '<h3>11 &middot; Third-party services</h3>',
     '<p>The Site relies on services we do not control, including GitHub Pages for hosting, Cloudflare for security, infrastructure and the storage of player data, texts and mail, Google Fonts for typefaces, OpenSea and OSWiki for collection data, Apechain and its networks, and Glyph for wallet sign-in. Each has its own terms and privacy practices and may process technical data such as your IP address to provide its service. We are not responsible for any third-party service, its content, its outages or its conduct.</p>',
     '<h3>12 &middot; Your data</h3>',
-    '<p>While you only browse or play demo runs, the Site does not require you to sign in and does not save your runs or cards. Settings such as sound and volume may be stored in your own browser. Once sign-in opens, we expect to store information needed to run the game, such as your wallet address, Glyph name, username, picture, runs, scores and cards, and technical information needed to keep the Site secure and to count visits. We will never ask for your seed phrase, private keys or payment card details. Public information, such as your name and scores, may be shown on leaderboards. Texts and mail sent or received through the Site, your coin totals, and records of Marketplace purchases and sales are stored on our servers, and your username, scores and deck progress may be shown to other players on leaderboards, including the Top 10 deck board.</p>',
+    '<p>While you only browse or play demo runs, the Site does not require you to sign in and does not save your runs or cards. Settings such as sound and volume may be stored in your own browser. When you sign in with Glyph, we store the information needed to run the game: your wallet address, Glyph name and picture link, your runs and how they were played, scores, coins, cards, stats, texts, mail, and Marketplace trades. We also keep an anonymous random browser id and visit times to count visitors, and short-lived technical records to keep the Site secure. Texts and mail are kept so they are still there the next time you sign in. We will never ask for your seed phrase, private keys or payment card details. Public information, such as your name and scores, may be shown on leaderboards. Texts and mail sent or received through the Site, your coin totals, and records of Marketplace purchases and sales are stored on our servers, and your username, scores and deck progress may be shown to other players on leaderboards, including the Top 10 deck board.</p>',
     '<h3>13 &middot; Intellectual property</h3>',
     '<p>The Mimu On Ape name, characters and artwork belong to Mimu On Ape and its respective creators and rights holders. The card artwork, names and marks of any other collection, project or company shown in the Site belong to their respective rights holders and are used for identification and community enjoyment only. The Site&rsquo;s design, code, text, sounds and game belong to their authors. You may view and play the Site for personal, non-commercial use. You may not copy, scrape, resell, reverse engineer or redistribute any part of it without permission.</p>',
     '<h3>14 &middot; Conduct, messages and mail</h3>',

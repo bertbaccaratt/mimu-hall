@@ -1,19 +1,16 @@
 /* ADMIN: a quiet link in the bottom-left corner opens a password box, then the control room for THE HALL.
-   Temporary foundation: the password is only checked here in the page (against a hash). It will be protected properly on Cloudflare later,
-   and the live numbers (visitors, runs, live runs) arrive through HallAdmin.setFeed(...) once that exists. */
+   The password is checked by the server (Cloudflare); the page only holds a short-lived token. The live numbers arrive through HallAdmin.setFeed(...). */
 (function () {
   'use strict';
   var P = window.HallProfile; if (!P) return;
-  var HASH = '8af2f20569b2860098db9e8251390d8d1f6bd797cd227ef6c1c6aa4d7e0276f5', SALT = 'mimu-hall-admin|v1|';
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmt(n) { return (n == null || isNaN(n)) ? '—' : Math.floor(n).toLocaleString('en-US'); }
   function dur(sec) { if (sec == null || isNaN(sec)) return '—'; sec = Math.floor(sec); var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + 'h ' : '') + (h || m ? m + 'm ' : '') + (h ? '' : s + 's'); }
   function hms(sec) { var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return (h ? h + ' h ' : '') + (m ? m + ' min' : (h ? '' : sec + ' s')); }
 
-  var feed = null, handlers = {}, tick = 0, fails = 0, lockUntil = 0;
+  var feed = null, handlers = {}, tick = 0;
   function stamp(ts) { try { return new Date(ts).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase(); } catch (e) { return ''; } }
-  function sha(s) { var b = new TextEncoder().encode(SALT + s); return crypto.subtle.digest('SHA-256', b).then(function (d) { return Array.prototype.map.call(new Uint8Array(d), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }); }
 
   /* ---------- the link and the login box ---------- */
   var link = document.createElement('button'); link.className = 'adminlink'; link.type = 'button'; link.textContent = 'ADMIN'; link.setAttribute('aria-label', 'Administration'); document.body.appendChild(link);
@@ -23,19 +20,18 @@
     shade.innerHTML = '<div class="adm-login" role="dialog" aria-label="Administration login"><button class="x" type="button" aria-label="Close">&times;</button><h3 class="gold">ADMIN</h3><p>PASSWORD REQUIRED</p><input id="admPw" type="password" autocomplete="off" aria-label="Password" placeholder="&middot; &middot; &middot; &middot; &middot; &middot;"><button class="go" type="button">ENTER</button><div class="err" id="admErr"></div></div>';
     shade.classList.add('open'); var inp = $('admPw'); setTimeout(function () { inp.focus(); }, 30);
     shade.querySelector('.x').addEventListener('click', close);
+    var busy = false;
     function submit() {
-      var now = Date.now(); if (now < lockUntil) { $('admErr').textContent = 'TOO MANY TRIES · WAIT ' + Math.ceil((lockUntil - now) / 1000) + 's'; return; }
-      sha(inp.value).then(function (h) {
-        if (h === HASH) { fails = 0; try { sessionStorage.setItem('hall-admin', '1'); } catch (e) {} openPanel(); }
-        else { fails++; inp.value = ''; if (fails >= 3) { lockUntil = Date.now() + 30000; fails = 0; $('admErr').textContent = 'TOO MANY TRIES · WAIT 30s'; } else $('admErr').textContent = 'WRONG PASSWORD'; }
-      });
+      if (busy || !inp.value) return; if (!window.HallNet) { $('admErr').textContent = 'THE SERVER IS NOT REACHABLE'; return; }
+      busy = true; $('admErr').textContent = 'CHECKING…';
+      HallNet.admin.login(inp.value).then(function () { busy = false; HallNet.admin.start(); openPanel(); }, function (e) { busy = false; inp.value = ''; $('admErr').textContent = String((e && e.message) || 'COULD NOT SIGN IN').toUpperCase(); });
     }
     shade.querySelector('.go').addEventListener('click', submit); inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
   }
-  function close() { shade.classList.remove('open'); shade.innerHTML = ''; clearInterval(tick); }
+  function close() { shade.classList.remove('open'); shade.innerHTML = ''; clearInterval(tick); if (window.HallNet) HallNet.admin.stop(); }
   shade.addEventListener('click', function (e) { if (e.target === shade) close(); });
   window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && shade.classList.contains('open')) close(); });
-  link.addEventListener('click', function () { var ok = false; try { ok = sessionStorage.getItem('hall-admin') === '1'; } catch (e) {} if (ok) openPanel(); else openLogin(); });
+  link.addEventListener('click', function () { var ok = !!(window.HallNet && HallNet.admin.token()); if (ok) { HallNet.admin.start(); openPanel(); } else openLogin(); });
 
   /* ---------- the control room ---------- */
   function worksCards() {
@@ -222,6 +218,54 @@
       '<div class="cols2"><div class="box"><h4>SYSTEM CHECK</h4><div class="sys one" id="admSys"></div></div><div class="box"><h4>THIS BROWSER</h4>' + thisBrowser() + '</div></div>' +
       '<div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></section>';
   }
+  /* ---------- FLAGGED RUNS: runs the server held back because something did not add up ---------- */
+  var FLAG_TEXT = {
+    TIME_MISMATCH: 'The time the run claims does not match the clock on the server.', DISTANCE_TOO_FAR: 'More distance than the speed limit allows for that time.', SCORE_TOO_HIGH: 'The score is higher than distance and coins can explain.',
+    COINS_TOO_HIGH: 'More coins than a run could have picked up.', INPUT_TOO_FAST: 'Jumps, slides or lane changes faster than a hand can do.', TOO_MANY_HITS: 'More box hits than a run can survive.', BOXES_TOO_MANY: 'More boxes cleared than the road holds.',
+    PACK_TOO_EARLY: 'A black pack was collected before the first one could appear.', TOO_MANY_CARDS: 'More cards than the sighting timetable allows.', TIER_NOT_OPEN: 'A card of a rarity that was not open yet at that time.', UNKNOWN_CARD: 'A card number that does not exist.',
+    NO_INPUT: 'A long run with no moves at all (a bot or an idle script).', FEW_HEARTBEATS: 'The game did not report in while it ran (a result sent without playing).', LIFE_NOT_PURCHASED: 'An extra life was used without being bought.'
+  };
+  var flagSig = '', flagTab = 'l';
+  function flagCard(r, held) {
+    var e = r.extra || {}, miles = ((r.distance || 0) / 1609.34).toFixed(2), reasons = (r.flags || []).map(function (f) { return '<li><b>' + esc(f.code) + '</b><span>' + esc(f.note || FLAG_TEXT[f.code] || '') + '</span></li>'; }).join('');
+    return '<div class="fgc' + (held ? '' : ' done') + '"><div class="fgh"><b>' + esc(r.name) + '</b><span>' + esc(String(r.address || '').slice(0, 6) + '…' + String(r.address || '').slice(-4)) + '</span><em>' + stamp(r.ts) + (r.banned ? ' · BANNED' : '') + (held ? '' : ' · ' + String(r.status).toUpperCase()) + '</em></div>' +
+      '<div class="fgs"><span><small>SCORE</small>' + fmt(r.score) + '</span><span><small>TIME ALIVE</small>' + dur(r.alive) + '</span><span><small>COINS</small>' + fmt(r.coins) + '</span><span><small>DISTANCE</small>' + miles + ' MI</span><span><small>CARDS CLAIMED</small>' + (r.cards || []).length + '</span><span><small>JUMPS</small>' + fmt(e.jumps) + '</span><span><small>SLIDES</small>' + fmt(e.slides) + '</span><span><small>LANES</small>' + fmt(e.lanes) + '</span><span><small>BOXES CLEARED</small>' + fmt(e.boxesJumped) + '</span><span><small>HITS</small>' + fmt(e.hits) + '</span><span><small>PACKS</small>' + fmt(e.packs) + '</span><span><small>EXTRA LIFE</small>' + (e.extraLife ? 'YES' : 'NO') + '</span></div>' +
+      '<ul class="fgr">' + (reasons || '<li><b>REVIEWED</b><span>This run was held and then reviewed.</span></li>') + '</ul>' +
+      (held ? '<div class="fga"><button type="button" class="ok" data-fa="approve" data-r="' + esc(r.id) + '">APPROVE</button><button type="button" data-fa="remove" data-r="' + esc(r.id) + '">REMOVE RUN</button><button type="button" class="bad" data-fa="ban" data-r="' + esc(r.id) + '">BAN PLAYER</button></div>' : '') + '</div>';
+  }
+  function paintFlag() {
+    var el = $('admFlag'); if (!el) return; var f = (feed && feed.flagged) || { held: [], resolved: [] }, n = $('admFlagN'); if (n) n.textContent = f.held.length ? '(' + f.held.length + ')' : '';
+    var sig = JSON.stringify([f.held.map(function (r) { return r.id; }), f.resolved.map(function (r) { return r.id + r.status; }), !!feed]); if (sig === flagSig) return; flagSig = sig;
+    el.innerHTML = '<div class="box dbox"><h4>WAITING FOR YOUR REVIEW (' + f.held.length + ')</h4><div class="hint" style="margin-bottom:12px">A run is held, and does not count toward points, cards or badges, when the server finds a reason below. Approve it to count it, remove it to throw it away, or ban the player.</div>' +
+      (f.held.length ? f.held.map(function (r) { return flagCard(r, true); }).join('') : '<div class="rk none">' + (feed ? 'NO FLAGGED RUNS. EVERYTHING LOOKS CLEAN.' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div>' +
+      '<div class="box dbox"><h4>RECENTLY REVIEWED</h4>' + (f.resolved.length ? f.resolved.map(function (r) { return flagCard(r, false); }).join('') : '<div class="rk none">NOTHING REVIEWED YET</div>') + '</div>' +
+      '<div class="box dbox"><h4>WHAT GETS A RUN FLAGGED</h4><ul class="fgl">' + Object.keys(FLAG_TEXT).map(function (k) { return '<li><b>' + k + '</b><span>' + esc(FLAG_TEXT[k]) + '</span></li>'; }).join('') + '</ul></div>';
+  }
+
+  /* ---------- WANTED CARD: pick a card in the deck, choose how long, launch ---------- */
+  var wsel = null, wSig = '', wHours = 6, wMsg = '';
+  function wantedStatus(w) { return w.status === 'collected' ? 'FOUND BY ' + esc(String(w.winner || 'A PLAYER').toUpperCase()) : w.status === 'ended' ? 'ENDED BY THE TEAM' : w.status === 'expired' ? 'EXPIRED, NOBODY FOUND IT' : 'LIVE'; }
+  function wantedHtml() {
+    var f = feed || {}, w = f.wanted || { active: null, history: [] }, act = w.active, sel = wsel ? P.card(wsel) : null, t = sel ? P.tiers[sel.tier - 1] : null, fam = sel ? P.families.filter(function (x) { return x.key === sel.family; })[0] : null, i, opts = '';
+    for (i = 1; i <= 24; i++) opts += '<option value="' + i + '"' + (i === wHours ? ' selected' : '') + '>' + i + (i === 1 ? ' HOUR' : ' HOURS') + '</option>';
+    var h = '<div class="wbox"><div class="wsel">' + (sel ? '<img src="' + esc(sel.file) + '" alt="' + esc(sel.name) + '"><div><b>' + esc(sel.name) + '</b><em>#' + String(sel.n).padStart(3, '0') + ' &middot; ' + esc(t.name.toUpperCase()) + ' &middot; ' + esc((fam ? fam.name : sel.family).toUpperCase()) + '</em></div>' : '<div class="wnone">CLICK ANY CARD IN THE DECK ABOVE TO SELECT IT</div>') + '</div>';
+    h += '<div class="wred"><h5>LAUNCH A WANTED CARD</h5>';
+    if (act) {
+      var ac = P.card(act.card);
+      h += '<div class="wlive"><img src="' + esc(ac ? ac.file : '') + '" alt=""><div><small>LIVE NOW</small><b>' + esc(act.name) + ' #' + String(act.card).padStart(3, '0') + '</b><em>' + esc(act.tier.toUpperCase()) + ' &middot; RUNS FOR ' + act.hours + (act.hours === 1 ? ' HOUR' : ' HOURS') + '</em><strong id="admWTimer">--:--:--</strong><span class="ph">' + (act.phase === 'dropped' ? 'DROPPED ON ' + esc(String(act.target).toUpperCase()) + ', WAITING FOR THEM TO JUMP IT' : 'WAITING: THE CARD DROPS AT A RANDOM MOMENT ON A LIVE RUNNER') + '</span><small>DROPS SO FAR: ' + fmt(act.attempts) + '</small></div></div><button type="button" class="end" id="admWEnd">END WANTED CARD</button><div class="wmsg" id="admWMsg">' + esc(wMsg) + '</div>';
+    } else {
+      h += '<div class="wform"><label for="admWH">HOW LONG IT RUNS</label><select id="admWH">' + opts + '</select><button type="button" class="launch" id="admWLaunch"' + (sel ? '' : ' disabled') + '>LAUNCH</button></div><div class="hint">ONE WANTED CARD AT A TIME. LAUNCHING SENDS A MIMU EMAIL TO EVERYONE WHO HAS SIGNED IN, SHOWING THE CARD WITH A LIVE COUNTDOWN. AT A RANDOM MOMENT THE CARD DROPS INTO THE RUN OF ONE PLAYER WHO IS RUNNING, AND IF THEY JUMP IT, IT GOES INTO THEIR DECK.</div><div class="wmsg" id="admWMsg">' + esc(wMsg) + '</div>';
+    }
+    h += '</div><div class="whist"><h5>WANTED CARD HISTORY</h5>' + ((w.history || []).length ? w.history.map(function (x) { return '<div class="whr"><b>' + esc(x.name) + ' #' + String(x.card).padStart(3, '0') + '</b><span>' + x.hours + 'H &middot; ' + stamp(x.launchedAt) + '</span><em class="' + x.status + '">' + wantedStatus(x) + '</em></div>'; }).join('') : '<div class="rk none">NO WANTED CARDS LAUNCHED YET</div>') + '</div></div>';
+    return h;
+  }
+  function paintWanted() {
+    var el = $('admWanted'); if (!el) return; var w = (feed && feed.wanted) || {}, sig = JSON.stringify([wsel, w.active && [w.active.id, w.active.phase, w.active.target, w.active.attempts], (w.history || []).map(function (x) { return x.id + x.status; }), wMsg]);
+    if (sig !== wSig) { wSig = sig; el.innerHTML = wantedHtml(); var sh = $('admWH'); if (sh) sh.addEventListener('change', function () { wHours = +sh.value; }); }
+    var tm = $('admWTimer'); if (tm && w.active) { var s = Math.max(0, Math.floor((w.active.endsAt - Date.now()) / 1000)); tm.textContent = Math.floor(s / 3600) + ':' + ('0' + Math.floor(s % 3600 / 60)).slice(-2) + ':' + ('0' + s % 60).slice(-2); }
+    Array.prototype.forEach.call(document.querySelectorAll('.cth[data-cn]'), function (c) { c.classList.toggle('sel', +c.getAttribute('data-cn') === wsel); });
+  }
+  function wantedAct(p, ok) { wMsg = 'SENDING…'; wSig = ''; paintWanted(); p.then(function () { wMsg = ok; wSig = ''; paintWanted(); }, function (e) { wMsg = String((e && e.message) || 'COULD NOT DO THAT').toUpperCase(); wSig = ''; paintWanted(); }); }
   function tiles() {
     var f = feed || {}, v = f.visitors || {}, r = f.runs || {}, e = f.economy || {}, none = feed ? '' : 'WAITING FOR LIVE FEED', sr = f.series || {};
     var traded = (e.cardsBought != null || e.cardsSold != null) ? (e.cardsBought || 0) + (e.cardsSold || 0) : null;
@@ -316,12 +360,12 @@
       '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
       '<main class="cr-main">' +
       ovHtml() +
-      '<section data-p="live"><div class="livebox off" id="admLB2"></div></section>' +
+      '<section data-p="live"><div class="mtabs" id="admLT"><button type="button" class="on" data-k="l">LIVE</button><button type="button" data-k="f">FLAGGED RUNS <i id="admFlagN"></i></button></div><div id="admLiveWrap"><div class="livebox off" id="admLB2"></div></div><div id="admFlagWrap" style="display:none"><div id="admFlag"></div></div></section>' +
       '<section data-p="msg"><div class="hx"><div class="box hxl"><h4>CONVERSATIONS</h4><div class="hxnew"><input id="admHTo" list="admPl" maxlength="40" placeholder="START A NEW TEXT: PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><button type="button" class="go" id="admHNew">NEW</button></div><div class="hxlist" id="admHT"></div></div><div class="box hxr"><h4 id="admHTitle">PICK A CONVERSATION</h4><div class="hint">HYPE is the account you text players from. Players can and will text HYPE back, so their replies land here. Players can also text HYPE first.</div><div class="hxlog" id="admHLog"></div><div class="cmp"><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
       '<section data-p="eco"><div id="admEco"></div></section>' +
-      '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Once the live feed is connected, each card shows how many times it has been found and lights up when it has been found at least once.</div>' + deckGrid() + '</div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
+      '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Each card shows how many times it has been found. Click a card to select it, then launch it as a wanted card below.</div>' + deckGrid() + '<div id="admWanted"></div></div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
       '<section data-p="sys">' + (DOCS.pages.sys || '') + '</section>' +
@@ -337,11 +381,18 @@
     }
     show(curTab);
     shade.querySelector('.adm-x').addEventListener('click', close);
+    root.addEventListener('click', function (ev) {
+      var c = ev.target.closest('.cth[data-cn]'); if (c) { wsel = +c.getAttribute('data-cn'); wMsg = ''; wSig = ''; paintWanted(); return; }
+      if (ev.target.closest('#admWLaunch')) { if (!wsel) return; wantedAct(handlers.wantedLaunch ? handlers.wantedLaunch(wsel, wHours) : Promise.reject(new Error('Not connected yet')), 'LAUNCHED. THE EMAIL IS ON ITS WAY TO EVERY PLAYER'); return; }
+      if (ev.target.closest('#admWEnd')) { wantedAct(handlers.wantedEnd ? handlers.wantedEnd() : Promise.reject(new Error('Not connected yet')), 'THE WANTED CARD WAS ENDED'); return; }
+      var fb = ev.target.closest('[data-fa]'); if (fb && handlers.flag) { fb.disabled = true; flagSig = ''; handlers.flag(fb.getAttribute('data-r'), fb.getAttribute('data-fa')).then(function () { flagSig = ''; paintFlag(); }, function () { fb.disabled = false; }); return; }
+      var lt = ev.target.closest('#admLT button'); if (lt) { flagTab = lt.getAttribute('data-k'); Array.prototype.forEach.call(lt.parentNode.children, function (x) { x.classList.toggle('on', x === lt); }); $('admLiveWrap').style.display = flagTab === 'l' ? '' : 'none'; $('admFlagWrap').style.display = flagTab === 'f' ? '' : 'none'; }
+    });
     root.addEventListener('click', function (ev) { var g = ev.target.closest('[data-go]'); if (g) show(g.getAttribute('data-go')); });
     $('admNav').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b && b.getAttribute('data-t')) show(b.getAttribute('data-t')); });
     shade.onkeydown = function (ev) { if (/^[1-9]$/.test(ev.key) && !/INPUT|TEXTAREA/.test((ev.target || {}).tagName || '')) show(NAV[+ev.key - 1][0]); };
     shade.tabIndex = -1; shade.focus();
-    $('admOut').addEventListener('click', function () { try { sessionStorage.removeItem('hall-admin'); } catch (e) {} close(); });
+    $('admOut').addEventListener('click', function () { try { sessionStorage.removeItem('hall-admin'); } catch (e) {} if (window.HallNet) HallNet.admin.logout(); close(); });
     var mtab = 'c';
     function lists() {
       var m = (feed && feed.mails) || [];
@@ -385,7 +436,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists(); paintHype();
     }
