@@ -105,7 +105,7 @@
         '<a class="srow" href="https://x.com/bert_baccaratt" target="_blank" rel="noopener noreferrer"><span class="si">' + IC.pen + '</span><span class="sl">Created by</span><span class="v xlink">@BERT_BACCARATT</span></a>' +
         row('crown', 'Company', '<span class="v">MIMU ON APE</span>') +
         row('help', 'How to play', '<span class="v">&rsaquo;</span>', 'sRules', 'button') +
-        row('doc', 'Terms of Service', '<span class="v">&rsaquo;</span>', 'sTos', 'button') +
+        row('doc', 'About','<span class="v">&rsaquo;</span>', 'sTos', 'button') +
       '</div>' +
       '<div class="sgl">ACCOUNT</div><div class="sgrp">' + row('link', 'Disconnect Glyph', '<span class="v">' + (signed ? 'SIGN OUT' : 'NOT CONNECTED') + '</span>', 'sDisc', 'button') + '</div>' +
       '<div class="sfoot">THE HALL &middot; MIMU ON APE &middot; CREATED BY @BERT_BACCARATT</div></div>';
