@@ -66,7 +66,7 @@
   }
 
   /* ---------- MESSAGES ---------- */
-  var ms = { view: 'list', id: null, name: '', system: false, blocked: false, poll: 0, err: '', pending: null };
+  var ms = { view: 'list', id: null, name: '', system: false, noBlock: false, blocked: false, poll: 0, err: '', pending: null };
   function M() { return P.messages ? P.messages() : null; }
   function avatar(name, system) { var c = (name || '?').charAt(0).toUpperCase(); return '<span class="cmav' + (system ? ' sys' : '') + '">' + esc(c) + '</span>'; }
   function drawMessages() {
@@ -80,11 +80,11 @@
       M().threads().then(function (rows) {
         var box = $('msList'); if (!box) return;
         if (!rows || !rows.length) { box.innerHTML = '<div class="empty">NO TEXTS YET<br><span style="opacity:.7">PRESS NEW TEXT TO START ONE</span></div>'; return; }
-        box.innerHTML = rows.map(function (r) { return '<button type="button" class="cmrow" data-id="' + esc(r.id) + '" data-sys="' + (r.system ? 1 : 0) + '" data-bl="' + (r.blocked ? 1 : 0) + '" data-n="' + esc(r.name) + '">' + avatar(r.name, r.system) + '<span class="cmmid"><b>' + esc(r.name) + (r.blocked ? ' &middot; BLOCKED' : '') + '</b><em>' + esc(r.last || '') + '</em></span><span class="cmtm">' + when(r.ts) + (r.unread ? '<i class="cmud"></i>' : '') + '</span></button>'; }).join('');
+        box.innerHTML = rows.map(function (r) { return '<button type="button" class="cmrow" data-id="' + esc(r.id) + '" data-sys="' + (r.system ? 1 : 0) + '" data-nb="' + (r.noBlock ? 1 : 0) + '" data-bl="' + (r.blocked ? 1 : 0) + '" data-n="' + esc(r.name) + '">' + avatar(r.name, r.system) + '<span class="cmmid"><b>' + esc(r.name) + (r.blocked ? ' &middot; BLOCKED' : '') + '</b><em>' + esc(r.last || '') + '</em></span><span class="cmtm">' + when(r.ts) + (r.unread ? '<i class="cmud"></i>' : '') + '</span></button>'; }).join('');
       }, function () { var box = $('msList'); if (box) box.innerHTML = '<div class="empty">COULD NOT LOAD TEXTS</div>'; });
     };
     load(); ms.poll = setInterval(function () { if (current() === 'messages' && ms.view === 'list') load(); }, 10000);
-    $('msList').addEventListener('click', function (ev) { var b = ev.target.closest('.cmrow'); if (!b) return; ms.view = 'thread'; ms.id = b.getAttribute('data-id'); ms.name = b.getAttribute('data-n'); ms.system = b.getAttribute('data-sys') === '1'; ms.blocked = b.getAttribute('data-bl') === '1'; ms.err = ''; drawMessages(); });
+    $('msList').addEventListener('click', function (ev) { var b = ev.target.closest('.cmrow'); if (!b) return; ms.view = 'thread'; ms.id = b.getAttribute('data-id'); ms.name = b.getAttribute('data-n'); ms.system = b.getAttribute('data-sys') === '1'; ms.noBlock = b.getAttribute('data-nb') === '1'; ms.blocked = b.getAttribute('data-bl') === '1'; ms.err = ''; drawMessages(); });
   }
   function drawNew() {
     var el = $('msgApp');
@@ -97,7 +97,7 @@
   }
   function drawThread() {
     var el = $('msgApp');
-    el.innerHTML = '<div class="pg cm th"><div class="cmhead"><button type="button" class="cmback" id="msBack" aria-label="Back">&lsaquo;</button><h3>' + esc(ms.name) + '</h3>' + (ms.system ? '<span></span>' : '<button type="button" class="cmbtn red" id="msBlock">' + (ms.blocked ? 'UNBLOCK' : 'BLOCK') + '</button>') + '</div><div class="cmlog" id="msLog"></div>' +
+    el.innerHTML = '<div class="pg cm th"><div class="cmhead"><button type="button" class="cmback" id="msBack" aria-label="Back">&lsaquo;</button><h3>' + esc(ms.name) + '</h3>' + (ms.system || ms.noBlock ? '<span></span>' : '<button type="button" class="cmbtn red" id="msBlock">' + (ms.blocked ? 'UNBLOCK' : 'BLOCK') + '</button>') + '</div><div class="cmlog" id="msLog"></div>' +
       (ms.system ? '<div class="cmfoot note">YOU CANNOT REPLY TO ' + esc(ms.name) + '</div>' : ms.blocked ? '<div class="cmfoot note">YOU BLOCKED THIS PLAYER &middot; UNBLOCK TO TEXT</div>' : '<form class="cmfoot" id="msForm"><input class="cminp" id="msIn" maxlength="280" placeholder="TEXT" autocomplete="off"><button type="submit" class="cmbtn">SEND</button></form>') + '<div class="cmerr" id="msErr">' + esc(ms.err) + '</div></div>';
     $('msBack').addEventListener('click', function () { ms.view = 'list'; drawMessages(); });
     var bl = $('msBlock'); if (bl) bl.addEventListener('click', function () { var on = !ms.blocked; M().block(ms.id, on).then(function () { ms.blocked = on; drawMessages(); }, function () { ms.err = 'COULD NOT CHANGE BLOCK'; drawMessages(); }); });

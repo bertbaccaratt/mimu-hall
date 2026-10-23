@@ -152,10 +152,9 @@
   /* ---------- the OVERVIEW page: a mind map to learn the control room, then everything about the visitors ---------- */
   var MAP = [
     ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['cards', 'CARDS', 'the 120 cards, pictured']]],
-    ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text a player as HYPE'], ['mail', 'MIMU MAIL', 'email everyone as MIMU']]],
-    ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points and trades']]],
-    ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works'], ['data', 'DATA CONTRACT', 'what the server sends'], ['road', 'CHECKLIST', 'what is done and next'], ['log', 'CHANGELOG', 'every change made'], ['files', 'FILES', 'what is in the site']]],
-    ['DO', 'g5', [['tools', 'TOOLS', 'test mode and snapshot']]]
+    ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
+    ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, prices and trades']]],
+    ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works'], ['data', 'DATA CONTRACT', 'what the server sends'], ['road', 'CHECKLIST', 'what is done and next']]]
   ];
   function mindMap() {
     return '<div class="box mmbox"><h4>HOW TO USE THE CONTROL ROOM</h4>' +
@@ -165,8 +164,8 @@
       '<li><b>MOVE AROUND</b> with the menu (left side, or the strip at the top on a phone), or press the keys 1 to 9. Esc closes the control room.</li>' +
       '<li><b>READ THE LIGHTS</b> at the top: green means connected, gray means waiting. The Live Runs frame is red when nobody plays and green when somebody does.</li>' +
       '<li><b>NO NUMBERS YET?</b> Dashes mean the live feed is not connected. The system check and the guide pages are always real.</li>' +
-      '<li><b>SEND</b> texts as HYPE and emails as MIMU from their own pages. They say NOT CONNECTED until the server is live.</li>' +
-      '<li><b>STALE PAGE?</b> Press Ctrl+Shift+R once to load the newest files. Tools has a snapshot download. LOG OUT under the menu signs you out.</li></ol></div>';
+      '<li><b>SEND</b> texts as HYPE (you can read and answer replies there) and announcement emails as MIMU (outgoing only). They say NOT CONNECTED until the server is live.</li>' +
+      '<li><b>STALE PAGE?</b> Press Ctrl+Shift+R once to load the newest files. LOG OUT under the menu signs you out.</li></ol></div>';
   }
   function bars24(a) {
     var mx = Math.max.apply(null, (a || []).concat([1])), out = '', i, v;
@@ -217,8 +216,8 @@
       '<div class="cols3"><div class="box"><h4>BROWSERS</h4>' + rankList(v.browsers, hint) + '</div><div class="box"><h4>TOP BAR TABS OPENED</h4>' + rankList(v.tabs, hint) + '</div><div class="box"><h4>PHONE APPS OPENED</h4>' + rankList(v.apps, hint) + '</div></div>';
   }
   function ovHtml() {
-    return '<section data-p="ov">' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
-      '<div class="tiles" id="admVT"></div><div id="admVis"></div>' +
+    return '<section data-p="ov"><div class="tiles vis" id="admVT"></div>' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
+      '<div id="admVis"></div>' +
       '<div class="box dbox"><h4>THE GAME AT A GLANCE</h4><div class="tiles" id="admTiles"></div></div>' +
       '<div class="cols2"><div class="box"><h4>SYSTEM CHECK</h4><div class="sys one" id="admSys"></div></div><div class="box"><h4>THIS BROWSER</h4>' + thisBrowser() + '</div></div>' +
       '<div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></section>';
@@ -249,11 +248,37 @@
     var a = (feed && feed.activity) || [];
     return a.length ? a.slice(0, 14).map(function (x) { return '<div class="act"><em>' + stamp(x.ts) + '</em><span>' + esc(x.text) + '</span></div>'; }).join('') : '<div class="act none">WAITING FOR THE LIVE FEED &middot; SIGN-INS, RUNS, CARDS, SALES AND TEXTS APPEAR HERE</div>';
   }
-  function economy() {
-    var e = (feed && feed.economy) || {}, t = [
-      ['COINS EARNED', fmt(e.coinsEarned)], ['COINS SPENT', fmt(e.coinsSpent)], ['CARDS BOUGHT', fmt(e.cardsBought)], ['CARDS SOLD', fmt(e.cardsSold)], ['POINTS PAID FOR SALES', fmt(e.pointsPaid)], ['AVERAGE COINS PER RUN', e.coinsPerRun != null ? fmt(e.coinsPerRun) : '—']
+  function flowBar(title, parts, none) {
+    var tot = parts.reduce(function (a, p) { return a + (p.v || 0); }, 0);
+    return '<div class="ef"><div class="eft"><b>' + title + '</b><span>' + (tot ? fmt(tot) + ' TOTAL' : none) + '</span></div><div class="efb">' + (tot ? parts.map(function (p) { return '<i class="' + p.c + '" style="width:' + (p.v / tot * 100) + '%" title="' + p.l + ' ' + fmt(p.v) + '"></i>'; }).join('') : '') + '</div><div class="efl">' + parts.map(function (p) { return '<span><i class="' + p.c + '"></i>' + p.l + ' <b>' + (p.v == null ? '—' : fmt(p.v)) + '</b>' + (tot && p.v ? ' &middot; ' + Math.round(p.v / tot * 100) + '%' : '') + '</span>'; }).join('') + '</div></div>';
+  }
+  function health(label, value, text, cls) { return '<div class="eh ' + (cls || 'off') + '"><i></i><b>' + label + '</b><em>' + value + '</em><span>' + text + '</span></div>'; }
+  function ecoHtml() {
+    var f = feed || {}, e = f.economy || {}, sr = f.series || {}, none = feed ? '' : 'WAITING FOR LIVE FEED', c = P.config;
+    var held = e.coinsHeld != null ? e.coinsHeld : (e.coinsEarned != null && e.coinsSpent != null ? e.coinsEarned - e.coinsSpent : null);
+    var tl = [
+      ['COINS EARNED', fmt(e.coinsEarned), 'every coin collected', sr.coins], ['COINS SPENT', fmt(e.coinsSpent), e.coinsEarned ? Math.round((e.coinsSpent || 0) / e.coinsEarned * 100) + '% of earned' : none], ['COINS IN WALLETS', fmt(held), 'earned minus spent'],
+      ['COINS PER RUN', e.coinsPerRun != null ? fmt(e.coinsPerRun) : '—', 'average finished run'], ['AVERAGE WALLET', e.avgBalance != null ? fmt(e.avgBalance) : '—', 'per signed-in player'], ['FACE DOWN SOLD', fmt(e.cardsBought), 'bought with coins'],
+      ['FACE UP SOLD', fmt(e.cardsBoughtUp), 'bought with points'], ['SOLD TO THE HALL', fmt(e.cardsSold), 'for set points'], ['LISTINGS OPEN', fmt(e.listingsActive), e.cardsListed != null ? fmt(e.cardsListed) + ' ever listed' : none],
+      ['POINTS FROM SALES', fmt(e.pointsPaid), 'paid out by the Hall'], ['POINTS BETWEEN PLAYERS', fmt(e.pointsMoved), 'face up trades'], ['EXTRA LIVES', fmt(e.livesBought), e.pointsSpentLives != null ? fmt(e.pointsSpentLives) + ' points spent' : none]
     ];
-    return '<div class="eco">' + t.map(function (x) { return '<div><small>' + x[0] + '</small><b>' + (feed ? x[1] : '—') + '</b></div>'; }).join('') + '</div>';
+    var h = '<div class="tiles eco2">' + tl.map(function (x) { return '<div class="tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><em>' + esc(x[2]) + '</em>' + (x[3] ? spark(x[3]) : '') + '</div>'; }).join('') + '</div>';
+    h += '<div class="box dbox"><h4>WHERE COINS AND POINTS GO</h4>' + flowBar('COINS', [{ l: 'SPENT ON FACE DOWN', v: e.coinsSpent, c: 'k1' }, { l: 'SITTING IN WALLETS', v: held, c: 'k2' }], none) + flowBar('POINTS MOVING AROUND', [{ l: 'EARNED IN RUNS', v: e.pointsRuns, c: 'k2' }, { l: 'PAID BY HALL SALES', v: e.pointsPaid, c: 'k1' }, { l: 'MOVED BETWEEN PLAYERS', v: e.pointsMoved, c: 'k3' }, { l: 'SPENT ON EXTRA LIVES', v: e.pointsSpentLives, c: 'k4' }], none) + '</div>';
+    var hs = '', sink = e.coinsEarned ? (e.coinsSpent || 0) / e.coinsEarned : null, infl = e.pointsRuns ? (e.pointsPaid || 0) / e.pointsRuns : null, ask = null, i;
+    if (e.tiers && e.tiers[0] && e.tiers[0].coins && e.tiers[0].avgListing) ask = e.tiers[0].avgListing;
+    hs += health('COIN SPENDING', sink == null ? '—' : Math.round(sink * 100) + '%', sink == null ? none || 'NO DATA YET' : sink < 0.2 ? 'COINS ARE PILING UP: THE FACE DOWN SHELF MAY BE TOO EXPENSIVE' : sink > 0.8 ? 'COINS DRAIN FAST: THE SHELF MAY BE TOO CHEAP' : 'A HEALTHY SHARE OF COINS IS BEING SPENT', sink == null ? 'off' : sink < 0.2 || sink > 0.8 ? 'warn' : 'ok');
+    hs += health('HALL SALES VS RUN POINTS', infl == null ? '—' : Math.round(infl * 100) + '%', infl == null ? none || 'NO DATA YET' : infl > 0.25 ? 'SELLING TO THE HALL IS A BIG SHARE OF ALL POINTS: CHECK THE SALE VALUES' : 'RUNNING STILL DRIVES MOST POINTS', infl == null ? 'off' : infl > 0.25 ? 'warn' : 'ok');
+    hs += health('LISTING ACTIVITY', e.listingsActive == null ? '—' : fmt(e.listingsActive), e.listingsActive == null ? none || 'NO DATA YET' : e.listingsActive === 0 ? 'NO PLAYER HAS A CARD FOR SALE: THE FACE UP SHELF IS EMPTY' : 'PLAYERS ARE OFFERING CARDS FOR SALE', e.listingsActive == null ? 'off' : e.listingsActive === 0 ? 'warn' : 'ok');
+    h += '<div class="box dbox"><h4>ECONOMY HEALTH</h4><div class="ehs">' + hs + '</div></div>';
+    var rows = P.tiers.map(function (t, k) { var x = (e.tiers || [])[k] || {}, d = function (v) { return v == null ? '—' : fmt(v); }; return ['<b style="color:' + t.color + '">' + esc(t.name.toUpperCase()) + '</b>', d(x.coins), d(x.saleValue), d(x.avgListing), d(x.listed), d(x.sold)]; });
+    h += '<div class="box dbox"><h4>PRICES BY RARITY</h4><div class="hint" style="margin-bottom:12px">Face down cards cost coins and are priced by us. The Hall pays a set number of points when a player sells a card to it. Face up cards are priced in points by the players. These come from the Marketplace server.</div>' + '<div class="dtab" style="--c:6"><div class="dh"><span>RARITY</span><span>FACE DOWN (COINS)</span><span>HALL SALE (POINTS)</span><span>AVERAGE FACE UP ASK</span><span>LISTED</span><span>SOLD</span></div>' + rows.map(function (r) { return '<div class="dr">' + r.map(function (c2) { return '<span>' + c2 + '</span>'; }).join('') + '</div>'; }).join('') + '</div></div>';
+    var days = (e.byDay || []), mx = Math.max.apply(null, days.map(function (d) { return d.trades || 0; }).concat([1]));
+    h += '<div class="cols2"><div class="box"><h4>TRADES, LAST 14 DAYS</h4>' + (days.length ? '<div class="dbars">' + days.slice(-14).map(function (d) { return '<span title="' + esc(d.d) + ' · ' + fmt(d.trades) + ' trades"><i style="height:' + Math.max(4, (d.trades || 0) / mx * 100) + '%"></i><em>' + esc(String(d.d).slice(-2)) + '</em></span>'; }).join('') + '</div>' : '<div class="rk none">' + (feed ? 'NO DATA YET' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div>' +
+      '<div class="box"><h4>MOST TRADED CARDS</h4>' + ((e.topCards || []).length ? '<div class="etop">' + e.topCards.slice(0, 8).map(function (x) { var cd = P.card ? P.card(x.n) : null; return '<div><img src="' + esc(cd ? cd.file : 'assets/game/card-back.webp') + '" alt="" loading="lazy"><b>#' + x.n + '</b><span>' + fmt(x.count) + ' TRADES</span></div>'; }).join('') + '</div>' : '<div class="rk none">' + (feed ? 'NO DATA YET' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div></div>';
+    h += '<div class="cols2"><div class="box"><h4>TOP SELLERS</h4>' + rankList(e.topSellers, feed ? 'NO DATA YET' : 'WAITING FOR THE LIVE FEED') + '</div><div class="box"><h4>TOP BUYERS</h4>' + rankList(e.topBuyers, feed ? 'NO DATA YET' : 'WAITING FOR THE LIVE FEED') + '</div></div>';
+    h += '<div class="box dbox"><h4>RECENT TRADES</h4><div class="acts">' + ((e.recent || []).length ? e.recent.slice(0, 14).map(function (x) { return '<div class="act"><em>' + stamp(x.ts) + '</em><span>' + esc(x.text) + '</span></div>'; }).join('') : '<div class="act none">' + (feed ? 'NO TRADES YET' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div></div>';
+    h += '<div class="box dbox"><h4>THE RULES OF THE ECONOMY</h4>' + '<ul class="dl"><li><b>Coins</b> come only from runs: each coin collected is also worth ' + c.coinPoints + ' points to that run. Coins are spent only on face down cards from the Hall, which are priced high on purpose.</li><li><b>Points</b> are the leaderboard score. Face up cards from players cost points, and the points go from the buyer to the seller. Any collected card can also be sold to the Hall for a set number of points.</li><li><b>Extra life:</b> after a crash a player may buy one extra life per run for ' + Math.round(c.life.share * 100) + '% of their points. It cannot be bought twice in a run.</li><li><b>Never money:</b> only coins and points change hands. Sales are final. The cards are in-game pictures, not real-world assets.</li><li><b>Where the numbers live:</b> all prices, sale values and limits are served by the Marketplace server, so you can change them without touching the site.</li></ul></div>';
+    return h;
   }
   function sysRows() {
     var A = window.MIMUAudio, f = feed || {}, ok = function (b) { return b ? 'ok' : 'off'; }, cards = (P.cards && P.cards().length) || 0, vw = window.innerWidth + ' x ' + window.innerHeight;
@@ -273,7 +298,7 @@
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST'], ['log', 'CHANGELOG'], ['files', 'FILES'], ['tools', 'TOOLS']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST']];
   var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
@@ -292,21 +317,16 @@
       '<main class="cr-main">' +
       ovHtml() +
       '<section data-p="live"><div class="livebox off" id="admLB2"></div></section>' +
-      '<section data-p="msg"><div class="box"><h4>TEXT AS HYPE</h4><div class="hint" style="margin-bottom:12px">A one-on-one text from the HYPE account to a signed-in player. Players cannot reply to HYPE.</div><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><textarea id="admHBody" maxlength="280" rows="4" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div><div class="box" style="margin-top:16px"><h4>RECENTLY SENT</h4><div class="sent" id="admHList"></div></div></section>' +
-      '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
+      '<section data-p="msg"><div class="hx"><div class="box hxl"><h4>CONVERSATIONS</h4><div class="hxnew"><input id="admHTo" list="admPl" maxlength="40" placeholder="START A NEW TEXT: PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><button type="button" class="go" id="admHNew">NEW</button></div><div class="hxlist" id="admHT"></div></div><div class="box hxr"><h4 id="admHTitle">PICK A CONVERSATION</h4><div class="hint">HYPE is the account you text players from. Players can and will text HYPE back, so their replies land here. Players can also text HYPE first.</div><div class="hxlog" id="admHLog"></div><div class="cmp"><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div></div></section>' +
+      '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
-      '<section data-p="eco"><div class="box"><h4>COINS AND THE MARKETPLACE</h4><div id="admEco"></div><div class="hint" style="margin-top:14px">Coins collected in runs are spent on cards in the Marketplace. Any collected card can be sold for leaderboard points. Prices and sale values are served by the Marketplace service once it is connected.</div></div></section>' +
+      '<section data-p="eco"><div id="admEco"></div></section>' +
       '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Once the live feed is connected, each card shows how many times it has been found and lights up when it has been found at least once.</div>' + deckGrid() + '</div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
       '<section data-p="sys">' + (DOCS.pages.sys || '') + '</section>' +
       '<section data-p="data">' + (DOCS.pages.data || '') + '</section>' +
       '<section data-p="road">' + (DOCS.pages.road || '') + '</section>' +
-      '<section data-p="log">' + (DOCS.pages.log || '') + '</section>' +
-      '<section data-p="files">' + (DOCS.pages.files || '') + '</section>' +
-      '<section data-p="tools"><div class="box"><h4>TOOLS</h4><div class="tools"><button type="button" class="sw' + (P.isTest() ? ' on' : '') + '" id="admTest"><i></i>TEST MODE</button><div class="hint">Test mode makes card sightings come every few seconds, opens every tier, and brings the pack after 40 seconds, so you can see every rarity and the slowdown without playing for hours. Nothing is saved while it is on. It only changes this browser.</div></div>' +
-      '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admSnap">DOWNLOAD SNAPSHOT</button><div class="hint">Saves the numbers on this page (and the current game settings) as a file on this computer.</div></div>' +
-      '</div></section>' +
       '</main></div><div class="cr-foot">KEYS &nbsp; 1&ndash;9 SWITCH PAGE &nbsp;&middot;&nbsp; ESC CLOSES &nbsp;&middot;&nbsp; GUIDE BUILT ' + esc(DOCS.built || '') + ' &middot; COMMIT ' + esc(DOCS.commit || '') + '</div></div>';
     var root = shade.querySelector('.adm');
     function show(t) {
@@ -321,27 +341,36 @@
     $('admNav').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b && b.getAttribute('data-t')) show(b.getAttribute('data-t')); });
     shade.onkeydown = function (ev) { if (/^[1-9]$/.test(ev.key) && !/INPUT|TEXTAREA/.test((ev.target || {}).tagName || '')) show(NAV[+ev.key - 1][0]); };
     shade.tabIndex = -1; shade.focus();
-    $('admTest').addEventListener('click', function () { var on = !P.isTest(); P.setTest(on); this.classList.toggle('on', on); });
-    $('admSnap').addEventListener('click', function () {
-      var blob = new Blob([JSON.stringify({ taken: new Date().toISOString(), feed: feed, config: P.config, testMode: P.isTest() }, null, 2)], { type: 'application/json' }), a = document.createElement('a');
-      a.href = URL.createObjectURL(blob); a.download = 'hall-snapshot.json'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
-    });
     $('admOut').addEventListener('click', function () { try { sessionStorage.removeItem('hall-admin'); } catch (e) {} close(); });
     var mtab = 'c';
     function lists() {
-      var h = (feed && feed.hypes) || [], m = (feed && feed.mails) || [], r = (feed && feed.replies) || [];
-      $('admHList').innerHTML = h.length ? h.slice(0, 10).map(function (x) { return '<div class="srow2"><b>' + esc(x.to || x.rn || '') + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NOTHING SENT YET</div>';
+      var m = (feed && feed.mails) || [];
       var box = $('admML'); if (mtab === 's') box.innerHTML = m.length ? m.slice(0, 12).map(function (x) { return '<div class="srow2"><b>' + esc(x.subject) + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NO MAIL SENT YET</div>';
-      if (mtab === 'r') box.innerHTML = r.length ? r.slice(0, 12).map(function (x) { return '<div class="srow2"><b>' + esc(x.from || '') + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NOTHING RECEIVED &middot; MAIL IS ONE-WAY FROM MIMU</div>';
     }
     function done(el, p, okText) {
       el.className = 'cmsg'; if (!p) { el.textContent = 'NOT CONNECTED YET · NOTHING WAS SENT'; el.classList.add('bad'); return; }
       el.textContent = 'SENDING…'; p.then(function () { el.textContent = okText; el.classList.add('ok'); lists(); }, function (e) { el.textContent = String((e && e.message) || 'COULD NOT SEND').toUpperCase(); el.classList.add('bad'); });
     }
+    /* HYPE inbox: threads on the left, the open conversation on the right */
+    var hxSel = null, hxSig = '', hxListSig = '';
+    function threads() {
+      var f = feed || {}, t = (f.hypeThreads || []).slice();
+      if (!t.length && f.hypes && f.hypes.length) { var by = {}; f.hypes.forEach(function (x) { var n = x.to || x.rn || ''; (by[n] = by[n] || { name: n, ts: 0, unread: 0, messages: [] }).messages.push({ me: true, body: x.body, ts: x.ts }); by[n].ts = Math.max(by[n].ts, x.ts || 0); }); t = Object.keys(by).map(function (k) { return by[k]; }); }
+      if (hxSel && !t.some(function (x) { return x.name === hxSel; })) t.unshift({ name: hxSel, ts: 0, unread: 0, messages: [] });
+      return t.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+    }
+    function paintHype() {
+      var t = threads(), sig = JSON.stringify(t.map(function (x) { return [x.name, x.ts, x.unread, (x.messages || []).length]; })) + '|' + hxSel;
+      if (sig !== hxListSig) { hxListSig = sig; $('admHT').innerHTML = t.length ? t.map(function (x) { var last = x.last || ((x.messages || []).slice(-1)[0] || {}).body || 'NO MESSAGES YET'; return '<button type="button" class="hxt' + (x.name === hxSel ? ' on' : '') + '" data-n="' + esc(x.name) + '"><span class="av">' + esc((x.name || '?').charAt(0).toUpperCase()) + '</span><span class="mid"><b>' + esc(x.name) + '</b><em>' + esc(last) + '</em></span><span class="tm">' + (x.ts ? stamp(x.ts) : '') + (x.unread ? '<i>' + x.unread + '</i>' : '') + '</span></button>'; }).join('') : '<div class="srow2 none">NO CONVERSATIONS YET &middot; PLAYER REPLIES AND NEW TEXTS APPEAR HERE</div>'; }
+      var cur = t.filter(function (x) { return x.name === hxSel; })[0], msgs = cur ? (cur.messages || []) : [], s2 = hxSel + '|' + msgs.length + '|' + (msgs.length ? msgs[msgs.length - 1].ts : 0);
+      if (s2 !== hxSig) { hxSig = s2; $('admHTitle').textContent = hxSel ? 'TEXTS WITH ' + String(hxSel).toUpperCase() : 'PICK A CONVERSATION'; var lg = $('admHLog'); lg.innerHTML = hxSel ? (msgs.length ? msgs.map(function (m) { return '<div class="hxb' + (m.me ? ' me' : '') + '"><span>' + esc(m.body).replace(/\n/g, '<br>') + '</span><small>' + (m.me ? 'HYPE' : esc(hxSel)) + ' &middot; ' + stamp(m.ts) + '</small></div>'; }).join('') : '<div class="srow2 none">NO MESSAGES YET &middot; WRITE THE FIRST ONE BELOW</div>') : '<div class="srow2 none">SELECT A CONVERSATION ON THE LEFT, OR START A NEW TEXT</div>'; lg.scrollTop = lg.scrollHeight; }
+    }
+    $('admHT').addEventListener('click', function (ev) { var b = ev.target.closest('.hxt'); if (!b) return; hxSel = b.getAttribute('data-n'); hxSig = ''; hxListSig = ''; if (handlers.markRead) handlers.markRead(hxSel); paintHype(); $('admHBody').focus(); });
+    $('admHNew').addEventListener('click', function () { var n = $('admHTo').value.trim(); if (!n) { var el = $('admHMsg'); el.className = 'cmsg bad'; el.textContent = 'TYPE A PLAYER USERNAME FIRST'; return; } hxSel = n; $('admHTo').value = ''; hxSig = ''; hxListSig = ''; $('admHMsg').textContent = ''; paintHype(); $('admHBody').focus(); });
     $('admHSend').addEventListener('click', function () {
-      var to = $('admHTo').value.trim(), body = $('admHBody').value.trim(), el = $('admHMsg');
-      if (!to || !body) { el.className = 'cmsg bad'; el.textContent = 'PICK A PLAYER AND WRITE A MESSAGE'; return; }
-      done(el, handlers.hype ? handlers.hype(to, body) : null, 'SENT AS HYPE'); if (handlers.hype) $('admHBody').value = '';
+      var body = $('admHBody').value.trim(), el = $('admHMsg');
+      if (!hxSel || !body) { el.className = 'cmsg bad'; el.textContent = hxSel ? 'WRITE A MESSAGE FIRST' : 'PICK A CONVERSATION OR START A NEW TEXT'; return; }
+      done(el, handlers.hype ? handlers.hype(hxSel, body) : null, 'SENT AS HYPE'); if (handlers.hype) $('admHBody').value = '';
     });
     $('admMSend').addEventListener('click', function () {
       var s = $('admMS').value.trim(), b = $('admMB').value.trim(), el = $('admMMsg');
@@ -354,17 +383,17 @@
       $('admMC').style.display = mtab === 'c' ? '' : 'none'; $('admML').style.display = mtab === 'c' ? 'none' : ''; lists();
     });
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
-    var plFed = false;
+    var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
-      lists();
+      lists(); paintHype();
     }
     refresh(); clearInterval(tick); tick = setInterval(refresh, 1000);
   }
   /* later: HallAdmin.setFeed({ visitors:{today,total}, runs:{today,total}, live:[{name,score,alive,cards}], cardsFound, topScore, longest, signedIn, messagesToday,
        economy:{coinsEarned,coinsSpent,cardsBought,cardsSold,pointsPaid,coinsPerRun}, cardsByTier:[...], series:{visitors,runs,signedIn,cards,coins,messages}, activity:[{ts,text}],
-       players:[{name}], hypes:[{to,body,ts}], mails:[{subject,body,ts}], replies:[{from,body,ts}], status:{cloudflare,glyph,market,texts,mail} })
-     and HallAdmin.setHandlers({ hype(to, body) -> Promise, mail(subject, body) -> Promise }) */
+       players:[{name}], hypeThreads:[{name,last,ts,unread,messages:[{me,body,ts}]}], mails:[{subject,body,ts}], status:{cloudflare,glyph,market,texts,mail} })
+     and HallAdmin.setHandlers({ hype(to, body) -> Promise, mail(subject, body) -> Promise, markRead(name) }) */
   window.HallAdmin = { setFeed: function (f) { feed = f; }, setHandlers: function (h) { handlers = h || {}; }, open: openPanel };
 })();
