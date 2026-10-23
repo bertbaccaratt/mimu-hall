@@ -40,6 +40,7 @@
   load('runB', 'assets/game/runB.webp');
   load('box', 'assets/game/box.webp');
   load('coin', 'assets/game/coin-sheet.webp');
+  load('coinG', 'assets/game/coin-gold.webp');   // the coins you collect: gold with black lines (the black sheet above is the big coin in the far background)
   load('wall', 'assets/game/wall.webp');
   load('floor', 'assets/game/floor.webp');
   load('slide', 'assets/game/slide.webp');
@@ -419,7 +420,7 @@
   }
   function drawCoin(e) {
     if (e.got) return;
-    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (e.z < 0.62 || !im.naturalWidth || y > H + 60) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coinG && imgs.coinG.naturalWidth ? imgs.coinG : imgs.coin; if (e.z < 0.62 || !im.naturalWidth || y > H + 60) return;
     var x = cxAt(s) + e.lane * LANE * W * s, cw = 0.17 * W * s, cy = y - cw * 0.85 - Math.sin(S.t * 4 + e.ph) * cw * 0.06;
     var fr = Math.floor(S.t * 10 + e.ph) % 20, fx = (fr % 5) * 192, fy = ((fr / 5) | 0) * 192;
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
