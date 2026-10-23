@@ -224,7 +224,7 @@
 
   /* ---------- CAMERA: a viewfinder, a shutter that flashes and clicks, and a photo gallery with a full-screen viewer ---------- */
   var cam = { n: 0, built: false };
-  var PICS = [1, 2, 6, 3, 4, 10, 5].map(function (i) { return 'assets/game/photos/p' + i + '.webp'; });
+  var PICS = [10, 1, 2, 3, 4, 5, 6].map(function (i) { return 'assets/game/photos/p' + i + '.webp'; });
   function camToast(txt) { var t = $('camToast'); if (!t) return; t.innerHTML = txt; t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
   function buildCamera() {
     var el = $('camApp'); if (!el || cam.built) { if (el) closeGallery(); return; } cam.built = true; el.classList.add('page');
@@ -249,12 +249,12 @@
       Array.prototype.forEach.call(g.querySelectorAll('.cgg button'), function (b) { b.addEventListener('click', function () { view(+b.getAttribute('data-i')); }); });
     }
     function view(i) {
-      var N = PICS.length; g.innerHTML = '<div class="cgh"><button type="button" class="cgx" id="galB">&lsaquo; PHOTOS</button><b>' + (i + 1) + ' OF ' + N + '</b><span></span></div><div class="cgv"><img src="' + PICS[i] + '" alt="Photo ' + (i + 1) + '"></div><button type="button" class="cga l" id="galP" aria-label="Previous">&lsaquo;</button><button type="button" class="cga r" id="galN" aria-label="Next">&rsaquo;</button>';
+      var N = PICS.length; g.innerHTML = '<div class="cgh"><button type="button" class="cgx" id="galB">&lsaquo; PHOTOS</button><b>' + (i + 1) + ' OF ' + N + '</b><span></span></div><div class="cgv"><img src="' + PICS[i] + '" alt="Photo ' + (i + 1) + '"></div>' + (i > 0 ? '<button type="button" class="cga l" id="galP" aria-label="Previous">&lsaquo;</button>' : '') + (i < N - 1 ? '<button type="button" class="cga r" id="galN" aria-label="Next">&rsaquo;</button>' : '');
       g.querySelector('#galB').addEventListener('click', grid);
-      g.querySelector('#galP').addEventListener('click', function () { view((i + N - 1) % N); }); g.querySelector('#galN').addEventListener('click', function () { view((i + 1) % N); });
+      var pv = g.querySelector('#galP'), nx = g.querySelector('#galN'); if (pv) pv.addEventListener('click', function () { view(i - 1); }); if (nx) nx.addEventListener('click', function () { view(i + 1); });
       var x0 = null, gv = g.querySelector('.cgv');
       gv.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
-      gv.addEventListener('pointerup', function (e) { if (x0 == null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) view(dx < 0 ? (i + 1) % N : (i + N - 1) % N); });
+      gv.addEventListener('pointerup', function (e) { if (x0 == null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) { var j = dx < 0 ? i + 1 : i - 1; if (j >= 0 && j < N) view(j); } });
     }
     grid(); cv.appendChild(g);
   }
