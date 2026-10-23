@@ -223,10 +223,10 @@
   function camToast(txt) { var t = $('camToast'); if (!t) return; t.innerHTML = txt; t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
   function buildCamera() {
     var el = $('camApp'); if (!el || cam.built) { if (el) closeGallery(); return; } cam.built = true; el.classList.add('page');
-    el.innerHTML = '<div class="cam"><div class="vf"><img src="assets/game/camera-photo.webp" alt="The camera view: Mimu, ready for a photo"><div class="gridl"></div></div>' +
-      '<div class="ct"><span>&#9889;&#xFE0E; AUTO</span><span>HDR</span></div><div class="md">PHOTO</div>' +
-      '<button type="button" class="th" id="camGal" aria-label="Open photos"><img src="' + PICS[PICS.length - 1] + '" alt=""><b id="camN"></b></button>' +
-      '<div class="cb"><button type="button" class="shut" id="camSh" aria-label="Take a photo"><i></i></button></div><div class="fl" id="camFl"></div><div class="camtoast" id="camToast"></div></div>';
+    el.innerHTML = '<div class="cam"><div class="camvf"><img src="assets/game/camera-photo.webp" alt="The camera view: Mimu, ready for a photo"><div class="camgrid"></div></div>' +
+      '<div class="camct"><span>&#9889;&#xFE0E; AUTO</span><span>HDR</span></div><div class="cammd">PHOTO</div>' +
+      '<button type="button" class="camth" id="camGal" aria-label="Open photos"><img src="' + PICS[PICS.length - 1] + '" alt=""><b id="camN"></b></button>' +
+      '<div class="camcb"><button type="button" class="camshut" id="camSh" aria-label="Take a photo"><i></i></button></div><div class="camflash" id="camFl"></div><div class="camtoast" id="camToast"></div></div>';
     $('camSh').addEventListener('click', function () {
       var f = $('camFl'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
       tones([[0, 0.03, [1800]], [0.05, 0.05, [900]]]);
@@ -234,20 +234,20 @@
     });
     $('camGal').addEventListener('click', function () { tones([[0, 0.03, [700]]]); openGallery(); });
   }
-  function closeGallery() { var g = document.querySelector('#camApp .gal'); if (g) g.remove(); }
+  function closeGallery() { var g = document.querySelector('#camApp .camgal'); if (g) g.remove(); }
   function openGallery() {
     var cv = document.querySelector('#camApp .cam'); if (!cv) return; closeGallery();
-    var g = document.createElement('div'); g.className = 'gal';
+    var g = document.createElement('div'); g.className = 'camgal';
     function grid() {
-      g.innerHTML = '<div class="gh"><button type="button" class="gx" id="galX">&lsaquo; CAMERA</button><b>PHOTOS</b><span>' + PICS.length + '</span></div><div class="gg">' + PICS.map(function (s, i) { return '<button type="button" data-i="' + i + '"><img src="' + s + '" alt="Photo ' + (i + 1) + '" loading="lazy"></button>'; }).join('') + '</div>';
+      g.innerHTML = '<div class="cgh"><button type="button" class="cgx" id="galX">&lsaquo; CAMERA</button><b>PHOTOS</b><span>' + PICS.length + '</span></div><div class="cgg">' + PICS.map(function (s, i) { return '<button type="button" data-i="' + i + '"><img src="' + s + '" alt="Photo ' + (i + 1) + '" loading="lazy"></button>'; }).join('') + '</div>';
       g.querySelector('#galX').addEventListener('click', function () { g.remove(); tones([[0, 0.03, [500]]]); });
-      Array.prototype.forEach.call(g.querySelectorAll('.gg button'), function (b) { b.addEventListener('click', function () { view(+b.getAttribute('data-i')); }); });
+      Array.prototype.forEach.call(g.querySelectorAll('.cgg button'), function (b) { b.addEventListener('click', function () { view(+b.getAttribute('data-i')); }); });
     }
     function view(i) {
-      var N = PICS.length; g.innerHTML = '<div class="gh"><button type="button" class="gx" id="galB">&lsaquo; PHOTOS</button><b>' + (i + 1) + ' OF ' + N + '</b><span></span></div><div class="gv"><img src="' + PICS[i] + '" alt="Photo ' + (i + 1) + '"></div><button type="button" class="ga l" id="galP" aria-label="Previous">&lsaquo;</button><button type="button" class="ga r" id="galN" aria-label="Next">&rsaquo;</button>';
+      var N = PICS.length; g.innerHTML = '<div class="cgh"><button type="button" class="cgx" id="galB">&lsaquo; PHOTOS</button><b>' + (i + 1) + ' OF ' + N + '</b><span></span></div><div class="cgv"><img src="' + PICS[i] + '" alt="Photo ' + (i + 1) + '"></div><button type="button" class="cga l" id="galP" aria-label="Previous">&lsaquo;</button><button type="button" class="cga r" id="galN" aria-label="Next">&rsaquo;</button>';
       g.querySelector('#galB').addEventListener('click', grid);
       g.querySelector('#galP').addEventListener('click', function () { view((i + N - 1) % N); }); g.querySelector('#galN').addEventListener('click', function () { view((i + 1) % N); });
-      var x0 = null, gv = g.querySelector('.gv');
+      var x0 = null, gv = g.querySelector('.cgv');
       gv.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
       gv.addEventListener('pointerup', function (e) { if (x0 == null) return; var dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) view(dx < 0 ? (i + 1) % N : (i + N - 1) % N); });
     }
