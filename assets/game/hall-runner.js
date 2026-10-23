@@ -301,7 +301,7 @@
     if (S.hintUntil && S.t > S.hintUntil) { S.hintUntil = 0; elHint.classList.remove('on'); }
     if (S.mode === 'idle') hbot.style.display = 'none'; else { hbot.style.display = '';
       var mph = Math.round(S.v * MPH), dd = (S.dist * MILES).toFixed(2), slow = S.slowT > 0;
-      if (mph !== lastMph) { lastMph = mph; elMph.textContent = mph; var f = Math.max(0, Math.min(Math.log(Math.max(mph, 25) / 25) / Math.log(16), 1));   // log scale from 25 to 400 mph: the start sits near empty and the needle keeps moving through very long runs elNeedle.style.transform = 'rotate(' + (-90 + f * 180).toFixed(1) + 'deg)'; elArc.setAttribute('stroke-dashoffset', (75.4 * (1 - f)).toFixed(1)); }
+      if (mph !== lastMph) { lastMph = mph; elMph.textContent = mph; var f = Math.max(0, Math.min(Math.log(Math.max(mph, 25) / 25) / Math.log(16), 1)); elNeedle.style.transform = 'rotate(' + (-90 + f * 180).toFixed(1) + 'deg)'; elArc.setAttribute('stroke-dashoffset', (75.4 * (1 - f)).toFixed(1)); }
       if (dd !== lastDist) { lastDist = dd; elDist.textContent = dd; }
       if (slow !== lastSlow) { lastSlow = slow; hbot.classList.toggle('slow', slow); }
     }
