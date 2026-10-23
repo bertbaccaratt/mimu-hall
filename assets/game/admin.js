@@ -135,9 +135,10 @@
   }
   function deckGrid() {
     var cs = P.cards ? P.cards() : [];
-    return '<div class="cgrid">' + cs.map(function (c) {
+    var filt = '<div class="cfilt" role="group" aria-label="Show one rarity"><button type="button" class="on" data-tf2="0">ALL <b>' + cs.length + '</b></button>' + P.tiers.map(function (t, i) { return '<button type="button" data-tf2="' + (i + 1) + '" style="--c:' + t.color + '"><i></i>' + esc(t.name.toUpperCase()) + ' <b>' + cs.filter(function (c) { return c.tier === i + 1; }).length + '</b></button>'; }).join('') + '</div>';
+    return filt + '<div class="cgrid" data-f="0">' + cs.map(function (c) {
       var t = P.tiers[c.tier - 1] || P.tiers[0];
-      return '<div class="cth" data-cn="' + c.n + '" style="--c:' + t.color + '" title="#' + c.n + ' ' + esc(c.name) + ' · ' + esc(t.name) + '"><img src="' + esc(c.file) + '" alt="" loading="lazy"><span>' + c.n + '</span></div>';
+      return '<div class="cth" data-t="' + c.tier + '" data-cn="' + c.n + '" style="--c:' + t.color + '" title="#' + c.n + ' ' + esc(c.name) + ' · ' + esc(t.name) + '"><img src="' + esc(c.file) + '" alt="" loading="lazy"><span>' + c.n + '</span></div>';
     }).join('') + '</div><div class="clg">' + P.tiers.map(function (t) { return '<span><i style="background:' + (t.grad || t.color) + '"></i>' + esc(t.name.toUpperCase()) + '</span>'; }).join('') + '</div>';
   }
   function paintCardsPage() {
@@ -211,8 +212,24 @@
       '<div class="cols3"><div class="box"><h4>WHERE FROM</h4>' + rankList(v.countries, hint) + '</div><div class="box"><h4>HOW THEY ARRIVED</h4>' + rankList(v.referrers, hint) + '</div><div class="box"><h4>DEVICES</h4>' + rankList(v.devices, hint) + '</div></div>' +
       '<div class="cols3"><div class="box"><h4>BROWSERS</h4>' + rankList(v.browsers, hint) + '</div><div class="box"><h4>TOP BAR TABS OPENED</h4>' + rankList(v.tabs, hint) + '</div><div class="box"><h4>PHONE APPS OPENED</h4>' + rankList(v.apps, hint) + '</div></div>';
   }
+  /* ---------- the top of the overview: the wanted card shortcut, and the list HYPE has to approve (shared by everyone who is signed in to the control room) ---------- */
+  var APPR = [['length', 'HOW LONG THE GAME WILL LAST'], ['start', 'WHEN THE GAME STARTS'], ['end', 'WHEN THE GAME ENDS'], ['haul', 'WHEN THE HAUL RUN ENDS AND THE GIVING BEGINS'], ['demo', 'HYPE HAS PLAYED THE DEMO, SO WE CAN FINISH CONNECTING GLYPH'], ['live', 'WE ARE READY TO GO LIVE']], apprSig = '', apprMsg = '';
+  function paintWNow() {
+    var el = $('admWNow'); if (!el) return; var w = feed && feed.wanted && feed.wanted.active, sig = w ? 'live' + w.id : 'none'; if (el.getAttribute('data-s') === sig) return; el.setAttribute('data-s', sig);
+    el.innerHTML = '<div class="wnt"><small>' + (w ? 'A WANTED CARD IS LIVE' : 'WANTED CARD') + '</small><b>' + (w ? esc(w.name.toUpperCase()) + ' #' + String(w.card).padStart(3, '0') : 'LAUNCH A WANTED CARD NOW') + '</b><span>' + (w ? 'See the timer, or end it, on the Cards page.' : 'Pick a card, choose how many hours, and every player gets the email.') + '</span></div><button type="button" class="wgo" data-go="cards">' + (w ? 'OPEN THE CARDS PAGE' : 'GO TO LAUNCH') + ' &rarr;</button>';
+  }
+  function paintAppr() {
+    var el = $('admAppr'); if (!el) return; var ap = (feed && feed.approvals) || {}, sig = JSON.stringify([ap, !!feed, apprMsg]); if (sig === apprSig) return; apprSig = sig;
+    var n = APPR.filter(function (a) { return ap[a[0]]; }).length;
+    el.innerHTML = '<h4>FOR HYPE TO APPROVE <em>' + n + ' OF ' + APPR.length + '</em></h4><div class="apl">' + APPR.map(function (a) { var at = ap[a[0]]; return '<button type="button" class="api' + (at ? ' on' : '') + '" data-ap="' + a[0] + '" aria-pressed="' + !!at + '"><i>' + (at ? '&#10003;' : '') + '</i><span>' + a[1] + '</span><em>' + (at ? 'APPROVED &middot; ' + stamp(at) : 'WAITING') + '</em></button>'; }).join('') + '</div><div class="apn">' + (apprMsg || (feed ? 'Tap a box to approve it. It turns green for every admin, on any device, within a few seconds. Tap again to take the approval back.' : 'NOT CONNECTED YET: THE LIST FILLS IN WHEN THE LIVE FEED IS CONNECTED.')) + '</div>';
+  }
+  function apprToggle(k) {
+    if (!handlers.approve || !feed) { apprMsg = 'NOT CONNECTED YET'; apprSig = ''; paintAppr(); return; }
+    feed.approvals = feed.approvals || {}; var on = !feed.approvals[k]; if (on) feed.approvals[k] = Date.now(); else delete feed.approvals[k]; apprMsg = ''; apprSig = ''; paintAppr();
+    handlers.approve(k, on).then(function () { apprSig = ''; paintAppr(); }, function (e) { if (on) delete feed.approvals[k]; else feed.approvals[k] = Date.now(); apprMsg = String((e && e.message) || 'COULD NOT SAVE').toUpperCase(); apprSig = ''; paintAppr(); });
+  }
   function ovHtml() {
-    return '<section data-p="ov"><div class="tiles vis" id="admVT"></div>' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
+    return '<section data-p="ov"><div class="wnow" id="admWNow"></div><div class="tiles vis" id="admVT"></div><div class="appr" id="admAppr"></div>' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
       '<div id="admVis"></div>' +
       '<div class="box dbox"><h4>THE GAME AT A GLANCE</h4><div class="tiles" id="admTiles"></div></div>' +
       '<div class="cols2"><div class="box"><h4>SYSTEM CHECK</h4><div class="sys one" id="admSys"></div></div><div class="box"><h4>THIS BROWSER</h4>' + thisBrowser() + '</div></div>' +
@@ -382,6 +399,8 @@
     show(curTab);
     shade.querySelector('.adm-x').addEventListener('click', close);
     root.addEventListener('click', function (ev) {
+      var ap = ev.target.closest('[data-ap]'); if (ap) { apprToggle(ap.getAttribute('data-ap')); return; }
+      var tf = ev.target.closest('[data-tf2]'); if (tf) { var gr = root.querySelector('.cgrid'), v = tf.getAttribute('data-tf2'); gr.setAttribute('data-f', v); Array.prototype.forEach.call(root.querySelectorAll('[data-tf2]'), function (x) { x.classList.toggle('on', x === tf); }); return; }
       var c = ev.target.closest('.cth[data-cn]'); if (c) { wsel = +c.getAttribute('data-cn'); wMsg = ''; wSig = ''; paintWanted(); return; }
       if (ev.target.closest('#admWLaunch')) { if (!wsel) return; wantedAct(handlers.wantedLaunch ? handlers.wantedLaunch(wsel, wHours) : Promise.reject(new Error('Not connected yet')), 'LAUNCHED. THE EMAIL IS ON ITS WAY TO EVERY PLAYER'); return; }
       if (ev.target.closest('#admWEnd')) { wantedAct(handlers.wantedEnd ? handlers.wantedEnd() : Promise.reject(new Error('Not connected yet')), 'THE WANTED CARD WAS ENDED'); return; }
@@ -436,7 +455,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists(); paintHype();
     }

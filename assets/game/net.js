@@ -92,7 +92,7 @@
   function loadGlyph() {
     if (window.MimuGlyph) return Promise.resolve();
     if (S.glyphP) return S.glyphP;
-    S.glyphP = new Promise(function (res, rej) { var s = document.createElement('script'); s.src = 'assets/game/glyph-connect.js?v=20261023n'; s.onload = res; s.onerror = function () { S.glyphP = null; rej(new Error('Glyph could not load. Check your connection and try again.')); }; document.head.appendChild(s); });
+    S.glyphP = new Promise(function (res, rej) { var s = document.createElement('script'); s.src = 'assets/game/glyph-connect.js?v=20261023r'; s.onload = res; s.onerror = function () { S.glyphP = null; rej(new Error('Glyph could not load. Check your connection and try again.')); }; document.head.appendChild(s); });
     return S.glyphP;
   }
   function signIn() {
@@ -113,8 +113,9 @@
     note.innerHTML = html; note.classList.add('on');
   }
   function hideNote() { if (note) note.classList.remove('on'); }
+  var GLYPH_LIVE = false;   // flip to true when HYPE has approved the demo and Glyph is ready: until then everyone plays the demo
   function connectThen(go) {
-    if (S.active) { go(); return; }
+    if (S.active || !GLYPH_LIVE) { go(); return; }
     var attempt = function () {
       showNote('<span class="gn">OPENING GLYPH&hellip;</span><small>APPROVE THE SIGN-IN IN THE GLYPH WINDOW</small>');
       signIn().then(function () { hideNote(); go(); }, function (e) {
@@ -127,6 +128,7 @@
   }
   /* a returning player is welcomed back without opening Glyph again */
   function restore() {
+    if (!GLYPH_LIVE) { lsDel(SKEY); return; }
     var s = lsGet(SKEY); if (!s || !s.token || !s.exp || s.exp < Date.now() + 60000) { lsDel(SKEY); return; }
     S.token = s.token; S.me = s.me || null; if (S.me) { S.active = true; P.connect(adapter); }
     call('/me').then(function (me) { S.me = me; S.active = true; saveSession(); if (P.isSignedIn()) { P.notify('connect'); } else P.connect(adapter); var b = $('enter'); if (b) { var i = b.querySelector('.inner'); if (i) i.textContent = 'WELCOME BACK'; } ev('signedIn'); }).catch(function (e) { if (e.status === 401) { signOutLocal(); } });
@@ -134,7 +136,7 @@
 
   /* ---------- funnel and usage counts ---------- */
   function hooks() {
-    var gate = $('gate'); if (gate) gate.addEventListener('click', function () { ev('loaded'); setTimeout(function () { loadGlyph().catch(function () {}); }, 1500); });
+    var gate = $('gate'); if (gate) gate.addEventListener('click', function () { ev('loaded'); if (GLYPH_LIVE) setTimeout(function () { loadGlyph().catch(function () {}); }, 1500); });
     var loader = $('loader'); if (loader && window.MutationObserver) new MutationObserver(function () { if (loader.classList.contains('done')) ev('finished'); }).observe(loader, { attributes: true, attributeFilter: ['class'] });
     var scr = $('pScreen'); if (scr && window.MutationObserver) new MutationObserver(function () { if (scr.classList.contains('unlocked')) ev('unlocked'); if (scr.classList.contains('inapp') && scr.dataset.app) ev('app:' + scr.dataset.app); }).observe(scr, { attributes: true, attributeFilter: ['class', 'data-app'] });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.addEventListener('click', function () { var h = (t.getAttribute('href') || '').replace('#', ''); if (/^[a-z]{2,12}$/.test(h)) ev('tab:' + h); }); });
@@ -155,6 +157,7 @@
       hype: function (to, body) { return call('/admin/hype', { body: { to: to, body: body }, admin: tk() }).then(adminFeed, fail); },
       mail: function (subject, body) { return call('/admin/mail', { body: { subject: subject, body: body }, admin: tk() }).then(adminFeed, fail); },
       markRead: function (name) { var t = adm.last && (adm.last.hypeThreads || []).filter(function (x) { return x.name === name; })[0]; if (t && t.id) call('/admin/read', { body: { id: t.id }, admin: tk() }).then(adminFeed, function () {}); },
+      approve: function (key, on) { return call('/admin/approve', { body: { key: key, on: !!on }, admin: tk() }).then(adminFeed, fail); },
       wantedLaunch: function (card, hours) { return call('/admin/wanted/launch', { body: { card: card, hours: hours }, admin: tk() }).then(adminFeed, fail); },
       wantedEnd: function () { return call('/admin/wanted/end', { body: {}, admin: tk() }).then(adminFeed, fail); },
       flag: function (runId, action) { return call('/admin/flag', { body: { runId: runId, action: action }, admin: tk() }).then(adminFeed, fail); }

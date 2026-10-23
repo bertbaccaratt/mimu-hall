@@ -10,7 +10,7 @@
   var nf = function (u) { return function (v) { return fmt(v) + (u ? ' ' + u : ''); }; };
 
   /* ---------- the catalogue: groups, then categories, each with its own milestones ---------- */
-  var GROUPS = [['run', 'RUNNING'], ['coin', 'COINS'], ['card', 'CARDS'], ['skill', 'SKILLS'], ['trade', 'TRADING'], ['soc', 'SOCIAL'], ['ph', 'PHONE'], ['loy', 'LOYALTY']];
+  var GROUPS = [['run', 'RUNNING'], ['coin', 'COINS'], ['card', 'CARDS'], ['skill', 'SKILLS'], ['trade', 'TRADING'], ['soc', 'SOCIAL'], ['loy', 'LOYALTY']];
   var CATS = [
     { g: 'run', k: 'runs', n: 'FINISHED RUNS', t: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500], names: ['First Footsteps', 'Warming Up', 'Regular Visitor', 'Hallway Local', 'Candle Keeper', 'Century Runner', 'Marble Veteran', 'Banner Bearer', 'Hall Legend', 'Endless Corridor'], d: function (n) { return 'Finish ' + fmt(n) + (n === 1 ? ' run' : ' runs'); } },
     { g: 'run', k: 'distance', n: 'DISTANCE RUN', t: [500, 2000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000], names: ['First Stretch', 'Down the Aisle', 'Long Gallery', 'Past the Pillars', 'Marathon Floor', 'Ten Thousand Steps', 'Across the Hall', 'The Great Walk', 'Beyond the Doors', 'A Million Strides'], f: nf('m'), d: function (n) { return 'Run ' + fmt(n) + ' metres in total'; } },
@@ -43,8 +43,6 @@
     { g: 'soc', k: 'textsSent', n: 'TEXTS SENT', t: [1, 10, 50, 250, 1000], names: ['Hello', 'Chatty', 'Conversationalist', 'Regular Texter', 'Hall Talker'], d: function (n) { return 'Send ' + fmt(n) + (n === 1 ? ' text' : ' texts'); } },
     { g: 'soc', k: 'textPartners', n: 'PLAYERS TEXTED', t: [1, 3, 5, 10, 25], names: ['First Contact', 'Small Circle', 'Social Spark', 'Wide Circle', 'Hall Socialite'], d: function (n) { return 'Text ' + n + ' different ' + (n === 1 ? 'player' : 'players'); } },
     { g: 'soc', k: 'mailRead', n: 'MAIL READ', t: [1, 5, 10, 25], names: ['First Letter', 'Mail Reader', 'Loyal Subscriber', 'Archivist'], d: function (n) { return 'Read ' + n + ' emails from MIMU'; } },
-    { g: 'ph', k: 'photos', n: 'PHOTOS TAKEN', t: [1, 10, 50, 250, 1000], names: ['Say Cheese', 'Snapshot', 'Photographer', 'Shutterbug', 'Paparazzi'], d: function (n) { return 'Take ' + fmt(n) + (n === 1 ? ' photo' : ' photos') + ' with the camera'; } },
-    { g: 'ph', k: 'calls', n: 'CALLS DIALED', t: [1, 5, 25, 100], names: ['Wrong Number', 'Persistent Caller', 'Busy Signal Fan', 'Always Busy'], d: function (n) { return 'Dial ' + n + (n === 1 ? ' number' : ' numbers') + ' on the keypad'; } },
     { g: 'loy', k: 'daysPlayed', n: 'DAYS PLAYED', t: [1, 3, 7, 14, 30, 60, 100], names: ['Day One', 'Three Days', 'A Full Week', 'Two Weeks', 'A Month', 'Sixty Days', 'Hundred Days'], d: function (n) { return 'Play on ' + n + (n === 1 ? ' day' : ' different days'); } },
     { g: 'loy', k: 'bestStreak', n: 'DAY STREAK', t: [2, 3, 7, 14, 30, 60], names: ['Two in a Row', 'Three-Day Run', 'Weekly Habit', 'Fortnight Flame', 'Monthly Flame', 'Sixty Straight'], d: function (n) { return 'Play ' + n + ' days in a row'; } },
     { g: 'loy', k: 'signedIn', n: 'WELCOME', t: [1], names: ['Welcome to the Hall'], d: function () { return 'Sign in with Glyph'; } }
@@ -86,6 +84,48 @@
     s += '<line class="gnd" x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '"/><circle class="ghub" cx="' + cx + '" cy="' + cy + '" r="4.2"/>';
     return '<svg class="gsvg' + (big ? ' big' : '') + '" viewBox="0 0 120 66" aria-hidden="true">' + s + '</svg>';
   }
+  var uid = 0;
+  function compact(n) { return n >= 1000000 ? +(n / 1000000).toFixed(1) + 'M' : n >= 1000 ? +(n / 1000).toFixed(1) + 'k' : String(n); }
+  /* COINS: a green stock-market chart that climbs as the total grows */
+  function chart(p, seed) {
+    var n = 18, i, pts = [], pv = 0.1 + 0.9 * p, id = 'cg' + (uid++), x, y, v, line = '', area;
+    for (i = 0; i < n; i++) { x = 4 + i * (112 / (n - 1)); v = pv * Math.pow(i / (n - 1), 0.85) + Math.sin(seed * 5.1 + i * 2.1) * 0.06 * (i / (n - 1)) * (i < n - 1 ? 1 : 0); v = Math.max(0.02, Math.min(1, v)); y = 50 - v * 42; pts.push([x, y]); line += (i ? ' L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }
+    area = line + ' L116 54 L4 54Z';
+    return '<svg class="cst" viewBox="0 0 120 58" aria-hidden="true"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ddc84" stop-opacity=".45"/><stop offset="1" stop-color="#3ddc84" stop-opacity="0"/></linearGradient></defs>' +
+      '<line class="cgl" x1="4" y1="14" x2="116" y2="14"/><line class="cgl" x1="4" y1="30" x2="116" y2="30"/><line class="cgl" x1="4" y1="46" x2="116" y2="46"/><path d="' + area + '" fill="url(#' + id + ')"/><path class="cln" d="' + line + '"/>' +
+      '<circle class="cdt" cx="' + pts[n - 1][0].toFixed(1) + '" cy="' + pts[n - 1][1].toFixed(1) + '" r="2.6"/><circle class="cpl" cx="' + pts[n - 1][0].toFixed(1) + '" cy="' + pts[n - 1][1].toFixed(1) + '" r="2.6"/></svg>';
+  }
+  /* CARDS: a digital dial, a ring of lit segments around an LCD readout */
+  function digital(done, len) {
+    var segs = 28, i, a, s = '', lit = Math.round(done / len * segs), x1, y1, x2, y2;
+    for (i = 0; i < segs; i++) { a = -Math.PI / 2 + i / segs * 2 * Math.PI; x1 = 40 + 21 * Math.cos(a); y1 = 30 + 21 * Math.sin(a); x2 = 40 + 27 * Math.cos(a); y2 = 30 + 27 * Math.sin(a); s += '<line class="dsg' + (i < lit ? ' on' : '') + '" x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"/>'; }
+    return '<svg class="dgs" viewBox="0 0 80 60" aria-hidden="true">' + s + '<text class="lcd" x="40" y="34" text-anchor="middle">' + done + '</text><text class="lcs" x="40" y="43" text-anchor="middle">OF ' + len + '</text></svg>';
+  }
+  /* SOCIAL: a three-quarter dial with coloured zones and a needle */
+  function dial270(frac, steps) {
+    var cx = 60, cy = 56, r = 40, i, s = '', a0 = 135, span = 270;
+    function pt(d, rr) { var t = d * Math.PI / 180; return [cx + rr * Math.cos(t), cy + rr * Math.sin(t)]; }
+    function arc(f, rr) { var sp = pt(a0, rr), ep = pt(a0 + span * f, rr); return 'M' + sp[0].toFixed(2) + ' ' + sp[1].toFixed(2) + ' A' + rr + ' ' + rr + ' 0 ' + (span * f > 180 ? 1 : 0) + ' 1 ' + ep[0].toFixed(2) + ' ' + ep[1].toFixed(2); }
+    s += '<path class="dtr" d="' + arc(0.9999, r) + '"/><path class="dz1" d="' + arc(0.33, r - 7) + '"/>';
+    if (frac > 0) s += '<path class="dfl" d="' + arc(Math.min(frac, 0.9999), r) + '"/>';
+    for (i = 0; i <= steps; i++) { var p = pt(a0 + span * i / steps, r - 4), q = pt(a0 + span * i / steps, r + 5); s += '<line class="dtk' + (i / steps <= frac + 0.0001 ? ' on' : '') + '" x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '"/>'; }
+    var nd = pt(a0 + span * Math.min(frac, 1), r - 10);
+    s += '<line class="dnd" x1="' + cx + '" y1="' + cy + '" x2="' + nd[0].toFixed(1) + '" y2="' + nd[1].toFixed(1) + '"/><circle class="dhb" cx="' + cx + '" cy="' + cy + '" r="4"/>';
+    return '<svg class="gsvg dsc" viewBox="0 0 120 84" aria-hidden="true">' + s + '</svg>';
+  }
+  /* LOYALTY: a ring that fills around a flame, with a dot for every step */
+  function flame(frac, steps) {
+    var r = 36, c = 2 * Math.PI * r, i, a, s = '', id = 'fg' + (uid++);
+    for (i = 0; i < steps; i++) { a = -Math.PI / 2 + (i + 1) / steps * 2 * Math.PI; s += '<circle class="fdt' + ((i + 1) / steps <= frac + 0.0001 ? ' on' : '') + '" cx="' + (50 + 43 * Math.cos(a)).toFixed(1) + '" cy="' + (50 + 43 * Math.sin(a)).toFixed(1) + '" r="1.9"/>'; }
+    return '<svg class="fls" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd45a"/><stop offset="1" stop-color="#ff6a3a"/></linearGradient></defs><circle class="ftr" cx="50" cy="50" r="' + r + '"/><circle class="ffl" cx="50" cy="50" r="' + r + '" stroke="url(#' + id + ')" stroke-dasharray="' + (c * Math.min(frac, 0.9999)).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 50 50)"/>' + s +
+      '<path class="fpa' + (frac > 0 ? ' on' : '') + '" transform="translate(50 52) scale(1.25)" d="M0-14C6-6 10-2 8 6C7 11 3 14 0 14C-4 14-8 11-8 6C-8 0-3-2 0-14Z"/><path class="fpb" transform="translate(50 56) scale(.8)" d="M0-10C4-4 6 0 5 5C4 8 2 10 0 10C-3 10-5 8-5 5C-5 1-2-1 0-10Z"/></svg>';
+  }
+  /* SKILLS: a detailed loading bar, one segment for every step, with the number each step needs */
+  function skillBar(c, val) {
+    var segs = '', labs = '';
+    c.t.forEach(function (t, i) { var prev = i ? c.t[i - 1] : 0, f = Math.max(0, Math.min(1, (val - prev) / (t - prev))); segs += '<span class="' + (val >= t ? 'done' : f > 0 ? 'part' : '') + '"><i style="width:' + Math.round(f * 100) + '%"></i></span>'; labs += '<span class="' + (val >= t ? 'done' : '') + '">' + compact(t) + '</span>'; });
+    return '<div class="skbar">' + segs + '</div><div class="sklab">' + labs + '</div>';
+  }
   function draw() {
     var el = $('badgeApp'); if (!el) return; el.classList.add('page'); var oldPg = el.querySelector('.pg'), keep = oldPg ? oldPg.scrollTop : 0, v = values(), signed = P.isSignedIn();
     var got = ALL.filter(function (b) { return (v[b.cat.k] || 0) >= b.n; }), metals = {}; METAL.forEach(function (m) { metals[m] = 0; }); got.forEach(function (b) { metals[b.metal]++; });
@@ -97,7 +137,13 @@
     function cardFor(c) {
       var ts = ALL.filter(function (b) { return b.cat === c; }), val = v[c.k] || 0, done = ts.filter(function (b) { return val >= b.n; }).length, nb = ts.filter(function (b) { return val < b.n; })[0];
       var nfrac = nb ? Math.min(1, val / nb.n) : null, f = c.f || nf('');
-      return '<button type="button" class="bdg' + (st.open === c.k ? ' open' : '') + (done === ts.length ? ' full' : '') + '" data-c="' + c.k + '" aria-expanded="' + (st.open === c.k) + '">' + gauge(done / ts.length, ts.length, nfrac) + '<span class="gnum">' + done + '<small>/' + ts.length + '</small></span><b>' + esc(c.n) + '</b><em>' + (nb ? 'NEXT &middot; ' + Math.round(nfrac * 100) + '%' : 'COMPLETE') + '</em><i class="gch" aria-hidden="true"></i></button>';
+      var open = st.open === c.k, cls = 'bdg ' + c.g + (open ? ' open' : '') + (done === ts.length ? ' full' : ''), head = '<button type="button" class="' + cls + '" data-c="' + c.k + '" aria-expanded="' + open + '">', gex = '<span class="gex">' + (open ? 'CLICK TO CLOSE' : 'CLICK TO EXPAND') + '</span></button>', nxt = '<em>' + (nb ? 'NEXT &middot; ' + Math.round(nfrac * 100) + '%' : 'COMPLETE') + '</em>', ov = (done + (nfrac || 0)) / ts.length, num = '<span class="gnum">' + done + '<small>/' + ts.length + '</small></span>';
+      if (c.g === 'coin') return head + chart(c.k === 'coins' ? ov : ov * 0.9, c.k.length) + '<span class="gnum up">&#9650; ' + fmt(val) + '</span><b>' + esc(c.n) + '</b><em>' + (nb ? 'NEXT TARGET &middot; ' + fmt(nb.n) : 'ALL TARGETS REACHED') + '</em>' + gex;
+      if (c.g === 'card') return head + digital(done, ts.length) + '<b>' + esc(c.n) + '</b><em>' + (nb ? 'NEXT &middot; ' + Math.round(nfrac * 100) + '%' : 'COMPLETE') + '</em>' + gex;
+      if (c.g === 'skill') return head + '<span class="skh"><b>' + esc(c.n) + '</b><span class="skv">' + f(val) + '</span></span>' + skillBar(c, val) + '<span class="skf"><span>' + done + ' OF ' + ts.length + ' STEPS &middot; ' + Math.round(ov * 100) + '% OVERALL</span><em>' + (nb ? 'NEXT AT ' + f(nb.n) + ' &middot; ' + fmt(nb.n - val) + ' TO GO' : 'COMPLETE') + '</em></span>' + gex;
+      if (c.g === 'soc') return head + dial270(done / ts.length, ts.length) + num + '<b>' + esc(c.n) + '</b>' + nxt + gex;
+      if (c.g === 'loy') return head + flame(done / ts.length, ts.length) + num + '<b>' + esc(c.n) + '</b>' + nxt + gex;
+      return head + gauge(done / ts.length, ts.length, nfrac) + num + '<b>' + esc(c.n) + '</b>' + nxt + gex;
     }
     function panelFor(c) {
       var bs = ALL.filter(function (b) { return b.cat === c && (st.show === 'all' || (st.show === 'got') === ((v[c.k] || 0) >= b.n)); });
@@ -108,15 +154,16 @@
       if (st.group !== 'all' && st.group !== g[0]) return;
       var cs = CATS.filter(function (c) { return c.g === g[0]; }), earned = ALL.filter(function (b) { return b.cat.g === g[0] && (v[b.cat.k] || 0) >= b.n; }).length, tot = ALL.filter(function (b) { return b.cat.g === g[0]; }).length, i;
       body += '<div class="bdgrp"><div class="bdch"><b>' + g[1] + '</b><span>' + earned + ' / ' + tot + '</span></div><div class="bdgrid">';
-      for (i = 0; i < cs.length; i += 2) {
-        body += cardFor(cs[i]) + (cs[i + 1] ? cardFor(cs[i + 1]) : '');
-        var openC = cs.slice(i, i + 2).filter(function (c) { return c.k === st.open; })[0]; if (openC) body += panelFor(openC);
+      var step = g[0] === 'skill' ? 1 : 2;
+      for (i = 0; i < cs.length; i += step) {
+        body += cs.slice(i, i + step).map(cardFor).join('');
+        var openC = cs.slice(i, i + step).filter(function (c) { return c.k === st.open; })[0]; if (openC) body += panelFor(openC);
       }
       body += '</div></div>';
     });
     el.innerHTML = '<div class="pg bd"><div class="pgh"><h2 class="gold">BADGES</h2><div class="pgsub">MILESTONES &middot; NOT RANKED &middot; NO VALUE</div></div>' +
       '<div class="bdsum"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>' + gauge(got.length / ALL.length, 10, null, true) + '<div class="bdbig"><b>' + got.length + '</b><span>OF ' + ALL.length + ' EARNED &middot; ' + pct + '%</span></div><div class="bdm">' + METAL.map(function (m) { return '<span class="' + m + '"><i></i>' + metals[m] + '<small>' + METAL_NAME[m] + '</small></span>'; }).join('') + '</div></div>' +
-      '<div class="bdnote">' + (signed ? 'Badges are only milestones to keep track of what you have done in the Hall. They do not change the leaderboard and they are worth nothing.' : 'SIGN IN WITH GLYPH TO START EARNING BADGES. UNTIL THEN EVERY BADGE IS LOCKED. BADGES ARE ONLY MILESTONES: THEY NEVER CHANGE THE LEADERBOARD AND ARE WORTH NOTHING.') + '</div>' +
+      '<div class="bdnote">' + (signed ? 'Badges are only milestones to keep track of what you have done in the Hall. They do not change the leaderboard and they are worth nothing.' : 'THE GAME IS A DEMO FOR NOW, SO EVERY BADGE STAYS LOCKED UNTIL GLYPH SIGN-IN OPENS. BADGES ARE ONLY MILESTONES: THEY NEVER CHANGE THE LEADERBOARD AND ARE WORTH NOTHING.') + '</div>' +
       (upnext.length ? '<div class="sec"><div class="sech">UP NEXT</div>' + upnext.map(function (b) { return row(b, v); }).join('') + '</div>' : '') +
       '<div class="sec"><div class="chips" id="bdG">' + groups + '</div><div class="chips" id="bdS" style="margin-top:6px">' + shows + '</div></div>' +
       '<div class="sec" id="bdL">' + (body || '<div class="empty">NOTHING TO SHOW HERE YET</div>') + '</div></div>';
