@@ -5,7 +5,6 @@
   var root = document.getElementById('hallApp');
   if (!root) return;
 
-  var BEST_KEY = 'hall-best';
   var LANE = 0.40;            // lane width as a share of the screen width (at the bottom of the screen)
   var XW = 0.78;              // where the side walls stand, as a share of the screen width, measured from the middle of the road
   var PZ = 1.22;              // how far ahead of the camera the runner stands (1 = bottom of the screen)
@@ -20,11 +19,11 @@
   /* ---------- screen furniture (score, start / game over cards) ---------- */
   var cv = el('canvas', 'hcv'); root.appendChild(cv);
   var ctx = cv.getContext('2d');
-  var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b><div class="hhp"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="hc"><span class="hcoin"></span><b>0</b></div>');
+  var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b><div class="hhp"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="hr"><div class="hc"><span class="hcoin"></span><b>0</b></div><div class="hk"><span class="hcardi"></span><b>0</b></div><div class="hsl"></div></div>');
   root.appendChild(hud);
-  var hpSegs = hud.querySelectorAll('.hhp i'), elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b');
+  var hpSegs = hud.querySelectorAll('.hhp i'), elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b'), elCards = hud.querySelector('.hk b'), elSlow = hud.querySelector('.hsl');
   var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
-  var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
+  var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>CARDS</span><b class="rk">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
   root.appendChild(ovStart); root.appendChild(ovDead);
   ovDead.style.display = 'none';
 
@@ -39,6 +38,7 @@
   load('wall', 'assets/game/wall.webp');
   load('floor', 'assets/game/floor.webp');
   load('slide', 'assets/game/slide.webp');
+  load('pack', 'assets/game/pack.webp');
 
   /* the marble floor, painted once: black stone with fine gold veins */
   var tex = document.createElement('canvas'); tex.width = TEX_W; tex.height = TEX_H;
@@ -61,12 +61,11 @@
   })();
 
   /* ---------- state ---------- */
-  var W = 0, H = 0, y0 = 0, dpr = 1, active = false, raf = 0, last = 0, S, embers = [], bestScore = 0;
-  try { bestScore = parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch (e) {}
+  var W = 0, H = 0, y0 = 0, dpr = 1, active = false, raf = 0, last = 0, S, embers = [], bestScore = 0, cardImgs = {};
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -82,7 +81,8 @@
   if (window.ResizeObserver) new ResizeObserver(resize).observe(root); window.addEventListener('resize', resize);
 
   /* ---------- spawning: boxes (obstacles) and coins ---------- */
-  function box(z, lane) { var r = Math.random(); S.ents.push({ k: 'box', z: z, lane: lane - 1, sc: 0.94 + Math.random() * 0.12, tier: r < 0.55 ? 0 : r < 0.8 ? 1 : 2 }); }
+  function specialNear(z, lane) { for (var i = 0; i < S.ents.length; i++) { var e = S.ents[i]; if ((e.k === 'card' || e.k === 'pack') && e.lane === lane && Math.abs(e.z - z) < 1.8) return true; } return false; }
+  function box(z, lane) { if (specialNear(z, lane - 1)) return; var r = Math.random(); S.ents.push({ k: 'box', z: z, lane: lane - 1, sc: 0.94 + Math.random() * 0.12, tier: r < 0.55 ? 0 : r < 0.8 ? 1 : 2 }); }
   function coin(z, lane) { S.ents.push({ k: 'coin', z: z, lane: lane - 1, ph: Math.random() * 20, got: false }); }
   function pattern() {
     var z = S.lastZ + 2.3 + Math.random() * 1.6 - Math.min(0.9, S.dist / 1400), r = Math.random(), l = (Math.random() * 3) | 0, o = (l + 1 + ((Math.random() * 2) | 0)) % 3, i, len = 1.2, l3 = 3 - l - o;
@@ -96,17 +96,75 @@
     S.lastZ = z + len;
   }
 
+  /* ---------- card sightings and the pack ---------- */
+  function cardImg(n) { var im = cardImgs[n]; if (!im) { im = new Image(); im.src = HallProfile.card(n).file; cardImgs[n] = im; } return im; }
+  // which card appears: the tiers that are open (time alive in this run, and owning enough of the tier below), weighted odds, a tiny lucky chance, mostly cards you do not own yet
+  function pickCard() {
+    var P = HallProfile, cfg = P.config.sight, list = P.cards(); if (!list.length) return null;
+    var test = S.rc.test, own = P.owned(), byTier = [[], [], [], [], [], []], i, t;
+    function have(c) { return own.has(c.n) || S.runOwned.has(c.n); }
+    list.forEach(function (c) { byTier[c.tier].push(c); });
+    function owns(tr) { var n = 0; byTier[tr].forEach(function (c) { if (have(c)) n++; }); return n; }
+    function complete(tr) { return owns(tr) >= byTier[tr].length; }
+    var tier = 0, open = [], w = [], total = 0, r;
+    if (!test && S.alive >= cfg.lucky.afterSec) {
+      r = Math.random();
+      if (r < cfg.lucky.legendary && !complete(5)) tier = 5; else if (r < cfg.lucky.legendary + cfg.lucky.prestige && !complete(4)) tier = 4;
+    }
+    if (!tier) {
+      for (t = 1; t <= 5; t++) {
+        var lockOk = test || S.alive >= cfg.locksSec[t - 1];
+        var gateOk = test || t === 1 || owns(t - 1) >= Math.ceil(cfg.unlockShare * byTier[t - 1].length);
+        if (lockOk && gateOk && !complete(t)) { open.push(t); w.push(cfg.odds[t - 1]); }
+      }
+      if (!open.length) { open = [1, 2, 3, 4, 5]; w = cfg.odds.slice(); }
+      w.forEach(function (x) { total += x; }); r = Math.random() * total;
+      for (i = 0; i < open.length; i++) { r -= w[i]; if (r <= 0) { tier = open[i]; break; } }
+      if (!tier) tier = open[open.length - 1];
+    }
+    var cand = byTier[tier].filter(function (c) { return !have(c); });
+    if (!cand.length || Math.random() < cfg.dupChance) cand = byTier[tier];
+    return cand[(Math.random() * cand.length) | 0];
+  }
+  // a lane for something floating ahead: never on top of a box, and (for the pack) never the lane the last pack used
+  function freeLane(z, avoid) {
+    var lanes = [-1, 0, 1].filter(function (l) { return l !== avoid; }).sort(function () { return Math.random() - 0.5; }), i, j, bad;
+    for (var dz = 0; dz < 12; dz += 1.4) for (i = 0; i < lanes.length; i++) { bad = false; for (j = 0; j < S.ents.length; j++) { var e = S.ents[j]; if (e.lane === lanes[i] && Math.abs(e.z - (z + dz)) < 1.8) bad = true; } if (!bad) return { lane: lanes[i], z: z + dz }; }
+    return { lane: lanes[0], z: z };
+  }
+  function spawnCard() {
+    var c = pickCard(); if (!c) return; cardImg(c.n);
+    var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false });
+  }
+  function spawnPack() {
+    var spot = freeLane(16.5, S.packLane); S.packLane = spot.lane; S.ents.push({ k: 'pack', z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false });
+  }
+  function collectCard(e) {
+    S.cards.push(e.n); S.runOwned.add(e.n); S.cardPulse = 1;
+    HallProfile.addCard(e.n);                                  // does nothing until somebody is signed in
+    if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card();
+  }
+  function collectPack() {
+    S.slowT = HallProfile.config.pack.slowSec; S.packPulse = 1;
+    if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
+  }
   /* ---------- update ---------- */
   function start() {
     S = fresh(); S.mode = 'run'; S.v = 4.6; showHp();
+    // this run's timetable (admin test mode makes the card sightings and the pack come quickly)
+    var cf = HallProfile.config, test = HallProfile.isTest();
+    S.rc = { test: test, sightEvery: test ? HallProfile.testConfig.sight.everySec : cf.sight.everySec, packEvery: test ? HallProfile.testConfig.pack.everySec : cf.pack.everySec };
+    S.nextSight = S.rc.sightEvery; S.nextPack = test ? HallProfile.testConfig.pack.firstSec : cf.pack.firstSec;
     ovStart.style.display = 'none'; ovDead.style.display = 'none';
   }
   function die(silent) {
     S.mode = 'dead'; S.flash = 1; S.shake = 1; if (!silent && window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
     var sc = Math.floor(S.score), isBest = sc > bestScore;
-    if (isBest) { bestScore = sc; try { localStorage.setItem(BEST_KEY, String(bestScore)); } catch (e) {} }
-    ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
+    if (isBest) bestScore = sc;
+    ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rk').textContent = S.cards.length; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
     showBest();
+    // demo runs are not saved or ranked: this only does something once somebody is signed in
+    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive) });
     setTimeout(function () { if (S.mode === 'dead') ovDead.style.display = 'flex'; }, 650);
   }
   // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
@@ -123,8 +181,15 @@
   }
   function update(dt) {
     S.t += dt;
-    var running = S.mode === 'run';
-    var v = S.mode === 'run' ? (4.6 + 4.2 * (1 - Math.exp(-S.dist / 650))) : S.mode === 'dead' ? Math.max(0, S.v - dt * 14) : 1.3;
+    var running = S.mode === 'run', cf = HallProfile.config, climbMul = 1;
+    if (running) {
+      S.alive += dt;
+      // the pack: 20% slower for 60 seconds, eased in and out. The climb is frozen while it lasts, so afterwards you are back at the speed you had when you grabbed it.
+      if (S.slowT > 0) S.slowT = Math.max(0, S.slowT - dt); else S.climbT += dt;
+      S.slowF += ((S.slowT > 0 ? 1 - cf.pack.slowPct / 100 : 1) - S.slowF) * Math.min(1, dt * 1.6);
+      climbMul = Math.pow(1 + cf.climb.pct / 100, S.climbT / cf.climb.everySec);        // a slow forever climb: no ceiling
+    }
+    var v = S.mode === 'run' ? (4.6 + 4.2 * (1 - Math.exp(-S.dist / 650))) * climbMul * S.slowF : S.mode === 'dead' ? Math.max(0, S.v - dt * 14) : 1.3;
     S.v = v;
     var step = v * dt;
     S.scrollZ += step;
@@ -132,6 +197,8 @@
       S.dist += step;
       S.score += step * 4;
       S.run += dt * (6 + v);
+      if (S.alive >= S.nextSight) { S.nextSight += S.rc.sightEvery; spawnCard(); }
+      if (S.alive >= S.nextPack) { S.nextPack += S.rc.packEvery; spawnPack(); }
       // the road: now and then it swings and curves, and it always drifts a little
       S.curveNext -= dt;
       if (S.curveNext <= 0) { var r = Math.random(); S.curveT = r < 0.36 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.5); S.curveNext = 3 + Math.random() * 5; }
@@ -148,6 +215,7 @@
           var cross = pz >= PZ - 0.10 && e.z <= PZ + 0.10;
           if (cross) {
             if (e.k === 'coin' && !e.got) { e.got = true; S.coins++; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
+            else if ((e.k === 'card' || e.k === 'pack') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else collectPack(); } }
             else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } }
           }
         }
@@ -168,6 +236,9 @@
     // hud
     var sc2 = pad(S.score, 5); if (elScore.textContent !== sc2) elScore.textContent = sc2;
     if (elCoins.textContent !== String(S.coins)) elCoins.textContent = S.coins;
+    if (elCards.textContent !== String(S.cards.length)) elCards.textContent = S.cards.length;
+    var sl = S.slowT > 0 ? 'SLOW ' + Math.floor(S.slowT / 60) + ':' + pad(Math.floor(S.slowT % 60), 2) : ''; if (elSlow.textContent !== sl) elSlow.textContent = sl;
+    S.cardPulse = Math.max(0, (S.cardPulse || 0) - dt * 2); S.packPulse = Math.max(0, (S.packPulse || 0) - dt * 2);
   }
 
   /* ---------- drawing ---------- */
@@ -294,6 +365,38 @@
     ctx.restore();
   }
 
+  /* a card sighting: the front of the card floating above the boxes, in an aura the colour of its rarity (half strength) */
+  function drawCard(e) {
+    if (e.got) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh; if (e.z < 0.62 || y > H + 120) return;
+    var tr = HallProfile.tiers[e.tier - 1], im = cardImg(e.n), x = cxAt(s) + e.lane * LANE * W * s, cw = 0.24 * W * s, ch = cw * 1.386;
+    var cy = y - 0.70 * W * s + Math.sin(S.t * 2.6 + e.ph) * 0.02 * W * s, pulse = 0.8 + 0.2 * Math.sin(S.t * 4 + e.ph), g, gr = ch * 0.95;
+    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
+    shadow(x, y, cw * 0.5);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    var cols = e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
+    cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
+    ctx.restore();
+    ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5);
+    if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * 0.025); ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
+    ctx.restore();
+  }
+  /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */
+  function drawPack(e) {
+    if (e.got) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.pack; if (e.z < 0.62 || !im.naturalWidth || y > H + 120) return;
+    var x = cxAt(s) + e.lane * LANE * W * s, pw = 0.34 * W * s, ph = pw * im.naturalHeight / im.naturalWidth, cy = y - 0.66 * W * s + Math.sin(S.t * 2.2 + e.ph) * 0.02 * W * s, pulse = 0.8 + 0.2 * Math.sin(S.t * 3 + e.ph);
+    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
+    shadow(x, y, pw * 0.3);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    var g = ctx.createRadialGradient(x, cy, pw * 0.1, x, cy, pw * 0.9); g.addColorStop(0, 'rgba(232,198,115,' + (0.42 * pulse) + ')'); g.addColorStop(0.6, 'rgba(200,150,60,' + (0.16 * pulse) + ')'); g.addColorStop(1, 'rgba(200,150,60,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy, pw * 0.9, 0, 6.3); ctx.fill(); ctx.restore();
+    ctx.shadowColor = 'rgba(232,198,115,' + (0.7 * pulse) + ')'; ctx.shadowBlur = Math.max(4, pw * 0.3);
+    ctx.drawImage(im, x - pw / 2, cy - ph / 2, pw, ph);
+    ctx.restore();
+  }
   function drawPlayer() {
     var hh = H - y0, y = y0 + SP * hh, x = cxAt(SP) + S.px * LANE * W * SP, jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0;
     var im = (Math.floor(S.run) % 2 === 0) ? imgs.runA : imgs.runB; if (!im.naturalWidth) return;
@@ -348,7 +451,7 @@
     for (j = 0; j < S.ents.length; j++) list.push({ z: S.ents[j].z, e: S.ents[j] });
     list.push({ z: PZ, p: 1 });
     list.sort(function (a, b) { return b.z - a.z; });
-    for (j = 0; j < list.length; j++) { var it = list[j]; if (it.p) drawPlayer(); else if (it.e) { if (it.e.k === 'box') drawBox(it.e); else drawCoin(it.e); } }
+    for (j = 0; j < list.length; j++) { var it = list[j]; if (it.p) drawPlayer(); else if (it.e) { if (it.e.k === 'box') drawBox(it.e); else if (it.e.k === 'card') drawCard(it.e); else if (it.e.k === 'pack') drawPack(it.e); else drawCoin(it.e); } }
     // embers
     ctx.globalCompositeOperation = 'lighter';
     for (j = 0; j < embers.length; j++) { var em = embers[j], a = 0.35 + 0.35 * Math.sin(S.t * 2 + em.p); ctx.fillStyle = 'rgba(255,190,100,' + a + ')'; ctx.beginPath(); ctx.arc(em.x * W, em.y * H, em.r, 0, 6.3); ctx.fill(); }
@@ -404,6 +507,8 @@
   window.HallRunner = {
     open: function () { forfeit(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
     close: function () { forfeit(); active = false; },
-    state: function () { return S; }
+    state: function () { return S; },
+    // what the admin page shows about the run in progress on this device
+    live: function () { return { mode: S.mode, score: Math.floor(S.score), alive: Math.floor(S.alive), speed: S.v, hp: S.hp, cards: S.cards.length, coins: S.coins, slow: S.slowT > 0 }; }
   };
 })();

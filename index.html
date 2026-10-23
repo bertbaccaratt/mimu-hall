@@ -6,6 +6,7 @@
 <title>MIMU</title>
 <meta name="theme-color" content="#000000">
 <link rel="preload" as="image" href="assets/poster.webp">
+<link rel="stylesheet" href="assets/game/apps.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -157,7 +158,7 @@
   .aic:hover img, .aic:focus-visible img { transform: scale(1.06); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 22px rgba(232,198,115,.5); }
   .aic:focus-visible { outline: none; }
   .app { position: absolute; inset: 0; z-index: 3; background: #030102; opacity: 0; visibility: hidden; transform: scale(.9); transform-origin: 14% 20%; transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1), visibility 0s .45s; }
-  .pscreen.inapp .app { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  .pscreen.inapp .app.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
   .hcv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
   .hhud { position: absolute; left: 0; right: 0; top: 8.4%; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 7%; color: #f6dc95; font-family: 'Cinzel', Georgia, serif; text-shadow: 0 2px 6px #000, 0 0 14px rgba(0,0,0,.8); pointer-events: none; z-index: 3; }
 .hhp { display: flex; gap: calc(var(--h) * .005); margin-top: calc(var(--h) * .009); } .hhp i { width: calc(var(--h) * .0245); height: calc(var(--h) * .0085); border-radius: 2px; background: linear-gradient(90deg, #b3171f, #e8c673); box-shadow: 0 0 6px rgba(232,198,115,.5); transition: opacity .25s, background .25s; } .hhp i.off { background: rgba(255,255,255,.13); box-shadow: none; }
@@ -322,7 +323,7 @@
     <div class="hm" id="pHomeScr">
       <div class="hdate" id="hDate"></div>
       <div class="hclock gold" id="hClock">0:00</div>
-      <div class="agrid"><button type="button" class="aic" id="hallIcon" aria-label="Open The Hall"><img src="assets/game/hall-icon.webp" alt="" width="256" height="256"><span>THE HALL</span></button><button type="button" class="aic" aria-label="Alarm" title="Alarm"><span class="atile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.4 1.6"/><path d="M4.2 6.2l2.6-2.2M19.8 6.2L17.2 4"/><path d="M6.4 19.6L5 21M17.6 19.6L19 21"/></svg></span><span>ALARM</span></button><button type="button" class="aic" aria-label="OpenSea" title="OpenSea"><span class="atile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 6.4v8.6H7.2z"/><path d="M13.4 8.6l3.6 6.4h-3.6z"/><path d="M6.6 16.4c1.6 1.5 3.4 1.9 5.4 1.9s3.8-.4 5.4-1.9"/></svg></span><span>OPENSEA</span></button><button type="button" class="aic" aria-label="X" title="X"><span class="atile"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span><span>X</span></button></div>
+      <div class="agrid"><button type="button" class="aic" id="hallIcon" aria-label="Open The Hall"><img src="assets/game/hall-icon.webp" alt="" width="256" height="256"><span>THE HALL</span></button><button type="button" class="aic" aria-label="Alarm" title="Alarm"><span class="atile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.4 1.6"/><path d="M4.2 6.2l2.6-2.2M19.8 6.2L17.2 4"/><path d="M6.4 19.6L5 21M17.6 19.6L19 21"/></svg></span><span>ALARM</span></button><button type="button" class="aic" aria-label="OpenSea" title="OpenSea"><span class="atile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 6.4v8.6H7.2z"/><path d="M13.4 8.6l3.6 6.4h-3.6z"/><path d="M6.6 16.4c1.6 1.5 3.4 1.9 5.4 1.9s3.8-.4 5.4-1.9"/></svg></span><span>OPENSEA</span></button><button type="button" class="aic" aria-label="X" title="X"><span class="atile"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span><span>X</span></button><button type="button" class="aic" id="collIcon" aria-label="Collected" title="Collected"><span class="atile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7.5" y="4" width="11" height="15" rx="1.6"/><path d="M5 7.2v11.3A1.6 1.6 0 0 0 6.6 20H15"/><circle cx="13" cy="11.6" r="2.4"/></svg></span><span>COLLECTED</span></button><button type="button" class="aic" id="lbIcon" aria-label="Leaderboard" title="Leaderboard"><span class="atile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 5H5a2 2 0 0 0 0 4h3M16 5h3a2 2 0 0 1 0 4h-3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg></span><span>LEADERBOARD</span></button></div>
       <div class="hdots"><i class="on"></i><i></i></div>
       <div class="dock">
         <button type="button" class="dic" aria-label="Phone" title="Phone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>
@@ -331,7 +332,9 @@
         <button type="button" class="dic" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       </div>
     </div>
-    <div class="app" id="hallApp"></div>
+    <div class="app on" id="hallApp"></div>
+    <div class="app" id="collApp"></div>
+    <div class="app" id="lbApp"></div>
     <div class="phome" id="pHome" role="button" aria-label="Home"></div>
     <div class="osd" id="osd" aria-hidden="true"><span id="osdTxt">VOLUME</span><div class="osdbar"><i id="osdFill"></i></div></div>
     <div class="psleep" id="pSleep"></div>
@@ -438,6 +441,8 @@ window.MIMUAudio = (function () {
     progress: function (v) { var k = Math.floor(v / 2.5); if (k !== lastTick) { lastTick = k; blip(PENT[(Math.random() * PENT.length) | 0], 0.05, 0.075); } },
     stage: function (i) { blip(660 + i * 110, 0.09, 0.09, 'sine'); blip(990 + i * 110, 0.13, 0.08, 'sine', 0.09); },
     coin: function () { blip(1318.5, 0.09, 0.2, 'sine'); blip(1760, 0.22, 0.17, 'sine', 0.07); blip(2637, 0.3, 0.06, 'sine', 0.07); },
+    card: function () { blip(880, 0.12, 0.1, 'sine'); blip(1318.5, 0.2, 0.09, 'sine', 0.06); blip(1760, 0.34, 0.07, 'sine', 0.12); },
+    pack: function () { blip(196, 0.5, 0.18, 'sine'); blip(147, 0.7, 0.16, 'triangle', 0.08); },
     hurt: function () { blip(160, 0.2, 0.26, 'triangle'); blip(98, 0.3, 0.22, 'sine', 0.02); },
     hit: function () { blip(130, 0.28, 0.32, 'triangle'); blip(82, 0.4, 0.3, 'sine', 0.03); },
     done: function () { [523.3, 659.3, 784, 1046.5].forEach(function (f, i) { blip(f, 0.5, 0.07, 'sine', i * 0.11); }); },
@@ -446,7 +451,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
+<script src="assets/game/profile.js" defer></script>
 <script src="assets/game/hall-runner.js" defer></script>
+<script src="assets/game/apps.js" defer></script>
+<script src="assets/game/admin.js" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -620,46 +628,77 @@ window.MIMUAudio = (function () {
   var gamesTab = document.querySelector('a[href="#games"]'), phoneEl = $('phone'), gShade = $('gamesShade'), clockEl = $('pClock'), dateEl = $('pDate');
   function tickClock() { var d = new Date(), TZ = 'America/Los_Angeles'; clockEl.textContent = d.toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit', hour12: false }).replace(/^24:/, '00:'); dateEl.textContent = d.toLocaleDateString('en-US', { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase(); $('hClock').textContent = clockEl.textContent; $('hDate').textContent = dateEl.textContent; }
   setInterval(tickClock, 15000); tickClock();
-  function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp')) HallRunner.open(); }
+  function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp') && $('pScreen').dataset.app === 'hall') HallRunner.open(); }
   function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
   // Hall Rules and About are placeholders for now ("coming soon")
   var RULES = [
     '<h3>The basics</h3>',
-    '<p>THE HALL is a three-lane runner on the phone in the middle of the page. Unlock the phone (swipe up on the lock screen, or press the lock button on the side), open the app <strong>THE HALL</strong>, and tap to run. Run as far as you can, grab coins, and stay off the boxes.</p>',
+    '<p>THE HALL is a three-lane runner on the phone in the middle of the page. Unlock the phone (swipe up on the lock screen, or press the lock button on the side), open the app <strong>THE HALL</strong>, and tap to run. Run as far as you can, grab coins, dodge or jump the boxes, and collect cards.</p>',
     '<h3>Controls</h3>',
     '<div class="rtab"><div class="rh">ACTION</div><div class="rh">TOUCH / MOUSE</div><div class="rh">KEYBOARD</div>',
     '<div class="rk">Start or run again</div><div>Tap the screen, or RUN AGAIN</div><div>Space</div>',
     '<div class="rk">Change lane</div><div>Swipe left or right</div><div>&larr; &rarr; or A D</div>',
     '<div class="rk">Jump</div><div>Swipe up</div><div>&uarr;, W or Space</div>',
-    '<div class="rk">Slide</div><div>Swipe down</div><div>&darr; or S</div>',
-    '</div>',
-    '<h3>No pause</h3>',
-    '<ul><li>There is <strong>no pause</strong>, anywhere. The run ends the moment you leave the game: pressing the home bar on the phone, pressing the lock button, closing the phone, switching to another browser tab, or anything that freezes the page for more than half a second.</li>',
-    '<li>Coming back later starts a fresh run, so a run cannot be saved for later.</li></ul>',
-    '<h3>The road</h3>',
-    '<ul><li>There are <strong>three lanes</strong>. Everything you meet, boxes and coins alike, stays inside them.</li>',
-    '<li>The hall is alive: the road <strong>sways</strong> all the time and every few seconds swings into a <strong>curve</strong> and straightens out again. The lanes bend with it, so keep to your lane.</li>',
-    '<li>You <strong>speed up</strong> the longer you run, so the first seconds are the easiest.</li></ul>',
-    '<h3>Coins</h3>',
-    '<ul><li>The collectible is the rotating coin. Run through one to pick it up: it chimes, adds to your coin count, and is worth <strong>25 points</strong>.</li>',
-    '<li>Coins come in rows, zigzags that make you change lane, and double lines. Some sit right next to a box, so choose your lane early.</li></ul>',
-    '<h3>Boxes</h3>',
-    '<ul><li>The obstacles are black Mudwater boxes in random sizes and lanes. A box you hit breaks and costs you some of your health, and you flash for a moment during which nothing can hurt you.</li>',
-    '<li>Change lanes to go around a box, or <strong>jump</strong> over it. Sliding does not get you past a box.</li>',
-    '<li>You have a <strong>health bar of six segments</strong> under your score. It does not come back during a run, and damage from different boxes adds up.</li>',
-    '<li>There are three kinds of box, all black, and they hurt differently:</li></ul>',
+    '<div class="rk">Slide</div><div>Swipe down</div><div>&darr; or S</div></div>',
+    '<h3>The road and the speed</h3>',
+    '<ul><li>There are <strong>three lanes</strong>. Everything you meet stays inside them.</li>',
+    '<li>The hall is alive: the road <strong>sways</strong> all the time and every few seconds swings into a <strong>curve</strong> and straightens out again. The lanes bend with it.</li>',
+    '<li><strong>The farther you go, the faster it gets.</strong> Every 30 minutes you stay alive the whole run speeds up another 3%, and it compounds. There is <strong>no top speed</strong>: the climb never stops, so every run ends sooner or later.</li></ul>',
+    '<h3>Boxes and health</h3>',
+    '<ul><li>The obstacles are black Mudwater boxes in random sizes and lanes. Change lanes to go around a box, or <strong>jump</strong> it. Sliding does not get you past a box.</li>',
+    '<li>You have a <strong>health bar of six segments</strong> under your score. A box that hits you breaks and takes some of it, and you flash for a moment during which nothing can hurt you. Health does not come back during a run, and damage from different boxes adds up.</li></ul>',
     '<div class="rtab rbox"><div class="rh">BOX</div><div class="rh">HITS YOU CAN TAKE</div><div class="rh">DAMAGE</div>',
     '<div class="rk"><span class="kind"></span>Plain black</div><div><strong>3 hits</strong>, the third ends the run</div><div>2 of 6 segments</div>',
     '<div class="rk"><span class="kind blue"></span>Blue glow</div><div><strong>2 hits</strong>, the second ends the run</div><div>3 of 6 segments</div>',
     '<div class="rk"><span class="kind red"></span>Red glow</div><div><strong>1 hit</strong>, it ends the run at once</div><div>all 6 segments</div></div>',
-    '<h3>Score</h3>',
-    '<ul><li>Your score grows with the <strong>distance</strong> you run, plus <strong>25 points for every coin</strong>.</li>',
-    '<li>When the run ends you see your score, your coins and your best. A new record is marked <strong>NEW</strong>. Your best score is saved on this device.</li></ul>',
+    '<h3>Coins</h3>',
+    '<ul><li>The collectible is the rotating coin. Run through one to pick it up: it chimes, adds to your coin count, and is worth <strong>25 points</strong>.</li>',
+    '<li>Coins come in rows, zigzags that make you change lane, and double lines. Some sit right next to a box, so choose your lane early.</li></ul>',
+    '<h3>The black pack</h3>',
+    '<ul><li>Every <strong>2 hours 30 minutes</strong> you stay alive, a black Mudwater pack floats into <strong>one lane</strong>, always a different lane from the last pack. The first one comes at 2 hours 15 minutes.</li>',
+    '<li><strong>Jump into it.</strong> It slows the whole run by about <strong>20% for 60 seconds</strong>, easing in and easing out. That is all it does: no points, no cards.</li>',
+    '<li>When the 60 seconds are over you are back at the speed you had when you grabbed it. The speed climb waits while you are slowed, so you lose no progress.</li></ul>',
+    '<h3>Cards</h3>',
+    '<p>There are <strong>120 cards</strong> to find. Every <strong>30 minutes</strong> you stay alive in a run, a card floats into one lane, a little higher than the boxes. <strong>Jump to collect it.</strong> Nothing interrupts the run: no pop-up, no flip, no slowdown, only a soft chime and the card count on your screen.</p>',
+    '<ul><li><strong>Dying resets the 30-minute clock,</strong> but you keep every card you have already collected.</li>',
+    '<li>A card you miss scrolls past and is gone. The next one comes 30 minutes after the last.</li>',
+    '<li>The glow around a card tells you how rare it is, so you know what you are jumping for:</li></ul>',
+    '<div class="rtab rcol"><div class="rh">RARITY</div><div class="rh">GLOW</div><div class="rh">CARDS</div><div class="rh">OPENS</div>',
+    '<div class="rk">Common</div><div><span class="swatch" style="background:#fff"></span>White</div><div>55</div><div>from the start</div>',
+    '<div class="rk">Uncommon</div><div><span class="swatch" style="background:#5fd37a"></span>Green</div><div>30</div><div>30 min alive</div>',
+    '<div class="rk">Rare</div><div><span class="swatch" style="background:#4aa3ff"></span>Blue</div><div>13</div><div>1 hour alive</div>',
+    '<div class="rk">Prestige</div><div><span class="swatch" style="background:#f0c24a"></span>Gold</div><div>14</div><div>2 hours alive</div>',
+    '<div class="rk">Legendary</div><div><span class="swatch" style="background:linear-gradient(90deg,#47d1ff,#c358d1)"></span>Cyan to magenta</div><div>8</div><div>3 hours alive</div></div>',
+    '<div class="rex">',
+    '<figure class="t1" style="--c:#fff;--g:rgba(255,255,255,.4)"><div class="fr"><img src="assets/game/cards/ex/001.webp" alt="Bottle Rocket" loading="lazy"></div><figcaption><b>COMMON</b>Bottle Rocket<br>#001</figcaption></figure>',
+    '<figure class="t2" style="--c:#5fd37a;--g:rgba(95,211,122,.45)"><div class="fr"><img src="assets/game/cards/ex/005.webp" alt="Dead Calm" loading="lazy"></div><figcaption><b>UNCOMMON</b>Dead Calm<br>#005</figcaption></figure>',
+    '<figure class="t3" style="--c:#4aa3ff;--g:rgba(74,163,255,.45)"><div class="fr"><img src="assets/game/cards/ex/009.webp" alt="The Skipper" loading="lazy"></div><figcaption><b>RARE</b>The Skipper<br>#009</figcaption></figure>',
+    '<figure class="t4" style="--c:#f0c24a;--g:rgba(240,194,74,.5)"><div class="fr"><img src="assets/game/cards/ex/008.webp" alt="Lofi on the Dock" loading="lazy"></div><figcaption><b>PRESTIGE</b>Lofi on the Dock<br>#008</figcaption></figure>',
+    '<figure class="t5" style="--c:#8aa8ff;--g:rgba(120,170,255,.55)"><div class="fr"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary" loading="lazy"></div><figcaption><b>LEGENDARY</b>Good Boy Gary<br>#049</figcaption></figure></div>',
+    '<p>On every card, the diamonds at the top show the rarity (one to five), the badge in the corner shows the family, and the number at the bottom is its place from 1 to 120. The four families are <strong>Club</strong> (62 cards), <strong>Mutant</strong> (22), <strong>Cosmic</strong> (16) and <strong>Arcana</strong> (20).</p>',
+    '<h3>Which cards appear</h3>',
+    '<ul><li><strong>Rare cards are hard to get.</strong> The higher tiers only open after you have stayed alive long enough in one run: Uncommon after 30 minutes, Rare after 1 hour, Prestige after 2 hours and Legendary after 3 hours. Dying starts the clock over.</li>',
+    '<li><strong>A tier opens once you own 60% of the tier below it:</strong> 33 Commons for Uncommon, 18 Uncommons for Rare, 8 Rares for Prestige and 9 Prestige for Legendary. Nobody skips ahead.</li>',
+    '<li>When several tiers are open, the common ones come up most often, and the Legendary tier is the thinnest slice.</li>',
+    '<li>Most sightings are a card you do not own yet. About one in five can be a card you already have.</li>',
+    '<li>There is also a very small lucky chance in shorter runs: after 1 hour alive, a sighting has a tiny chance of being a Prestige or a Legendary even if it has not opened for you yet.</li>',
+    '<li>The whole set is meant to take a long time, and the Legendaries come last.</li></ul>',
+    '<h3>The Collected app</h3>',
+    '<ul><li>Open <strong>COLLECTED</strong> on the phone home screen to see all 120 cards laid out <strong>face down</strong>. When you earn a card it flips over and shows its picture.</li>',
+    '<li>You can filter by tier, by family, and by owned or missing, and the progress bars show how far you are in every tier and family.</li></ul>',
+    '<h3>Scores and the leaderboard</h3>',
+    '<ul><li>Every run gets a <strong>score</strong>: points for distance, plus 25 for each coin.</li>',
+    '<li>Each run&rsquo;s score is <strong>added to the last one</strong>, building your <strong>lifetime total</strong>. The game also notes your <strong>best run</strong> and your <strong>last run</strong>.</li>',
+    '<li>Open <strong>LEADERBOARD</strong> on the phone to see everyone ranked by lifetime total, with filters for best run and last run.</li></ul>',
+    '<h3>No pause</h3>',
+    '<ul><li>There is <strong>no pause</strong>, anywhere. The run ends the moment you leave the game: pressing the home bar on the phone, pressing the lock button, closing the phone, switching to another browser tab, or anything that freezes the page for more than half a second.</li>',
+    '<li>Coming back later starts a fresh run, so a run cannot be saved for later.</li></ul>',
     '<h3>The phone</h3>',
     '<ul><li>Buttons on the left edge of the phone: the <strong>silent switch</strong> mutes the whole site, and the two below it turn the <strong>volume</strong> up and down.</li>',
     '<li>The button on the right edge is the <strong>lock button</strong>: on the lock screen it unlocks to the home screen, anywhere else it locks the phone.</li>',
-    '<li>Browsers keep a page silent until you click it, which is why the loading screen asks for a click first.</li>',
-    '<li>The other apps on the phone are on the way.</li></ul>',
+    '<li>Browsers keep a page silent until you click it, which is why the loading screen asks for a click first.</li></ul>',
+    '<h3>Saving</h3>',
+    '<p>Cards and scores are only kept for signed-in players. Until sign-in opens, every run is a demo run: it plays exactly the same, but nothing is saved and nothing is ranked.</p>',
     '<div class="rnote">These rules are updated as the game changes. If something here does not match the game, the game wins and the rules will be corrected.</div>'
   ].join('');  var INFO = { '#hall': ['HALL RULES', 'THE HALL &middot; HOW TO PLAY', '', RULES], '#about': ['ABOUT', 'MIMU ON APE INFO · TERMS OF SERVICE', 'COMING SOON'] };
   var infoEl = $('infoPanel'), infoShade = $('infoShade');
@@ -674,7 +713,13 @@ window.MIMUAudio = (function () {
   var pscreen = $('pScreen'), pswipe = $('pSwipe'), swipeStart = null;
   function isLocked() { return !pscreen.classList.contains('unlocked'); }
   function unlockPhone() { if (isLocked()) pscreen.classList.add('unlocked'); }
-  function openHall() { pscreen.classList.add('inapp'); if (window.HallRunner) HallRunner.open(); }
+  var APPS = { hall: $('hallApp'), collected: $('collApp'), leaders: $('lbApp') };
+  function openApp(name) {
+    Object.keys(APPS).forEach(function (k) { APPS[k].classList.toggle('on', k === name); });
+    pscreen.dataset.app = name; pscreen.classList.add('inapp');
+    if (name === 'hall') { if (window.HallRunner) HallRunner.open(); } else { if (window.HallRunner) HallRunner.close(); if (window.HallApps) HallApps.open(name); }
+  }
+  function openHall() { openApp('hall'); }
   function leaveHall() { pscreen.classList.remove('inapp'); if (window.HallRunner) HallRunner.close(); }
   function nudge() { pswipe.classList.remove('nudge'); void pswipe.offsetWidth; pswipe.classList.add('nudge'); }
   pscreen.addEventListener('pointerdown', function (ev) { if (isLocked() && !ev.target.closest('#pHome')) swipeStart = { x: ev.clientX, y: ev.clientY }; });
@@ -686,6 +731,8 @@ window.MIMUAudio = (function () {
   pscreen.addEventListener('pointercancel', function () { swipeStart = null; });
   $('pHome').addEventListener('click', function () { if (isLocked()) unlockPhone(); else if (pscreen.classList.contains('inapp')) leaveHall(); });
   $('hallIcon').addEventListener('click', openHall);
+  $('collIcon').addEventListener('click', function () { openApp('collected'); });
+  $('lbIcon').addEventListener('click', function () { openApp('leaders'); });
   // the phone's side buttons
   var osd = $('osd'), osdFill = $('osdFill'), osdTxt = $('osdTxt'), osdT = 0, bMute = $('bMute'), bUp = $('bUp'), bDown = $('bDown'), bPower = $('bPower'), pSleep = $('pSleep');
   function showOsd(text, frac) { osdTxt.textContent = text; osdFill.style.width = Math.round(frac * 100) + '%'; osd.classList.add('on'); clearTimeout(osdT); osdT = setTimeout(function () { osd.classList.remove('on'); }, 1500); }
