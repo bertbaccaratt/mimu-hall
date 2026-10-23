@@ -9,14 +9,14 @@
   var CONFIG = {
     climb: { pct: 3, everySec: 1800 },                                   // the run gets 3% faster every 30 minutes alive, compounding, no cap
     sight: {
-      everySec: 1800,                                                    // a card sighting every 30 minutes alive
+      everySec: 900,                                                     // a card sighting every 15 minutes alive (the first at 15 minutes)
       locksSec: [0, 1800, 3600, 7200, 10800],                            // Common, Uncommon, Rare, Prestige, Legendary open after this long alive in the run
       odds: [60, 21, 7, 6.5, 3.3],                                       // chance weights among the tiers that are open
       unlockShare: 0.6,                                                  // a tier opens once you own 60% of the tier below it
       dupChance: 0.2,                                                    // one sighting in five may be a card you already own
       lucky: { afterSec: 3600, prestige: 0.005, legendary: 0.001 }       // a tiny chance of a top card in shorter runs
     },
-    pack: { firstSec: 8100, everySec: 9000, slowPct: 20, slowSec: 60 },  // the black pack: 2:15, then every 2.5 hours alive; slows you 20% for 60 s
+    pack: { firstSec: 3600, everySec: 3600, slowPct: 20, slowSec: 60 },  // the black pack: at 1 hour, then every hour alive; slows you 20% for 60 s
     hp: { segments: 6, dmg: { plain: 2, red: 6, blue: 3 } },             // plain box 3 hits, blue 2, red 1
     coinPoints: 25,
     life: { share: 0.10 }                                                // after a crash a player may buy ONE extra life per run for 10% of their points (not coins)

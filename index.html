@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261023y"><link rel="stylesheet" href="assets/game/comms.css?v=20261023y"><link rel="stylesheet" href="assets/game/admin.css?v=20261023y">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261023z"><link rel="stylesheet" href="assets/game/comms.css?v=20261023z"><link rel="stylesheet" href="assets/game/admin.css?v=20261023z">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -480,10 +480,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261023y" defer></script>
-<script src="assets/game/hall-runner.js?v=20261023y" defer></script>
-<script src="assets/game/comms.js?v=20261023y" defer></script> <script src="assets/game/net.js?v=20261023y" defer></script> <script src="assets/game/badges.js?v=20261023y" defer></script> <script src="assets/game/apps.js?v=20261023y" defer></script>
-<script src="assets/game/admin-docs.js?v=20261023y" defer></script> <script src="assets/game/admin.js?v=20261023y" defer></script>
+<script src="assets/game/profile.js?v=20261023z" defer></script>
+<script src="assets/game/hall-runner.js?v=20261023z" defer></script>
+<script src="assets/game/comms.js?v=20261023z" defer></script> <script src="assets/game/net.js?v=20261023z" defer></script> <script src="assets/game/badges.js?v=20261023z" defer></script> <script src="assets/game/apps.js?v=20261023z" defer></script>
+<script src="assets/game/admin-docs.js?v=20261023z" defer></script> <script src="assets/game/admin.js?v=20261023z" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -702,12 +702,12 @@ window.MIMUAudio = (function () {
     '<ul><li>Two small readouts sit at the bottom of the game screen. <strong>Bottom left:</strong> a little speed gauge in <strong>miles per hour</strong>. It is green and climbs as the run speeds up.</li>',
     '<li>When a black pack slows you, the speed gauge turns <strong>red</strong> for the 60 seconds the slowdown lasts, then goes back to green. <strong>Bottom right:</strong> the distance you have run, in miles.</li></ul>',
     '<h3>The black pack</h3>',
-    '<ul><li>Every <strong>2 hours 30 minutes</strong> you stay alive, a black Mudwater pack floats into <strong>one lane</strong>, always a different lane from the last pack. The first one comes at 2 hours 15 minutes.</li>',
+    '<ul><li>Every <strong>hour</strong> you stay alive, a black Mudwater pack floats into <strong>one lane</strong>, always a different lane from the last pack. The first one comes at the 1 hour mark.</li>',
     '<li><strong>Jump into it.</strong> It slows the whole run by about <strong>20% for 60 seconds</strong>, easing in and easing out. That is all it does: no points, no cards.</li>',
     '<li>When the 60 seconds are over you are back at the speed you had when you grabbed it. The speed climb waits while you are slowed, so you lose no progress.</li></ul>',
     '<h3>Cards</h3>',
     '<div class="rnote" style="margin:0 0 12px">In-game cards only. They are pictures that stand for real cards, not the real cards, and they are not real-world assets. THE HALL is a mini game and a friendly competition made by the community. It has no affiliation with the makers of the real cards. A real version of each card exists and may have monetary value, but those real cards are not being given away or collected here, and nothing you collect in this game is a real-world asset.</div>',
-    '<p>There are <strong>120 cards</strong> to find. Every so often as you stay alive in a run, a card floats into one lane, a little higher than the boxes. <strong>Jump to collect it.</strong> Nothing interrupts the run: no pop-up, no flip, no slowdown, only a soft chime and the card count on your screen.</p>',
+    '<p>There are <strong>120 cards</strong> to find. Every <strong>15 minutes</strong> you stay alive in a run (the first one at 15 minutes), a card floats into one lane, a little higher than the boxes. <strong>Jump to collect it.</strong> Nothing interrupts the run: no pop-up, no flip, no slowdown, only a soft chime and the card count on your screen.</p>',
     '<ul><li><strong>Dying starts the timer over,</strong> but you keep every card you have already collected.</li>',
     '<li>A card you miss scrolls past and is gone. The next one comes a while after the last.</li>',
     '<li>The glow around a card tells you how rare it is, so you know what you are jumping for:</li></ul>',
@@ -725,7 +725,7 @@ window.MIMUAudio = (function () {
     '<figure class="t5" style="--c:#8aa8ff;--g:rgba(120,170,255,.55)"><div class="fr"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary" loading="lazy"></div><figcaption><b>LEGENDARY</b>Good Boy Gary<br>#049</figcaption></figure></div>',
     '<p>On every card, the diamonds at the top show the rarity (one to five), the badge in the corner shows the family, and the number at the bottom is its place from 1 to 120. The four families are <strong>Club</strong> (62 cards), <strong>Mutant</strong> (22), <strong>Cosmic</strong> (16) and <strong>Arcana</strong> (20).</p>',
     '<h3>Ways to get cards in a run</h3>',
-    '<ul><li><strong>Sightings.</strong> The slow, rare way: a card floats down the road every so often as you stay alive, and the rarity depends on how long you have survived. This is how new cards come into your deck.</li>',
+    '<ul><li><strong>Sightings.</strong> The slow, rare way: a card floats down the road every 15 minutes you stay alive, and the rarity depends on how long you have survived. This is how new cards come into your deck.</li>',
     '<li><strong>Your first card.</strong> A brand-new player gets one starter card early in their very first run, <strong>once ever</strong>. Jump it when it floats in. It never comes again.</li>',
     '<li><strong>Echo cards.</strong> About every 15 minutes you stay alive, a faint, see-through copy of a card <strong>you already have</strong> floats by. Jump it and you get a <strong>duplicate</strong>. Echoes are only ever Common, Uncommon or Rare, with Common coming up most and Rare least. They can never be Prestige or Legendary, and they never give you a new card.</li>',
     '<li><strong>The wanted card.</strong> Now and then MIMU launches a <strong>wanted card</strong> and emails every player about it, with a live countdown. For as long as it runs, the card is up for grabs: at a random moment it drops into the run of one player who is running right then. If that player jumps it, it goes straight into their deck. If it is missed it can drop again for someone else before the time runs out. Only one wanted card is live at a time.</li>',
