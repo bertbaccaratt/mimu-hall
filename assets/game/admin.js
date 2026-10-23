@@ -78,6 +78,76 @@
     var pts = a.map(function (v, i) { return (i / (a.length - 1) * 100).toFixed(1) + ',' + (22 - (v - mn) / rg * 20).toFixed(1); }).join(' ');
     return '<svg class="sp" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="' + pts + '"/></svg>';
   }
+  /* ---------- the live runs frame: red when nobody is playing, green when somebody is ---------- */
+  function liveRuns() {
+    var rows = [], dev = (window.HallRunner && HallRunner.live) ? HallRunner.live() : null;
+    if (feed && feed.live) feed.live.forEach(function (r) { rows.push(r); });
+    else if (dev && dev.mode === 'run') rows.push({ name: 'THIS DEVICE (DEMO)', score: dev.score, alive: dev.alive, cards: dev.cards, coins: dev.coins, hp: dev.hp, slow: dev.slow, you: true });
+    rows.sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+    return rows;
+  }
+  function mmss(sec) { sec = Math.max(0, Math.floor(sec)); var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + ':' + (m < 10 ? '0' : '') + m : m) + ':' + (s < 10 ? '0' : '') + s; }
+  function runFacts(r) {
+    var c = P.config, s = c.sight, pk = c.pack, al = r.alive || 0, i, tier = 0;
+    for (i = 0; i < s.locksSec.length; i++) if (al >= s.locksSec[i]) tier = i;
+    var climb = Math.pow(1 + c.climb.pct / 100, al / c.climb.everySec);
+    var nextCard = s.everySec - (al % s.everySec);
+    var nextPack = al < pk.firstSec ? pk.firstSec - al : pk.everySec - ((al - pk.firstSec) % pk.everySec);
+    var hp = r.hp == null ? null : Math.max(0, Math.min(hp0(c), r.hp));
+    return { tier: P.tiers[tier] ? P.tiers[tier].name : '—', climb: Math.round((climb - 1) * 1000) / 10, nextCard: nextCard, nextPack: nextPack, hp: hp, segs: hp0(c) };
+  }
+  function hp0(c) { return c.hp.segments || 6; }
+  function hpBar(v, n) { var o = '<span class="hpb">', i; for (i = 0; i < n; i++) o += '<i class="' + (v != null && i < v ? 'on' : '') + '"></i>'; return o + '</span>'; }
+  function runRow(r, i) {
+    var f = runFacts(r), speedTxt = r.speed != null ? 'x' + (Math.round(r.speed * 100) / 100) : '+' + f.climb + '%';
+    return '<div class="lr' + (r.you ? ' you' : '') + '"><div class="lrt"><span class="n">' + (i + 1) + '</span><b>' + esc(r.name || 'RUNNER') + '</b><span class="lsc">' + fmt(r.score) + '</span></div>' +
+      '<div class="lrc"><span><small>ALIVE</small>' + mmss(r.alive) + '</span><span><small>SPEED CLIMB</small>' + speedTxt + '</span><span><small>HEALTH</small>' + hpBar(f.hp, f.segs) + '</span><span><small>COINS</small>' + fmt(r.coins) + '</span><span><small>CARDS</small>' + fmt(r.cards) + '</span>' +
+      '<span><small>TIER OPEN</small>' + esc(f.tier) + '</span><span><small>NEXT CARD IN</small>' + mmss(f.nextCard) + '</span><span><small>NEXT PACK IN</small>' + mmss(f.nextPack) + '</span><span><small>STATE</small>' + (r.slow ? '<em class="slw">SLOWED BY PACK</em>' : 'FULL SPEED') + '</span>' +
+      (r.best != null ? '<span><small>BEST RUN</small>' + fmt(r.best) + '</span>' : '') + (r.lifetime != null ? '<span><small>LIFETIME</small>' + fmt(r.lifetime) + '</span>' : '') + '</div></div>';
+  }
+  function paintLive(id) {
+    var el = $(id); if (!el) return;
+    var all = liveRuns(), rows = all.slice(0, 9), on = all.length > 0, i;
+    var sum = function (k) { return all.reduce(function (a, r) { return a + (r[k] || 0); }, 0); };
+    var top = all.length ? Math.max.apply(null, all.map(function (r) { return r.score || 0; })) : null, longest = all.length ? Math.max.apply(null, all.map(function (r) { return r.alive || 0; })) : null;
+    var stats = [['RUNNING NOW', fmt(all.length)], ['TOP LIVE SCORE', top == null ? '—' : fmt(top)], ['LONGEST ALIVE', longest == null ? '—' : mmss(longest)], ['AVERAGE ALIVE', all.length ? mmss(sum('alive') / all.length) : '—'], ['COINS IN PLAY', fmt(sum('coins'))], ['CARDS FOUND NOW', fmt(sum('cards'))], ['SLOWED BY PACK', fmt(all.filter(function (r) { return r.slow; }).length)]];
+    var html = '<div class="lbh"><span class="lbd"></span><div><h3>' + (on ? fmt(all.length) + (all.length === 1 ? ' RUNNER' : ' RUNNERS') + ' PLAYING NOW' : 'NO ONE IS PLAYING') + '</h3><div class="lbs">TOP 9 LIVE RUNS &middot; ' + (feed && feed.live ? 'LIVE FEED' : 'THIS DEVICE ONLY UNTIL CLOUDFLARE IS CONNECTED') + '</div></div></div>' +
+      '<div class="lbst">' + stats.map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('') + '</div><div class="lrs">';
+    for (i = 0; i < 9; i++) html += rows[i] ? runRow(rows[i], i) : '<div class="lr empty"><div class="lrt"><span class="n">' + (i + 1) + '</span><b>&middot; &middot; &middot; WAITING FOR A RUNNER</b><span class="lsc">—</span></div></div>';
+    html += '</div>';
+    var rec = (feed && feed.recent) || [];
+    html += '<div class="lbr"><h4>JUST FINISHED</h4>' + (rec.length ? rec.slice(0, 5).map(function (x) { return '<div class="lbf"><b>' + esc(x.name) + '</b><span>' + fmt(x.score) + ' PTS</span><span>' + mmss(x.alive) + ' ALIVE</span><span>' + fmt(x.cards) + ' CARDS</span><span>' + fmt(x.coins) + ' COINS</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="lbf none">NO FINISHED RUNS TO SHOW YET</div>') + '</div>';
+    el.className = 'livebox ' + (on ? 'on' : 'off'); el.innerHTML = html;
+  }
+  /* ---------- the CARDS page: real card pictures stand for every section ---------- */
+  var EXAMPLES = { 1: '001', 2: '005', 3: '009', 4: '008', 5: '049' };
+  function tierCards() {
+    var total = (P.cards && P.cards().length) || 120;
+    return '<div class="ctiers">' + P.tiers.map(function (t, i) {
+      var bg = t.grad || t.color;
+      return '<div class="ctier" style="--c:' + t.color + ';--g:rgba(' + (t.glow || '255,255,255') + ',.5)"><div class="cimg"><img src="assets/game/cards/ex/' + EXAMPLES[t.n] + '.webp" alt="' + esc(t.name) + ' example card" loading="lazy"><span class="cct">' + t.count + '</span></div>' +
+        '<b>' + esc(t.name.toUpperCase()) + '</b><em>' + Math.round(t.count / total * 100) + '% OF THE DECK</em><div class="cbar"><i style="width:' + (t.count / total * 100) + '%;background:' + bg + '"></i></div><small data-tf="' + i + '">FOUND —</small></div>';
+    }).join('') + '</div>';
+  }
+  function famCards() {
+    var cs = P.cards ? P.cards() : [], total = cs.length || 120;
+    return '<div class="cfams">' + P.families.map(function (fm) {
+      var mine = cs.filter(function (c) { return c.family === fm.key; }), pick = [mine[0], mine[Math.floor(mine.length / 2)], mine[mine.length - 1]].filter(Boolean);
+      return '<div class="cfam"><div class="cfan">' + pick.map(function (c, k) { return '<img class="f' + k + '" src="' + esc(c.file) + '" alt="' + esc(c.name) + '" loading="lazy">'; }).join('') + '</div><b>' + esc(fm.name.toUpperCase()) + '</b><em>' + fm.count + ' CARDS &middot; ' + Math.round(fm.count / total * 100) + '%</em><div class="cbar"><i style="width:' + (fm.count / total * 100) + '%;background:#d9ac5c"></i></div></div>';
+    }).join('') + '</div>';
+  }
+  function deckGrid() {
+    var cs = P.cards ? P.cards() : [];
+    return '<div class="cgrid">' + cs.map(function (c) {
+      var t = P.tiers[c.tier - 1] || P.tiers[0];
+      return '<div class="cth" data-cn="' + c.n + '" style="--c:' + t.color + '" title="#' + c.n + ' ' + esc(c.name) + ' · ' + esc(t.name) + '"><img src="' + esc(c.file) + '" alt="" loading="lazy"><span>' + c.n + '</span></div>';
+    }).join('') + '</div><div class="clg">' + P.tiers.map(function (t) { return '<span><i style="background:' + (t.grad || t.color) + '"></i>' + esc(t.name.toUpperCase()) + '</span>'; }).join('') + '</div>';
+  }
+  function paintCardsPage() {
+    var f = feed || {}, bt = f.cardsByTier || [], cc = f.cardCounts || {};
+    Array.prototype.forEach.call(document.querySelectorAll('[data-tf]'), function (el) { var v = bt[+el.getAttribute('data-tf')]; el.textContent = 'FOUND ' + (v == null ? '—' : fmt(v)); });
+    Array.prototype.forEach.call(document.querySelectorAll('.cth[data-cn]'), function (el) { var v = cc[el.getAttribute('data-cn')]; el.classList.toggle('hot', v != null && v > 0); var b = el.querySelector('span'); b.textContent = v ? v : el.getAttribute('data-cn'); });
+  }
   function tiles() {
     var f = feed || {}, v = f.visitors || {}, r = f.runs || {}, e = f.economy || {}, none = feed ? '' : 'WAITING FOR LIVE FEED', sr = f.series || {};
     var traded = (e.cardsBought != null || e.cardsSold != null) ? (e.cardsBought || 0) + (e.cardsSold || 0) : null;
@@ -145,13 +215,13 @@
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
       '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '</nav>' +
       '<main class="cr-main">' +
-      '<section data-p="ov">' + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK BELOW IS REAL</div>') + '<div class="box" style="margin-bottom:16px"><h4>SYSTEM CHECK</h4><div class="sys" id="admSys"></div></div><div class="tiles" id="admTiles"></div><div class="cols2"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9"></div></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></div></section>' +
-      '<section data-p="live"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9b"></div></div></section>' +
+      '<section data-p="ov"><div class="livebox off" id="admLB"></div>' + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK BELOW IS REAL</div>') + '<div class="box" style="margin-bottom:16px"><h4>SYSTEM CHECK</h4><div class="sys" id="admSys"></div></div><div class="tiles" id="admTiles"></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></section>' +
+      '<section data-p="live"><div class="livebox off" id="admLB2"></div></section>' +
       '<section data-p="msg"><div class="box"><h4>TEXT AS HYPE</h4><div class="hint" style="margin-bottom:12px">A one-on-one text from the HYPE account to a signed-in player. Players cannot reply to HYPE.</div><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><textarea id="admHBody" maxlength="280" rows="4" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div><div class="box" style="margin-top:16px"><h4>RECENTLY SENT</h4><div class="sent" id="admHList"></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
       '<section data-p="eco"><div class="box"><h4>COINS AND THE MARKETPLACE</h4><div id="admEco"></div><div class="hint" style="margin-top:14px">Coins collected in runs are spent on cards in the Marketplace. Any collected card can be sold for leaderboard points. Prices and sale values are served by the Marketplace service once it is connected.</div></div></section>' +
-      '<section data-p="cards"><div class="box"><h4>THE 120 CARDS</h4><div id="admCards"></div></div></section>' +
+      '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Once the live feed is connected, each card shows how many times it has been found and lights up when it has been found at least once.</div>' + deckGrid() + '</div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
       '<section data-p="sys">' + (DOCS.pages.sys || '') + '</section>' +
@@ -210,7 +280,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false;
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admTiles').innerHTML = tiles(); var l = liveRows(); $('admLive9').innerHTML = l; $('admLive9b').innerHTML = l; $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admTiles').innerHTML = tiles(); paintLive('admLB'); paintLive('admLB2'); $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists();
     }
