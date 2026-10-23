@@ -159,7 +159,7 @@
       S.curve += (Math.sin(S.t * 0.25) * 0.5 - S.curve) * Math.min(1, dt * 0.5);
       S.run += dt * 3;
     } else if (S.mode === 'dead') {
-      for (var j = 0; j < S.ents.length; j++) S.ents[j].z -= step;
+      for (var j = S.ents.length - 1; j >= 0; j--) { S.ents[j].z -= step; if (S.ents[j].z < 0.62) S.ents.splice(j, 1); }   // things that reach the runner's back are gone, as in a live run
     }
     S.sway = Math.sin(S.t * 0.9) * 0.6 + Math.sin(S.t * 0.37 + 1) * 0.4;
     S.camX = S.sway * 0.012 * W + S.curve * 0.012 * W;
@@ -260,7 +260,7 @@
 
   var AURA = [null, { c: 'rgba(255,36,48,', rim: 'rgba(255,70,80,' }, { c: 'rgba(70,140,255,', rim: 'rgba(110,170,255,' }];
   function drawBox(e) {
-    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (e.z < 0.3 || !im.naturalWidth || y > H + 90) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (e.z < 0.62 || !im.naturalWidth || y > H + 90) return;
     var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.42 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth, au = AURA[e.tier], pulse = 0.82 + 0.18 * Math.sin(S.t * 5 + e.z * 2);
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, bw * 0.55);
@@ -280,7 +280,7 @@
   }
   function drawCoin(e) {
     if (e.got) return;
-    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (e.z < 0.3 || !im.naturalWidth || y > H + 60) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (e.z < 0.62 || !im.naturalWidth || y > H + 60) return;
     var x = cxAt(s) + e.lane * LANE * W * s, cw = 0.17 * W * s, cy = y - cw * 0.85 - Math.sin(S.t * 4 + e.ph) * cw * 0.06;
     var fr = Math.floor(S.t * 10 + e.ph) % 20, fx = (fr % 5) * 192, fy = ((fr / 5) | 0) * 192;
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
@@ -290,7 +290,7 @@
     ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(x, cy, cw * 0.95, 0, 6.3); ctx.fill();
     ctx.globalCompositeOperation = 'source-over';
     ctx.drawImage(im, fx, fy, 192, 192, x - cw / 2, cy - cw / 2, cw, cw);
-    ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= 0.35; ctx.drawImage(im, fx, fy, 192, 192, x - cw / 2, cy - cw / 2, cw, cw);
+    if (S.mode === 'run') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha *= 0.22; ctx.drawImage(im, fx, fy, 192, 192, x - cw / 2, cy - cw / 2, cw, cw); }
     ctx.restore();
   }
 
