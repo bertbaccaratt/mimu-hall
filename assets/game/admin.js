@@ -148,7 +148,7 @@
   }
   /* ---------- the OVERVIEW page: a mind map to learn the control room, then everything about the visitors ---------- */
   var MAP = [
-    ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['cards', 'CARDS', 'the 120 cards, pictured']]],
+    ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['flag', 'FLAGGED RUNS', 'runs held for review: approve, deny or ban'], ['cards', 'CARDS', 'the 120 cards, pictured']]],
     ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
     ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, prices and trades']]],
     ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works'], ['data', 'DATA CONTRACT', 'what the server sends'], ['road', 'CHECKLIST', 'what is done and next']]]
@@ -359,7 +359,7 @@
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST']];
   var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
@@ -374,10 +374,10 @@
     apprSig = ''; flagSig = ''; wSig = ''; shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
-      '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
+      '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + (n[0] === 'flag' ? ' <em id=\"admFlagN\"></em>' : '') + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
       '<main class="cr-main">' +
       ovHtml() +
-      '<section data-p="live"><div class="mtabs" id="admLT"><button type="button" class="on" data-k="l">LIVE</button><button type="button" data-k="f">FLAGGED RUNS <i id="admFlagN"></i></button></div><div id="admLiveWrap"><div class="livebox off" id="admLB2"></div></div><div id="admFlagWrap" style="display:none"><div id="admFlag"></div></div></section>' +
+      '<section data-p="live"><div class="livebox off" id="admLB2"></div></section><section data-p="flag"><div id="admFlag"></div></section>' +
       '<section data-p="msg"><div class="hx"><div class="box hxl"><h4>CONVERSATIONS</h4><div class="hxnew"><input id="admHTo" list="admPl" maxlength="40" placeholder="START A NEW TEXT: PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><button type="button" class="go" id="admHNew">NEW</button></div><div class="hxlist" id="admHT"></div></div><div class="box hxr"><h4 id="admHTitle">PICK A CONVERSATION</h4><div class="hint">HYPE is the account you text players from. Players can and will text HYPE back, so their replies land here. Players can also text HYPE first.</div><div class="hxlog" id="admHLog"></div><div class="cmp"><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
@@ -405,7 +405,6 @@
       if (ev.target.closest('#admWLaunch')) { if (!wsel) return; wantedAct(handlers.wantedLaunch ? handlers.wantedLaunch(wsel, wHours) : Promise.reject(new Error('Not connected yet')), 'LAUNCHED. THE EMAIL IS ON ITS WAY TO EVERY PLAYER'); return; }
       if (ev.target.closest('#admWEnd')) { wantedAct(handlers.wantedEnd ? handlers.wantedEnd() : Promise.reject(new Error('Not connected yet')), 'THE WANTED CARD WAS ENDED'); return; }
       var fb = ev.target.closest('[data-fa]'); if (fb && handlers.flag) { fb.disabled = true; flagSig = ''; handlers.flag(fb.getAttribute('data-r'), fb.getAttribute('data-fa')).then(function () { flagSig = ''; paintFlag(); }, function () { fb.disabled = false; }); return; }
-      var lt = ev.target.closest('#admLT button'); if (lt) { flagTab = lt.getAttribute('data-k'); Array.prototype.forEach.call(lt.parentNode.children, function (x) { x.classList.toggle('on', x === lt); }); $('admLiveWrap').style.display = flagTab === 'l' ? '' : 'none'; $('admFlagWrap').style.display = flagTab === 'f' ? '' : 'none'; }
     });
     root.addEventListener('click', function (ev) { var g = ev.target.closest('[data-go]'); if (g) show(g.getAttribute('data-go')); });
     $('admNav').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b && b.getAttribute('data-t')) show(b.getAttribute('data-t')); });
