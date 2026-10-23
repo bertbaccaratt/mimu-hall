@@ -138,6 +138,10 @@
     var el = $('mktApp'); if (!el) return; el.classList.add('page');
     var A = P.market ? P.market() : null, t = P.totals ? P.totals() : {}, on = P.isSignedIn() && A;
     el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">MARKETPLACE</h2><div class="pgsub">BUY CARDS WITH COINS &middot; SELL CARDS FOR POINTS</div></div>' +
+      '<div class="howto"><div class="hth"><b>HOW TO USE THE MARKETPLACE</b></div>' +
+      '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card that is not owned yet, face down"></div><figcaption>NOT OWNED<br>FACE DOWN</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, an owned card, flipped face up"></div><figcaption>OWNED<br>FLIPPED &middot; #049</figcaption></figure></div>' +
+      '<div class="hsub">THIS IS HOW EVERY CARD LOOKS IN <b>COLLECTED</b>: FACE DOWN UNTIL YOU HAVE IT, THEN IT FLIPS OVER. THE DIAMONDS SHOW HOW RARE IT IS AND THE NUMBER IS ITS PLACE FROM 1 TO 120.</div>' +
+      '<ol class="hsteps"><li><b>BUY</b> A FACE-DOWN CARD YOU WANT. PRESS ITS COIN PRICE AND IT FLIPS INTO YOUR COLLECTED.</li><li><b>SELL</b> ANY CARD YOU OWN, EARNED OR BOUGHT. PRESS ITS POINTS BUTTON. THE POINTS GO ON YOUR LEADERBOARD SCORE.</li><li><b>CHECK</b> YOUR DECK IN COLLECTED ANY TIME. FILTER BY RARITY, FAMILY, OWNED OR MISSING.</li><li>COINS COME FROM RUNS. POINTS COME FROM SELLING. SALES ARE FINAL.</li></ol></div>' +
       '<div class="mkstats"><div><small>COIN BALANCE</small><b>' + fmt(t.balance) + '</b></div><div><small>COINS EARNED</small><b>' + fmt(t.coins) + '</b></div></div>' +
       '<div class="tabs3" id="mkTabs"><button' + (mk.tab === 'buy' ? ' class="on"' : '') + ' data-k="buy">BUY</button><button' + (mk.tab === 'sell' ? ' class="on"' : '') + ' data-k="sell">SELL</button></div>' +
       '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE SHELVES OPEN WITH SIGN-IN<br><span style="opacity:.7">' + (mk.tab === 'buy' ? 'SPEND COINS ON CARDS YOU HAVE NOT FOUND' : 'SELL ANY CARD YOU OWN FOR LEADERBOARD POINTS') + '</span></div>') + '</div></div>';
@@ -152,6 +156,18 @@
     }, function () { var box = $('mkList'); if (box) box.innerHTML = '<div class="empty">COULD NOT LOAD THE SHELVES</div>'; });
   }
 
+  /* ---------- X and OPENSEA: phone-view pictures of the Mimu On Ape pages, each with a button that opens the real page ---------- */
+  var SHOTS = {
+    x: { name: 'Mimu On Ape', sub: '@mimuonape', url: 'https://x.com/mimuonape', btn: 'Open on X', img: 'assets/game/x-profile.jpg', alt: 'The Mimu On Ape profile on X: MIMU, @mimuonape, 3,470 followers', cls: 'xshot',
+      logo: '<svg viewBox="0 0 24 24"><path fill="#fff" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
+    os: { name: 'MIMU On Ape', sub: 'OpenSea collection', url: 'https://opensea.io/collection/mimuonape', btn: 'Open on OpenSea', img: 'assets/game/opensea-collection.jpg', alt: 'The MIMU On Ape collection on OpenSea: items, floor price, volume and owners', cls: 'osshot',
+      logo: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2081e2"/><path fill="#fff" d="M11.200 4.800c.2-.4.7-.3.8.1.8 2 1.300 4.200 1.300 6.400 0 .3-.2.5-.5.500H7c-.4 0-.6-.4-.4-.7zM14.400 9c0-.2.3-.3.4-.1 1.400 1.400 2.700 3.300 3.400 5 .1.2-.1.4-.3.4h-3.500c-.3 0-.5-.2-.5-.5zM5.400 15.400c0-.2.2-.3.3-.3h12.600c.3 0 .4.2.4.4-.3 1.900-1.900 3.400-3.800 3.400H9.200c-2.100 0-3.700-1.400-3.800-3.500z"/></svg>' }
+  };
+  function drawShot(id, key) {
+    var el = $(id), s = SHOTS[key]; if (!el || el.dataset.b) return; el.dataset.b = '1'; el.classList.add('page');
+    el.innerHTML = '<div class="xapp"><div class="xh">' + s.logo + '<div style="flex:1;min-width:0"><b>' + esc(s.name) + '</b><span>' + esc(s.sub) + '</span></div><a class="xopen" href="' + s.url + '" target="_blank" rel="noopener noreferrer">' + s.btn + '</a></div><div class="xbody"><div class="' + s.cls + '"><img src="' + s.img + '" alt="' + esc(s.alt) + '" width="750" height="1624" decoding="async"></div></div></div>';
+  }
+
   /* ---------- the phone asks for an app ---------- */
   window.HallComms = {
     open: function (name) {
@@ -159,6 +175,8 @@
       if (name === 'messages') { ms.view = 'list'; drawMessages(); }
       if (name === 'mail') drawMail();
       if (name === 'market') drawMarket();
+      if (name === 'x') drawShot('xApp', 'x');
+      if (name === 'opensea') drawShot('osApp', 'os');
     }
   };
   var scr = $('pScreen'); if (scr && window.MutationObserver) new MutationObserver(function () { if (current() !== 'phone' && ph.st !== 'dial') { clearTimers(); ph.st = 'dial'; paintPhone(); } }).observe(scr, { attributes: true, attributeFilter: ['class'] });
