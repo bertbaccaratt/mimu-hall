@@ -1,5 +1,5 @@
 /* the control room, second edition: header with the Los Angeles clock and service lights, a page menu on the left, and one page at a time on the right */
-.adm.v2 { display: flex; flex-direction: column; padding: 0; height: min(880px, 92vh); max-height: 92vh; overflow: hidden; width: min(1240px, 96vw); background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(120,16,28,.7), rgba(10,3,5,.97) 62%); animation: admIn .45s cubic-bezier(.2,.8,.2,1) both; }
+.adm.v2 { display: flex; flex-direction: column; padding: 0; height: min(880px, 92vh); max-height: 92vh; overflow: hidden; width: min(1240px, 96vw); background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(120,16,28,.7), rgba(10,3,5,.97) 62%); }
 @keyframes admIn { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
 .adm.v2::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, #f6dc95, transparent); background-size: 200% 100%; animation: admSweep 5s linear infinite; z-index: 2; }
 @keyframes admSweep { from { background-position: 200% 0; } to { background-position: -200% 0; } }
@@ -31,3 +31,9 @@
   .ad-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .ad-nav { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid rgba(217,172,92,.2); padding: 10px; } .ad-nav button { white-space: nowrap; padding: 9px 12px; } .ad-nav button i { display: none; }
   .ad-main { padding: 16px 14px 24px; } .adm.v2 .tiles { grid-template-columns: repeat(2, 1fr); } .eco { grid-template-columns: 1fr 1fr; } .ad-foot { display: none; }
 }
+.banner { margin-bottom: 16px; padding: 11px 14px; font-size: 10px; letter-spacing: .2em; line-height: 1.7; color: #e8c673; background: rgba(217,172,92,.08); border: 1px solid rgba(217,172,92,.35); }
+.sys { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 14px; }
+.sysr { display: grid; grid-template-columns: 14px 190px 1fr; gap: 10px; align-items: center; padding: 8px 10px; font-size: 11px; letter-spacing: .1em; background: rgba(0,0,0,.28); border: 1px solid rgba(217,172,92,.14); }
+.sysr i { width: 8px; height: 8px; border-radius: 50%; background: #4a3a1c; } .sysr b { font-weight: 500; font-size: 10px; letter-spacing: .2em; color: #f1d9a0; } .sysr span { color: #b9a27a; }
+.sysr.ok i { background: #5fd37a; box-shadow: 0 0 8px rgba(95,211,122,.6); } .sysr.bad i { background: #ff6b5e; box-shadow: 0 0 8px rgba(255,90,70,.6); } .sysr.warn i { background: #f0c24a; box-shadow: 0 0 8px rgba(240,194,74,.6); } .sysr.off i { background: #6e5630; }
+@media (max-width: 900px) { .sys { grid-template-columns: 1fr; } .sysr { grid-template-columns: 14px 120px 1fr; } }

@@ -110,15 +110,40 @@
     ];
     return '<div class="eco">' + t.map(function (x) { return '<div><small>' + x[0] + '</small><b>' + (feed ? x[1] : '—') + '</b></div>'; }).join('') + '</div>';
   }
+  function sysRows() {
+    var A = window.MIMUAudio, f = feed || {}, ok = function (b) { return b ? 'ok' : 'off'; }, cards = (P.cards && P.cards().length) || 0, vw = window.innerWidth + ' x ' + window.innerHeight;
+    var rows = [
+      ['GAME FILES', !!(window.HallRunner && window.HallApps && window.HallComms && A) ? 'ok' : 'bad', window.HallRunner && window.HallApps && window.HallComms && A ? 'ALL LOADED' : 'SOMETHING DID NOT LOAD'],
+      ['CARD LIST', cards === 120 ? 'ok' : 'bad', cards + ' OF 120 CARDS LOADED'],
+      ['LIVE FEED', ok(!!feed), feed ? 'CONNECTED' : 'NOT CONNECTED YET (CLOUDFLARE)'],
+      ['GLYPH SIGN-IN', ok(P.isSignedIn()), P.isSignedIn() ? 'SIGNED IN AS ' + esc(P.username()) : 'NOT CONNECTED YET'],
+      ['MESSAGES', ok(!!(P.messages && P.messages())), P.messages && P.messages() ? 'CONNECTED' : 'WAITS FOR SIGN-IN'],
+      ['MAIL', ok(!!(P.mail && P.mail())), P.mail && P.mail() ? 'CONNECTED' : 'WAITS FOR SIGN-IN'],
+      ['MARKETPLACE', ok(!!(P.market && P.market())), P.market && P.market() ? 'CONNECTED' : 'WAITS FOR SIGN-IN'],
+      ['HYPE AND MAIL SENDING', ok(!!(handlers.hype && handlers.mail)), handlers.hype && handlers.mail ? 'READY' : 'NOT CONNECTED YET'],
+      ['SOUND', 'ok', A && A.isMuted() ? 'MUTED' : 'ON · VOLUME ' + Math.round((A ? A.getVolume() : 0) * 8) + ' OF 8'],
+      ['TEST MODE', P.isTest() ? 'warn' : 'ok', P.isTest() ? 'ON (THIS BROWSER ONLY)' : 'OFF'],
+      ['THIS BROWSER', 'ok', 'WINDOW ' + vw]
+    ];
+    return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
+  }
   var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['tools', 'TOOLS']];
   var curTab = 'ov';
   function openPanel() {
+    try { buildPanel(); }
+    catch (e) {
+      clearInterval(tick); shade.classList.add('open');
+      shade.innerHTML = '<div class="adm-login" role="dialog"><button class="x" type="button" aria-label="Close">&times;</button><h3 class="gold">ADMIN</h3><p>THE CONTROL ROOM HIT A PROBLEM</p><div class="err">' + esc(e && e.message) + '</div></div>';
+      shade.querySelector('.x').addEventListener('click', close);
+    }
+  }
+  function buildPanel() {
     shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="ad-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="ad-right"><div class="ad-clock" id="admClock"></div><div class="ad-pills" id="admPills"></div></div></div>' +
       '<div class="ad-body"><nav class="ad-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '</nav>' +
       '<main class="ad-main">' +
-      '<section data-p="ov"><div class="tiles" id="admTiles"></div><div class="cols2"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9"></div></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></div></section>' +
+      '<section data-p="ov">' + (feed ? '' : '<div class="banner">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK BELOW IS REAL</div>') + '<div class="box" style="margin-bottom:16px"><h4>SYSTEM CHECK</h4><div class="sys" id="admSys"></div></div><div class="tiles" id="admTiles"></div><div class="cols2"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9"></div></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></div></section>' +
       '<section data-p="live"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9b"></div></div></section>' +
       '<section data-p="msg"><div class="box"><h4>TEXT AS HYPE</h4><div class="hint" style="margin-bottom:12px">A one-on-one text from the HYPE account to a signed-in player. Players cannot reply to HYPE.</div><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><textarea id="admHBody" maxlength="280" rows="4" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div><div class="box" style="margin-top:16px"><h4>RECENTLY SENT</h4><div class="sent" id="admHList"></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
@@ -177,7 +202,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false;
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admTiles').innerHTML = tiles(); var l = liveRows(); $('admLive9').innerHTML = l; $('admLive9b').innerHTML = l; $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admTiles').innerHTML = tiles(); var l = liveRows(); $('admLive9').innerHTML = l; $('admLive9b').innerHTML = l; $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists();
     }
