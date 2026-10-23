@@ -187,7 +187,22 @@
   .osd { position: absolute; left: 50%; top: 8.2%; transform: translate(-50%, -8px); z-index: 8; min-width: 44%; display: flex; align-items: center; gap: calc(var(--h) * .012); padding: calc(var(--h) * .011) calc(var(--h) * .02); border-radius: 99px; background: rgba(12,5,6,.78); border: 1px solid rgba(217,172,92,.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: calc(var(--h) * .012); letter-spacing: .24em; color: #f1d9a0; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; box-shadow: 0 6px 20px rgba(0,0,0,.6); }
   .osd.on { opacity: 1; transform: translate(-50%, 0); }
   .osdbar { flex: 1; height: calc(var(--h) * .006); border-radius: 99px; background: rgba(217,172,92,.25); overflow: hidden; } .osdbar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #b3171f, #e8c673); transition: width .15s ease; }
-  .psleep { position: absolute; inset: 0; z-index: 9; background: #000; opacity: 0; pointer-events: none; transition: opacity .4s ease; } .pscreen.asleep .psleep { opacity: 1; pointer-events: auto; cursor: pointer; }  /* Apechain panel: see-through glass over the hall */
+  .psleep { position: absolute; inset: 0; z-index: 9; background: #000; opacity: 0; pointer-events: none; transition: opacity .4s ease; } .pscreen.asleep .psleep { opacity: 1; pointer-events: auto; cursor: pointer; }  /* Hall Rules: the how-to-play sheet */
+  .ipanel.rules { width: min(880px, 94vw); max-height: calc(100vh - 150px); display: flex; flex-direction: column; padding: 40px 34px 28px; top: calc(50% + 34px); }
+  .ipanel.rules .irule { margin: 18px auto 18px; } .ipanel.rules .isoon { display: none; } .ipanel.rules .iline { font-size: clamp(10px, 1vw, 13px); }
+  .ibody { text-align: left; overflow-y: auto; overscroll-behavior: contain; padding-right: 10px; scrollbar-width: thin; scrollbar-color: rgba(217,172,92,.5) transparent; color: #d7bd86; font-size: 14px; line-height: 1.75; letter-spacing: .03em; font-family: Georgia, 'Times New Roman', serif; }
+  .ibody::-webkit-scrollbar { width: 8px; } .ibody::-webkit-scrollbar-thumb { background: rgba(217,172,92,.45); }
+  .ibody h3 { margin: 26px 0 8px; font: 500 13px 'Cinzel', Georgia, serif; letter-spacing: .34em; color: #f1d9a0; text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+  .ibody h3:first-child { margin-top: 4px; } .ibody h3::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(217,172,92,.6), transparent); }
+  .ibody p { margin: 0 0 8px; } .ibody ul { margin: 0; padding: 0; list-style: none; } .ibody li { position: relative; padding-left: 20px; margin: 4px 0; }
+  .ibody li::before { content: ""; position: absolute; left: 4px; top: .68em; width: 6px; height: 6px; background: #d9ac5c; transform: rotate(45deg); }
+  .ibody strong { color: #f1d9a0; font-weight: 700; }
+  .rtab { display: grid; grid-template-columns: 1.2fr 1.4fr 1.4fr; margin: 8px 0 4px; border: 1px solid rgba(217,172,92,.3); background: rgba(0,0,0,.25); }
+  .rtab > div { padding: 8px 12px; border-bottom: 1px solid rgba(217,172,92,.15); } .rtab > div:nth-last-child(-n+3) { border-bottom: 0; }
+  .rtab .rh { font: 500 10px 'Cinzel', Georgia, serif; letter-spacing: .28em; color: #b9904f; background: rgba(217,172,92,.08); } .rtab .rk { color: #f1d9a0; }
+  .rnote { margin-top: 22px; padding: 12px 16px; border: 1px solid rgba(217,172,92,.3); background: rgba(217,172,92,.06); font-size: 13px; color: #c9a15a; }
+  .kind { display: inline-block; width: .8em; height: .8em; margin: 0 .35em 0 .1em; vertical-align: -1px; border: 1px solid rgba(217,172,92,.6); background: #0b0708; } .kind.red { box-shadow: 0 0 8px 2px rgba(255,40,50,.8); } .kind.blue { box-shadow: 0 0 8px 2px rgba(90,150,255,.85); }
+  @media (max-width: 640px) { .ipanel.rules { padding: 34px 16px 20px; } .ibody { font-size: 13px; } .rtab { grid-template-columns: 1fr 1fr; } .rtab > div:nth-child(3n) { display: none; } }  /* Apechain panel: see-through glass over the hall */
   .ashade { position: fixed; inset: 0; z-index: 2; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.30), rgba(0,0,0,.70)); opacity: 0; pointer-events: none; transition: opacity .6s ease; }
   .ashade.open { opacity: 1; pointer-events: auto; }
   .apanel { position: fixed; left: 50%; top: 118px; bottom: 40px; width: min(1060px, 92vw); z-index: 3; display: flex; flex-direction: column; border: 1px solid rgba(217,172,92,.55); outline: 1px solid rgba(217,172,92,.22); outline-offset: 6px; background: linear-gradient(180deg, rgba(40,6,10,.46), rgba(8,2,3,.58)); -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1); box-shadow: 0 0 90px rgba(0,0,0,.8), 0 0 60px rgba(150,15,25,.22); opacity: 0; visibility: hidden; transform: translate(-50%, 18px) scale(.985); transition: opacity .55s ease, transform .6s cubic-bezier(.2,.8,.2,1), visibility 0s .6s; }
@@ -288,6 +303,7 @@
   <div class="irule"></div>
   <div class="iline" id="infoLine">HALL RULES</div>
   <div class="isoon" id="infoSoon">COMING SOON</div>
+  <div class="ibody" id="infoBody" style="display:none"></div>
 </section>
 <div class="ashade" id="gamesShade"></div>
 <section class="phone" id="phone" role="dialog" aria-label="Games" aria-hidden="true">
@@ -606,12 +622,43 @@ window.MIMUAudio = (function () {
   function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp')) HallRunner.open(); }
   function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
   // Hall Rules and About are placeholders for now ("coming soon")
-  var INFO = { '#hall': ['HALL RULES', 'HALL RULES', 'COMING SOON'], '#about': ['ABOUT', 'MIMU ON APE INFO · TERMS OF SERVICE', 'COMING SOON'] };
+  var RULES = [
+    '<h3>The basics</h3>',
+    '<p>THE HALL is a three-lane runner on the phone in the middle of the page. Unlock the phone (swipe up on the lock screen, or press the lock button on the side), open the app <strong>THE HALL</strong>, and tap to run. Run as far as you can, grab coins, and stay off the boxes.</p>',
+    '<h3>Controls</h3>',
+    '<div class="rtab"><div class="rh">ACTION</div><div class="rh">TOUCH / MOUSE</div><div class="rh">KEYBOARD</div>',
+    '<div class="rk">Start or run again</div><div>Tap the screen, or RUN AGAIN</div><div>Space</div>',
+    '<div class="rk">Change lane</div><div>Swipe left or right</div><div>&larr; &rarr; or A D</div>',
+    '<div class="rk">Jump</div><div>Swipe up</div><div>&uarr;, W or Space</div>',
+    '<div class="rk">Slide</div><div>Swipe down</div><div>&darr; or S</div>',
+    '<div class="rk">Pause</div><div>The pause button (tap the screen to keep going)</div><div>P</div></div>',
+    '<h3>The road</h3>',
+    '<ul><li>There are <strong>three lanes</strong>. Everything you meet, boxes and coins alike, stays inside them.</li>',
+    '<li>The hall is alive: the road <strong>sways</strong> all the time and every few seconds swings into a <strong>curve</strong> and straightens out again. The lanes bend with it, so keep to your lane.</li>',
+    '<li>You <strong>speed up</strong> the longer you run, so the first seconds are the easiest.</li></ul>',
+    '<h3>Coins</h3>',
+    '<ul><li>The collectible is the rotating coin. Run through one to pick it up: it chimes, adds to your coin count, and is worth <strong>25 points</strong>.</li>',
+    '<li>Coins come in rows, zigzags that make you change lane, and double lines. Some sit right next to a box, so choose your lane early.</li></ul>',
+    '<h3>Boxes</h3>',
+    '<ul><li>The obstacles are black Mudwater boxes in random sizes and lanes. <strong>Hit one and the run is over.</strong></li>',
+    '<li>Change lanes to go around a box, or <strong>jump</strong> over it. Sliding does not get you past a box.</li>',
+    '<li>There are three kinds of box. <span class="kind"></span>The plain black box, <span class="kind red"></span>the box with a red glow, and <span class="kind blue"></span>the box with a blue glow. Right now all three end your run. The red and blue glows are reserved for point values that will be announced.</li></ul>',
+    '<h3>Score</h3>',
+    '<ul><li>Your score grows with the <strong>distance</strong> you run, plus <strong>25 points for every coin</strong>.</li>',
+    '<li>When the run ends you see your score, your coins and your best. A new record is marked <strong>NEW</strong>. Your best score is saved on this device.</li></ul>',
+    '<h3>The phone</h3>',
+    '<ul><li>Buttons on the left edge of the phone: the <strong>silent switch</strong> mutes the whole site, and the two below it turn the <strong>volume</strong> up and down.</li>',
+    '<li>The button on the right edge is the <strong>lock button</strong>: on the lock screen it unlocks to the home screen, anywhere else it locks the phone.</li>',
+    '<li>Browsers keep a page silent until you click it, which is why the loading screen asks for a click first.</li>',
+    '<li>The other apps on the phone are on the way.</li></ul>',
+    '<div class="rnote">These rules are updated as the game changes. If something here does not match the game, the game wins and the rules will be corrected.</div>'
+  ].join('');  var INFO = { '#hall': ['HALL RULES', 'THE HALL &middot; HOW TO PLAY', '', RULES], '#about': ['ABOUT', 'MIMU ON APE INFO · TERMS OF SERVICE', 'COMING SOON'] };
   var infoEl = $('infoPanel'), infoShade = $('infoShade');
   function closeInfo(keepTab) { infoEl.classList.remove('open'); infoShade.classList.remove('open'); infoEl.setAttribute('aria-hidden', 'true'); if (!keepTab) setActive(null); }
   function openInfo(t) {
     closeApe(true); closeGames(true); var d = INFO[t.getAttribute('href')] || INFO['#about'];
-    $('infoTitle').textContent = d[0]; $('infoLine').textContent = d[1]; $('infoSoon').textContent = d[2];
+    $('infoTitle').textContent = d[0]; $('infoLine').innerHTML = d[1]; $('infoSoon').textContent = d[2];
+    var ib = $('infoBody'); ib.innerHTML = d[3] || ''; ib.style.display = d[3] ? 'block' : 'none'; ib.scrollTop = 0; infoEl.classList.toggle('rules', !!d[3]);
     setActive(t); infoEl.classList.add('open'); infoShade.classList.add('open'); infoEl.setAttribute('aria-hidden', 'false');
   }
   // the phone: swipe up (or press the bar at the bottom) to unlock, then open the app THE HALL; the bar at the bottom goes home
