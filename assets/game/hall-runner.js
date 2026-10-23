@@ -21,6 +21,10 @@
   var ctx = cv.getContext('2d');
   var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b><div class="hhp"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="hr"><div class="hc"><span class="hcoin"></span><b>0</b></div><div class="hk"><span class="hcardi"></span><b>0</b></div><div class="hsl"></div></div>');
   root.appendChild(hud);
+  var MPH = 6.5, MILES = 0.001806;   // game speed units to miles per hour, and game distance units to miles (1 unit is about 2.9 metres)
+  var hbot = el('div', 'hbot', '<div class="hsp"><svg viewBox="0 0 60 36" aria-hidden="true"><path class="gtr" d="M6 32 A24 24 0 0 1 54 32"/><path class="gfl" d="M6 32 A24 24 0 0 1 54 32" stroke-dasharray="75.4" stroke-dashoffset="75.4"/><line class="gnd" x1="30" y1="32" x2="30" y2="13"/><circle class="ghb" cx="30" cy="32" r="2.6"/></svg><b class="hv">0</b><span>MPH</span></div><div class="hdi"><b class="hd">0.00</b><span>MILES</span></div>');
+  root.appendChild(hbot);
+  var elMph = hbot.querySelector('.hv'), elNeedle = hbot.querySelector('.gnd'), elArc = hbot.querySelector('.gfl'), elDist = hbot.querySelector('.hd'), lastMph = -1, lastDist = '', lastSlow = null;
   var hpSegs = hud.querySelectorAll('.hhp i'), elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b'), elCards = hud.querySelector('.hk b'), elSlow = hud.querySelector('.hsl');
   var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
   var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>CARDS</span><b class="rk">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
@@ -187,7 +191,7 @@
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rk').textContent = S.cards.length; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
     showBest();
     // demo runs are not saved or ranked: this only does something once somebody is signed in
-    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive), distance: Math.round(S.dist), jumps: S.jumps, slides: S.slides, lanes: S.lanes, boxesJumped: S.boxesJumped, hits: S.hits, packs: S.packs, extraLife: !!S.lifeUsed });
+    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive), distance: Math.round(S.dist * 2.906), jumps: S.jumps, slides: S.slides, lanes: S.lanes, boxesJumped: S.boxesJumped, hits: S.hits, packs: S.packs, extraLife: !!S.lifeUsed });
     setTimeout(function () { if (S.mode === 'dead') ovDead.style.display = 'flex'; }, 650);
   }
   // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
@@ -265,6 +269,12 @@
     var sc2 = pad(S.score, 5); if (elScore.textContent !== sc2) elScore.textContent = sc2;
     if (elCoins.textContent !== String(S.coins)) elCoins.textContent = S.coins;
     if (elCards.textContent !== String(S.cards.length)) elCards.textContent = S.cards.length;
+    if (S.mode === 'idle') hbot.style.display = 'none'; else { hbot.style.display = '';
+      var mph = Math.round(S.v * MPH), dd = (S.dist * MILES).toFixed(2), slow = S.slowT > 0;
+      if (mph !== lastMph) { lastMph = mph; elMph.textContent = mph; var f = Math.min(mph / 90, 1); elNeedle.style.transform = 'rotate(' + (-90 + f * 180).toFixed(1) + 'deg)'; elArc.setAttribute('stroke-dashoffset', (75.4 * (1 - f)).toFixed(1)); }
+      if (dd !== lastDist) { lastDist = dd; elDist.textContent = dd; }
+      if (slow !== lastSlow) { lastSlow = slow; hbot.classList.toggle('slow', slow); }
+    }
     var sl = S.slowT > 0 ? 'SLOW ' + Math.floor(S.slowT / 60) + ':' + pad(Math.floor(S.slowT % 60), 2) : ''; if (elSlow.textContent !== sl) elSlow.textContent = sl;
     S.cardPulse = Math.max(0, (S.cardPulse || 0) - dt * 2); S.packPulse = Math.max(0, (S.packPulse || 0) - dt * 2);
   }
