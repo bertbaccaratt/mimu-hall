@@ -66,7 +66,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -146,7 +146,7 @@
     if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card();
   }
   function collectPack() {
-    S.slowT = HallProfile.config.pack.slowSec; S.packPulse = 1;
+    S.packs++; S.slowT = HallProfile.config.pack.slowSec; S.packPulse = 1;
     if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
   }
   /* ---------- update ---------- */
@@ -187,7 +187,7 @@
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rk').textContent = S.cards.length; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
     showBest();
     // demo runs are not saved or ranked: this only does something once somebody is signed in
-    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive) });
+    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive), distance: Math.round(S.dist), jumps: S.jumps, slides: S.slides, lanes: S.lanes, boxesJumped: S.boxesJumped, hits: S.hits, packs: S.packs, extraLife: !!S.lifeUsed });
     setTimeout(function () { if (S.mode === 'dead') ovDead.style.display = 'flex'; }, 650);
   }
   // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
@@ -202,7 +202,7 @@
   var DMG = [2, 6, 3];
   function showHp() { for (var i = 0; i < hpSegs.length; i++) hpSegs[i].classList.toggle('off', i >= S.hp); }
   function hurt(e) {
-    S.hp = Math.max(0, S.hp - DMG[e.tier || 0]); showHp();
+    S.hits++; S.hp = Math.max(0, S.hp - DMG[e.tier || 0]); showHp();
     if (S.hp <= 0) { die(); return; }
     S.inv = 1.3; S.flash = 0.6; S.shake = 0.7;
     if (window.MIMUAudio && MIMUAudio.hurt) MIMUAudio.hurt();
@@ -244,7 +244,7 @@
           if (cross) {
             if (e.k === 'coin' && !e.got) { e.got = true; S.coins++; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
             else if ((e.k === 'card' || e.k === 'pack') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else collectPack(); } }
-            else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } }
+            else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } else if (jh >= 0.42 && !e.jumped) { e.jumped = true; S.boxesJumped++; } }
           }
         }
         if (e.z < 0.55 || (e.got && e.z < PZ - 0.2)) S.ents.splice(i, 1);
@@ -502,9 +502,9 @@
   }
 
   /* ---------- controls ---------- */
-  function lane(d) { if (S.mode !== 'run') return; S.lane = clamp(S.lane + d, -1, 1); }
-  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; }
-  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; }
+  function lane(d) { if (S.mode !== 'run') return; var nl = clamp(S.lane + d, -1, 1); if (nl !== S.lane) S.lanes++; S.lane = nl; }
+  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; S.jumps++; }
+  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; S.slides++; }
   var down = null;
   root.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; down = { x: e.clientX, y: e.clientY, t: Date.now(), used: false }; });
   root.addEventListener('pointermove', function (e) {

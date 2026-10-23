@@ -65,6 +65,8 @@
     market: function () { return adapter && adapter.market ? adapter.market : null; },   // { listings(), sellable(), buy(n), sell(n) }
     lifeCost: function () { var pts = Math.floor((adapter && adapter.totals ? adapter.totals().lifetime : 0) || 0); return Math.max(1, Math.ceil(pts * CONFIG.life.share)); },
     buyLife: function (cost) { if (!adapter) return Promise.resolve({ demo: true }); return adapter.buyLife ? Promise.resolve(adapter.buyLife(cost)) : Promise.reject(new Error('NOT AVAILABLE YET')); },   // the server takes the points and answers; rejects with a message
+    stats: function () { return adapter && adapter.stats ? adapter.stats() : {}; },   // what the server has counted for this player: runs, distance, aliveSec, longestSec, bestScore, coins, bestCoinsRun, packs, boxesJumped, jumps, slides, lanes, hits, extraLives, bought, boughtUp, sold, listed, textsSent, textPartners, mailRead, photos, calls, daysPlayed, bestStreak
+    track: function (metric, n) { if (adapter && adapter.track) adapter.track(metric, n || 1); },   // small actions the page reports (photos, calls)
     deckBoard: function () { return adapter && adapter.deckBoard ? adapter.deckBoard() : Promise.resolve([]); },   // top 10 by deck progress: [{ username, owned, rarest, family, runs, best }]
     leaderboard: function (kind) { return adapter && adapter.leaderboard ? adapter.leaderboard(kind) : Promise.resolve([]); },   // kind: 'lifetime' | 'best' | 'last'
     onChange: function (fn) { listeners.push(fn); },

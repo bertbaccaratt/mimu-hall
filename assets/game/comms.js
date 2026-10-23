@@ -40,7 +40,7 @@
   function dial() {
     if (ph.st !== 'dial') { clearTimers(); ph.st = 'dial'; paintPhone(); return; }
     if (!ph.num) return;
-    ph.st = 'calling'; paintPhone();
+    ph.st = 'calling'; P.track('calls'); paintPhone();
     tones([[0, 1.0, [440, 480]]]);
     ph.timers.push(setTimeout(function () {
       ph.st = 'busy'; paintPhone();
@@ -235,7 +235,7 @@
     $('camSh').addEventListener('click', function () {
       var f = $('camFl'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
       tones([[0, 0.03, [1800]], [0.05, 0.05, [900]]]);
-      cam.n++; $('camN').textContent = cam.n; camToast('&#128248; SAVED TO PHOTOS: <b>MIMU, CAUGHT IN 4K</b>');
+      cam.n++; P.track('photos'); $('camN').textContent = cam.n; camToast('&#128248; SAVED TO PHOTOS: <b>MIMU, CAUGHT IN 4K</b>');
     });
     $('camGal').addEventListener('click', function () { tones([[0, 0.03, [700]]]); openGallery(); });
   }
