@@ -133,29 +133,49 @@
   }
 
   /* ---------- MARKETPLACE ---------- */
-  var mk = { tab: 'buy', msg: '' };
+  /* three shelves: FACE DOWN cards come from the Hall and cost coins (deliberately dear); FACE UP cards come from other players and cost points (far dearer); SELL puts your own cards up */
+  var mk = { tab: 'down', msg: '' };
   function drawMarket() {
     var el = $('mktApp'); if (!el) return; el.classList.add('page');
     var A = P.market ? P.market() : null, t = P.totals ? P.totals() : {}, on = P.isSignedIn() && A;
-    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">MARKETPLACE</h2><div class="pgsub">BUY CARDS WITH COINS &middot; SELL CARDS FOR POINTS</div></div>' +
+    var tabs = [['down', 'FACE DOWN &middot; COINS'], ['up', 'FACE UP &middot; POINTS'], ['sell', 'SELL']];
+    var lockSub = { down: 'FACE DOWN CARDS FROM THE HALL, FOR COINS', up: 'FACE UP CARDS FROM PLAYERS, FOR POINTS', sell: 'SELL ANY CARD YOU HAVE COLLECTED' }[mk.tab];
+    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">MARKETPLACE</h2><div class="pgsub">FACE DOWN FOR COINS &middot; FACE UP FOR POINTS</div></div>' +
       '<div class="howto"><div class="hth"><b>HOW TO USE THE MARKETPLACE</b></div>' +
-      '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card that is not owned yet, face down"></div><figcaption>NOT OWNED<br>FACE DOWN</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, an owned card, flipped face up"></div><figcaption>OWNED<br>FLIPPED &middot; #049</figcaption></figure></div>' +
+      '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card you do not have yet, face down"></div><figcaption>FACE DOWN<br>FROM THE HALL<br>COSTS COINS</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a collected card, face up"></div><figcaption>FACE UP &middot; #049<br>FROM A PLAYER<br>COSTS POINTS</figcaption></figure></div>' +
       '<div class="hsub">THIS IS HOW EVERY CARD LOOKS IN <b>COLLECTED</b>: FACE DOWN UNTIL YOU HAVE IT, THEN IT FLIPS OVER. THE DIAMONDS SHOW HOW RARE IT IS AND THE NUMBER IS ITS PLACE FROM 1 TO 120.</div>' +
-      '<ol class="hsteps"><li><b>WHERE THE CARDS COME FROM</b> EVERY CARD ON THE BUY SHELF IS OWNED BY ANOTHER PLAYER, AND THE SELLER SETS THE COIN PRICE.</li><li><b>BUY</b> PRESS A COIN PRICE AND THE CARD FLIPS INTO YOUR COLLECTED.</li><li><b>NEGOTIATE</b> PRESS TEXT ON A LISTING TO MESSAGE THE SELLER. ASK THEM TO LOWER THE PRICE OR MAKE AN OFFER. IF THEY AGREE, THEY CHANGE THE PRICE AND YOU BUY IT.</li><li><b>SELL</b> ANY CARD YOU OWN, EARNED OR BOUGHT. SELL IT FOR POINTS THAT GO ON YOUR LEADERBOARD SCORE, OR LIST IT FOR COINS AT YOUR OWN PRICE AND LET BUYERS TEXT YOU.</li><li><b>CHECK</b> YOUR DECK IN COLLECTED ANY TIME.</li><li>ONLY COINS AND POINTS CHANGE HANDS, NEVER MONEY. SALES ARE FINAL.</li></ol></div>' +
-      '<div class="mkstats"><div><small>COIN BALANCE</small><b>' + fmt(t.balance) + '</b></div><div><small>COINS EARNED</small><b>' + fmt(t.coins) + '</b></div></div>' +
-      '<div class="tabs3" id="mkTabs"><button' + (mk.tab === 'buy' ? ' class="on"' : '') + ' data-k="buy">BUY</button><button' + (mk.tab === 'sell' ? ' class="on"' : '') + ' data-k="sell">SELL</button></div>' +
-      '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE SHELVES OPEN WITH SIGN-IN<br><span style="opacity:.7">' + (mk.tab === 'buy' ? 'SPEND COINS ON CARDS YOU HAVE NOT FOUND' : 'SELL ANY CARD YOU OWN FOR LEADERBOARD POINTS') + '</span></div>') + '</div></div>';
+      '<ol class="hsteps"><li><b>FACE DOWN CARDS COME FROM THE HALL.</b> THEY ARE CARDS YOU DO NOT HAVE YET, AND THEY COST <b>COINS</b>. THEY ARE PRICED HIGH ON PURPOSE, SO RUNNING STAYS THE BEST WAY TO BUILD A DECK.</li>' +
+      '<li><b>FACE UP CARDS COME FROM PLAYERS.</b> THESE ARE CARDS OTHER PLAYERS HAVE ALREADY COLLECTED, AND THEY COST <b>POINTS</b>, DRAMATICALLY MORE THAN A FACE DOWN CARD. THE SELLER SETS THE PRICE. POINTS YOU SPEND COME OFF YOUR LEADERBOARD SCORE AND GO TO THE SELLER.</li>' +
+      '<li><b>NEGOTIATE.</b> PRESS TEXT ON A FACE UP LISTING TO MESSAGE THE SELLER. ASK THEM TO LOWER THE PRICE OR MAKE AN OFFER. IF THEY AGREE, THEY CHANGE THE PRICE AND YOU BUY IT.</li>' +
+      '<li><b>SELL.</b> ANY CARD YOU HAVE COLLECTED, EARNED OR BOUGHT, CAN GO TO THE HALL FOR A SET NUMBER OF POINTS, OR BE LISTED FACE UP FOR YOUR OWN PRICE IN POINTS WHILE BUYERS TEXT YOU.</li>' +
+      '<li><b>CHECK</b> YOUR DECK IN COLLECTED ANY TIME. ONLY COINS AND POINTS CHANGE HANDS, NEVER MONEY. SALES ARE FINAL.</li></ol></div>' +
+      '<div class="mkstats"><div><small>COIN BALANCE</small><b>' + fmt(t.balance) + '</b></div><div><small>COINS EARNED</small><b>' + fmt(t.coins) + '</b></div><div><small>YOUR POINTS</small><b>' + fmt(t.lifetime) + '</b></div></div>' +
+      '<div class="tabs3 t3" id="mkTabs">' + tabs.map(function (x) { return '<button' + (mk.tab === x[0] ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE SHELVES OPEN WITH SIGN-IN<br><span style="opacity:.7">' + lockSub + '</span></div>') + '</div></div>';
     $('mkTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; mk.tab = b.getAttribute('data-k'); mk.msg = ''; drawMarket(); });
     if (!on) return;
-    var buy = mk.tab === 'buy';
-    (buy ? A.listings() : A.sellable()).then(function (rows) {
+    var tab = mk.tab, src = tab === 'down' ? (A.shelf || A.listings) : tab === 'up' ? A.listings : A.sellable;
+    function thumb(r, c) { var back = tab === 'down'; return '<span class="mkn"><img class="mkt" alt="" loading="lazy" src="' + (back || !c ? 'assets/game/card-back.webp' : esc(c.file)) + '"><b>' + pad3(r.n) + '</b></span>'; }
+    function row(r) {
+      var c = P.card ? P.card(r.n) : null, name = tab === 'down' ? 'FACE DOWN CARD' : esc(c ? c.name : 'CARD'), sub = esc(r.tier || '') + (tab === 'down' ? ' &middot; FROM THE HALL' : '') + (r.count > 1 ? ' &middot; ' + r.count + ' COPIES' : '');
+      var seller = tab === 'up' && r.seller ? '<em class="sl">SOLD BY ' + esc(String(r.seller).toUpperCase()) + ' <button type="button" class="mkmsg" data-id="' + esc(r.sellerId || '') + '" data-name="' + esc(r.seller) + '">TEXT</button></em>' : '';
+      var list = tab === 'sell' && A.list ? '<span class="mkl"><input class="mkp" type="number" min="1" inputmode="numeric" placeholder="YOUR PRICE IN POINTS" aria-label="Your price in points"><button type="button" class="mklist" data-n="' + r.n + '">LIST</button></span>' : '';
+      var label = tab === 'down' ? fmt(r.price) + ' COINS' : tab === 'up' ? fmt(r.price) + ' PTS' : 'SELL +' + fmt(r.value) + ' PTS';
+      return '<div class="mkrow">' + thumb(r, c) + '<span class="cmmid"><b>' + name + '</b><em>' + sub + '</em>' + seller + list + '</span><button type="button" class="cmbtn" data-n="' + r.n + '"' + (r.id != null ? ' data-id="' + esc(r.id) + '"' : '') + '>' + label + '</button></div>';
+    }
+    src.call(A).then(function (rows) {
       var box = $('mkList'); if (!box) return;
-      if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + (buy ? 'NOTHING FOR SALE RIGHT NOW' : 'YOU HAVE NO CARDS TO SELL YET') + '</div>'; return; }
-      box.innerHTML = rows.map(function (r) { var c = P.card ? P.card(r.n) : null; return '<div class="mkrow"><span class="mkn">' + pad3(r.n) + '</span><span class="cmmid"><b>' + esc(c ? c.name : 'CARD') + '</b><em>' + esc(r.tier || '') + (r.count > 1 ? ' &middot; OWN ' + r.count : '') + '</em>' + (buy && r.seller ? '<em class="sl">SOLD BY ' + esc(String(r.seller).toUpperCase()) + ' <button type="button" class="mkmsg" data-id="' + esc(r.sellerId || '') + '" data-name="' + esc(r.seller) + '">TEXT</button></em>' : '') + (!buy && A.list ? '<span class="mkl"><input class="mkp" type="number" min="1" inputmode="numeric" placeholder="PRICE IN COINS" aria-label="Price in coins"><button type="button" class="mklist" data-n="' + r.n + '">LIST</button></span>' : '') + '</span><button type="button" class="cmbtn" data-n="' + r.n + '">' + (buy ? fmt(r.price) + ' COINS' : '+' + fmt(r.value) + ' PTS') + '</button></div>'; }).join('');
+      if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + (tab === 'sell' ? 'YOU HAVE NO CARDS TO SELL YET' : tab === 'up' ? 'NO PLAYER HAS A CARD FOR SALE RIGHT NOW' : 'THE HALL HAS NOTHING FACE DOWN FOR SALE') + '</div>'; return; }
+      box.innerHTML = rows.map(row).join('');
       box.addEventListener('click', function (ev) {
         var tx = ev.target.closest('.mkmsg'); if (tx) { ms.pending = { id: tx.getAttribute('data-id'), name: tx.getAttribute('data-name') }; var mi = $('msgIcon'); if (mi) mi.click(); return; }
-        var li = ev.target.closest('.mklist'); if (li) { var inp = li.parentNode.querySelector('.mkp'), pr = parseInt(inp.value, 10), n2 = parseInt(li.getAttribute('data-n'), 10); if (!(pr > 0)) { mk.msg = 'TYPE A PRICE IN COINS FIRST'; $('mkMsg').textContent = mk.msg; return; } li.disabled = true; A.list(n2, pr).then(function () { mk.msg = 'LISTED CARD ' + pad3(n2) + ' FOR ' + fmt(pr) + ' COINS'; drawMarket(); }, function (e) { mk.msg = String((e && e.message) || 'NOT AVAILABLE').toUpperCase(); drawMarket(); }); return; }
-        var b = ev.target.closest('.cmbtn'); if (!b) return; b.disabled = true; var n = parseInt(b.getAttribute('data-n'), 10); (buy ? A.buy(n) : A.sell(n)).then(function () { mk.msg = buy ? 'BOUGHT CARD ' + pad3(n) : 'SOLD CARD ' + pad3(n); drawMarket(); }, function (e) { mk.msg = String((e && e.message) || 'NOT AVAILABLE').toUpperCase(); drawMarket(); }); });
+        function fail(e) { mk.msg = String((e && e.message) || 'NOT AVAILABLE').toUpperCase(); drawMarket(); }
+        var li = ev.target.closest('.mklist'); if (li) { var inp = li.parentNode.querySelector('.mkp'), pr = parseInt(inp.value, 10), n2 = parseInt(li.getAttribute('data-n'), 10); if (!(pr > 0)) { mk.msg = 'TYPE A PRICE IN POINTS FIRST'; $('mkMsg').textContent = mk.msg; return; } li.disabled = true; A.list(n2, pr).then(function () { mk.msg = 'LISTED CARD ' + pad3(n2) + ' FACE UP FOR ' + fmt(pr) + ' POINTS'; drawMarket(); }, fail); return; }
+        var b = ev.target.closest('.cmbtn'); if (!b) return; b.disabled = true;
+        var n = parseInt(b.getAttribute('data-n'), 10), id = b.getAttribute('data-id'), p;
+        if (tab === 'down') p = A.buy(n); else if (tab === 'up') p = (A.buyListing || A.buy)(id != null ? id : n); else p = A.sell(n);
+        p.then(function () { mk.msg = tab === 'sell' ? 'SOLD CARD ' + pad3(n) + ' TO THE HALL' : 'BOUGHT CARD ' + pad3(n); drawMarket(); }, fail);
+      });
     }, function () { var box = $('mkList'); if (box) box.innerHTML = '<div class="empty">COULD NOT LOAD THE SHELVES</div>'; });
   }
 
@@ -163,7 +183,7 @@
   var SHOTS = {
     x: { name: 'Mimu On Ape', sub: '@mimuonape', url: 'https://x.com/mimuonape', btn: 'Open on X', img: 'assets/game/x-profile.jpg', alt: 'The Mimu On Ape profile on X: MIMU, @mimuonape, 3,470 followers', cls: 'xshot',
       logo: '<svg viewBox="0 0 24 24"><path fill="#fff" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
-    os: { name: 'MIMU On Ape', sub: 'OpenSea collection', url: 'https://opensea.io/collection/mimuonape', btn: 'Open on OpenSea', img: 'assets/game/opensea-collection.jpg', alt: 'The MIMU On Ape collection on OpenSea: items, floor price, volume and owners', cls: 'osshot',
+    os: { name: 'MIMU On Ape', sub: 'OpenSea collection', url: 'https://opensea.io/collection/mimuonape', btn: 'Open on OpenSea', img: 'assets/game/opensea-collection.jpg', alt: 'The MIMU On Ape collection on OpenSea: items, floor price, volume and holders', cls: 'osshot',
       logo: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#2081e2"/><path fill="#fff" d="M11.200 4.800c.2-.4.7-.3.8.1.8 2 1.300 4.200 1.300 6.400 0 .3-.2.5-.5.500H7c-.4 0-.6-.4-.4-.7zM14.400 9c0-.2.3-.3.4-.1 1.400 1.400 2.700 3.300 3.400 5 .1.2-.1.4-.3.4h-3.500c-.3 0-.5-.2-.5-.5zM5.400 15.400c0-.2.2-.3.3-.3h12.600c.3 0 .4.2.4.4-.3 1.900-1.900 3.400-3.800 3.400H9.200c-2.100 0-3.700-1.400-3.800-3.500z"/></svg>' }
   };
   function drawShot(id, key) {

@@ -11,13 +11,13 @@
 
   /* ---------- COLLECTED ---------- */
   var HOWTO_COLLECTED = '<div class="howto"><div class="hth"><b>HOW TO USE COLLECTED</b></div>' +
-    '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card you do not have yet, face down"></div><figcaption>NOT OWNED<br>FACE DOWN</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, an owned card, flipped face up"></div><figcaption>OWNED<br>FLIPPED &middot; #049</figcaption></figure></div>' +
+    '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card you do not have yet, face down"></div><figcaption>NOT COLLECTED<br>FACE DOWN</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a collected card, flipped face up"></div><figcaption>COLLECTED<br>FLIPPED &middot; #049</figcaption></figure></div>' +
     '<div class="hsub">ALL 120 CARDS START FACE DOWN. WHEN YOU EARN OR BUY ONE, IT FLIPS OVER AND SHOWS ITS PICTURE.</div>' +
     '<ol class="hsteps"><li><b>READ A CARD</b> THE DIAMONDS AT THE TOP SHOW HOW RARE IT IS (ONE TO FIVE), THE BADGE IN THE CORNER IS ITS FAMILY, AND THE NUMBER AT THE BOTTOM IS ITS PLACE FROM 1 TO 120.</li>' +
     '<li><b>WATCH THE BARS</b> THE TOP BAR IS YOUR WHOLE DECK. THE BARS BELOW SHOW HOW CLOSE YOU ARE IN EVERY RARITY TIER AND EVERY FAMILY.</li>' +
-    '<li><b>FILTER</b> USE THE BUTTONS TO SHOW ONE TIER, ONE FAMILY, ONLY CARDS YOU OWN, OR ONLY THE ONES YOU ARE MISSING.</li>' +
-    '<li><b>GET CARDS</b> JUMP THE FLOATING CARD IN THE HALL, OR BUY ONE FROM ANOTHER PLAYER IN THE MARKETPLACE.</li>' +
-    '<li><b>EXTRA COPIES</b> ANY CARD YOU OWN CAN BE SOLD OR LISTED IN THE MARKETPLACE.</li>' +
+    '<li><b>FILTER</b> USE THE BUTTONS TO SHOW ONE TIER, ONE FAMILY, ONLY CARDS YOU HAVE COLLECTED, OR ONLY THE ONES YOU ARE MISSING.</li>' +
+    '<li><b>GET CARDS</b> JUMP THE FLOATING CARD IN THE HALL. OR USE THE MARKETPLACE: FACE DOWN CARDS FROM THE HALL COST COINS, AND FACE UP CARDS FROM OTHER PLAYERS COST POINTS.</li>' +
+    '<li><b>EXTRA COPIES</b> ANY CARD YOU HAVE COLLECTED CAN BE SOLD OR LISTED IN THE MARKETPLACE.</li>' +
     '<li>UNTIL SIGN-IN OPENS THE HALL RUNS AS A DEMO, SO NOTHING IS SAVED HERE YET.</li></ol></div>';
   var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set();
   function tierDot(t) { return t.grad ? '<i class="dm" style="background:' + t.grad + '"></i>' : '<i class="dm" style="background:' + t.color + '"></i>'; }
@@ -27,7 +27,7 @@
     var famBars = P.families.map(function (fa) { return '<div class="pb" data-f="' + fa.key + '"><span>' + fa.name.toUpperCase() + '</span><div class="tr"><i></i></div><span class="ct">0/' + fa.count + '</span></div>'; }).join('');
     var tierChips = '<button class="chip on" data-k="tier" data-v="0">ALL</button>' + P.tiers.map(function (t) { return '<button class="chip" data-k="tier" data-v="' + t.n + '">' + tierDot(t) + ROMAN[t.n] + '</button>'; }).join('');
     var famChips = '<button class="chip on" data-k="family" data-v="">ALL</button>' + P.families.map(function (fa) { return '<button class="chip" data-k="family" data-v="' + fa.key + '">' + fa.name.toUpperCase() + '</button>'; }).join('');
-    var viewChips = ['all', 'owned', 'missing'].map(function (v, i) { return '<button class="chip' + (i ? '' : ' on') + '" data-k="view" data-v="' + v + '">' + v.toUpperCase() + '</button>'; }).join('');
+    var viewChips = ['all', 'owned', 'missing'].map(function (v, i) { return '<button class="chip' + (i ? '' : ' on') + '" data-k="view" data-v="' + v + '">' + (v === 'owned' ? 'COLLECTED' : v.toUpperCase()) + '</button>'; }).join('');
     var cards = P.cards().map(function (c) { return '<div class="cc" data-n="' + c.n + '" data-t="' + c.tier + '" data-f="' + c.family + '"><div class="cf"><div class="cb"><img src="assets/game/card-back.webp" alt="" loading="lazy" decoding="async"></div><div class="cfr"><img data-src="' + c.file + '" alt="' + esc(c.name) + '" decoding="async"></div></div><span class="cn">' + pad3(c.n) + '</span></div>'; }).join('');
     cEl.classList.add('page');
     cEl.innerHTML = '<div class="pg" id="cScroll"><div class="pgh"><h2 class="gold">COLLECTED</h2><div class="pgsub" id="cSub">0 / 120</div></div>' +

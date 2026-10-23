@@ -45,14 +45,14 @@
       ['CARD SIGHTING', 'one every ' + hms(s.everySec) + ' alive; jump to collect'],
       ['TIER LOCKS (TIME ALIVE)', P.tiers.map(function (t, i) { return t.name + ' ' + (s.locksSec[i] ? hms(s.locksSec[i]) : 'start'); }).join(' · ')],
       ['ODDS WHEN OPEN', P.tiers.map(function (t, i) { return t.name + ' ' + s.odds[i] + '%'; }).join(' · ')],
-      ['UNLOCK RULE', 'a tier opens when you own ' + Math.round(s.unlockShare * 100) + '% of the tier below'],
+      ['UNLOCK RULE', 'a tier opens when you have collected ' + Math.round(s.unlockShare * 100) + '% of the tier below'],
       ['LUCKY CHANCE', 'after ' + hms(s.lucky.afterSec) + ': Prestige ' + (s.lucky.prestige * 100) + '%, Legendary ' + (s.lucky.legendary * 100) + '% per sighting'],
-      ['DUPLICATES', Math.round(s.dupChance * 100) + '% of sightings may repeat an owned card'],
+      ['DUPLICATES', Math.round(s.dupChance * 100) + '% of sightings may repeat a card already collected'],
       ['THE PACK', 'first at ' + hms(pk.firstSec) + ', then every ' + hms(pk.everySec) + '; jump it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' s, no other bonus'],
       ['HEALTH', hp.segments + ' segments. Plain box ' + hp.dmg.plain + ' (3 hits), blue ' + hp.dmg.blue + ' (2 hits), red ' + hp.dmg.red + ' (1 hit)'],
       ['SCORING', 'distance + ' + c.coinPoints + ' per coin; every run adds to the lifetime total'],
       ['COINS', 'every coin adds to lifetime coins earned; the balance is earned minus spent'],
-      ['MARKETPLACE', 'buy cards with coins; sell any owned card for leaderboard points'],
+      ['MARKETPLACE', 'buy cards with coins; sell any collected card for leaderboard points'],
       ['NO PAUSE', 'leaving the game in any way ends the run'],
       ['SAVING', P.isSignedIn() ? 'signed in: runs, cards, coins and messages are saved' : 'nobody signed in: demo runs, nothing saved, nothing ranked']
     ];
@@ -148,7 +148,7 @@
       '<section data-p="msg"><div class="box"><h4>TEXT AS HYPE</h4><div class="hint" style="margin-bottom:12px">A one-on-one text from the HYPE account to a signed-in player. Players cannot reply to HYPE.</div><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><textarea id="admHBody" maxlength="280" rows="4" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div><div class="box" style="margin-top:16px"><h4>RECENTLY SENT</h4><div class="sent" id="admHList"></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
-      '<section data-p="eco"><div class="box"><h4>COINS AND THE MARKETPLACE</h4><div id="admEco"></div><div class="hint" style="margin-top:14px">Coins collected in runs are spent on cards in the Marketplace. Any owned card can be sold for leaderboard points. Prices and sale values are served by the Marketplace service once it is connected.</div></div></section>' +
+      '<section data-p="eco"><div class="box"><h4>COINS AND THE MARKETPLACE</h4><div id="admEco"></div><div class="hint" style="margin-top:14px">Coins collected in runs are spent on cards in the Marketplace. Any collected card can be sold for leaderboard points. Prices and sale values are served by the Marketplace service once it is connected.</div></div></section>' +
       '<section data-p="cards"><div class="box"><h4>THE 120 CARDS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="tools"><div class="box"><h4>TOOLS</h4><div class="tools"><button type="button" class="sw' + (P.isTest() ? ' on' : '') + '" id="admTest"><i></i>TEST MODE</button><div class="hint">Test mode makes card sightings come every few seconds, opens every tier, and brings the pack after 40 seconds, so you can see every rarity and the slowdown without playing for hours. Nothing is saved while it is on. It only changes this browser.</div></div>' +
