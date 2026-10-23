@@ -6,8 +6,8 @@
   if (!root) return;
 
   var BEST_KEY = 'hall-best';
-  var LANE = 0.36;            // lane width as a share of the screen width (at the bottom of the screen)
-  var XW = 0.74;              // where the side walls stand, as a share of the screen width, measured from the middle of the road
+  var LANE = 0.40;            // lane width as a share of the screen width (at the bottom of the screen)
+  var XW = 0.78;              // where the side walls stand, as a share of the screen width, measured from the middle of the road
   var PZ = 1.22;              // how far ahead of the camera the runner stands (1 = bottom of the screen)
   var SP = 1 / PZ;            // the runner's perspective scale
   var HORIZON = 0.385;        // where the floor meets the far end of the hall, as a share of the height
@@ -32,11 +32,13 @@
   /* ---------- artwork ---------- */
   var imgs = {}, pending = 0;
   function load(name, src) { pending++; var im = new Image(); var done = function () { pending--; }; im.onload = done; im.onerror = done; im.src = src; imgs[name] = im; }
-  load('back', 'assets/game/hall-back.webp');
+  load('back', 'assets/game/hall-back-open.webp');
   load('runA', 'assets/game/runA.webp');
   load('runB', 'assets/game/runB.webp');
   load('box', 'assets/game/box.webp');
   load('coin', 'assets/game/coin-sheet.webp');
+  load('wall', 'assets/game/wall.webp');
+  load('floor', 'assets/game/floor.webp');
 
   /* the marble floor, painted once: black stone with fine gold veins */
   var tex = document.createElement('canvas'); tex.width = TEX_W; tex.height = TEX_H;
@@ -160,12 +162,12 @@
   function cxAt(s) { return W / 2 + S.camX + S.curve * 0.52 * W * (1 - s) * (1 - s) + S.sway * 0.035 * W * (1 - s); }
 
   function drawFloor() {
-    var hh = H - y0, y, s, d, v, x0, wd;
+    var hh = H - y0, y, s, d, v, x0, wd, fsrc = imgs.floor.naturalWidth ? imgs.floor : tex, fw = imgs.floor.naturalWidth ? imgs.floor.naturalWidth : TEX_W, fh = imgs.floor.naturalWidth ? imgs.floor.naturalHeight : TEX_H;
     for (y = y0 + 2; y < H; y += 2) {
       s = (y - y0) / hh; if (s < 0.03) continue;
-      d = 1 / s; v = ((((d + S.scrollZ) * 0.45) % 1) + 1) % 1 * (TEX_H - 2);
+      d = 1 / s; v = ((((d + S.scrollZ) * 0.30) % 1) + 1) % 1 * (fh - 2);
       x0 = cxAt(s) - W * XW * s; wd = W * XW * 2 * s;
-      ctx.drawImage(tex, 0, v | 0, TEX_W, 2, x0, y, wd, 2.6);
+      ctx.drawImage(fsrc, 0, v | 0, fw, 2, x0, y, wd, 2.6);
     }
     // haze where the floor runs into the far end of the hall, and a soft dark at the bottom
     var g = ctx.createLinearGradient(0, y0 - 2, 0, y0 + hh * 0.28);
@@ -205,66 +207,48 @@
     }
   }
 
-  /* the side walls of the hall: dark stone panels, gold trim, pillars with candle sconces and crimson banners.
-     They stand either side of the road and bend with it. */
-  function mix(a, b, t) { return a + (b - a) * t; }
-  function rgb(r, g, b, a) { return 'rgba(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ',' + (a == null ? 1 : a) + ')'; }
+  /* the side walls of the hall: a photographed-looking wall (black veined marble, brass, crimson velvet, carved wood) stood either side
+     of the road, drawn in thin vertical slices so it runs away in perspective and bends with the road. */
+  var HN = 1.45;              // wall height, in "screen heights from the horizon to the bottom of the screen"
+  var BAY = 3.4;              // length of one wall bay in road units (the wall picture holds two bays, the second mirrored)
   function wp(z, side, h) { var s = 1 / z; return [cxAt(s) + side * XW * W * s, y0 + (H - y0) * s * (1 - h)]; }
-  function poly(pts, fill, stroke, lw) {
-    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.closePath();
-    if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
-  }
-  function wquad(z1, z2, h1, h2, side, fill) { poly([wp(z1, side, h1), wp(z1, side, h2), wp(z2, side, h2), wp(z2, side, h1)], fill); }
   function drawWalls() {
-    var PER = 3.4, n0 = Math.floor(S.scrollZ / PER), n, side, zc, f;
-    for (n = n0 + 8; n >= n0 - 1; n--) {
-      zc = n * PER - S.scrollZ;
-      for (side = -1; side <= 1; side += 2) {
-        // wall panel between two pillars
-        var qn = Math.max(0.6, zc + 0.24), qf = Math.min(28, zc + PER - 0.24);
-        if (qn < qf) {
-          f = clamp(qn / 22, 0, 1);
-          wquad(qn, qf, 0, 1.35, side, rgb(mix(36, 12, f), mix(17, 6, f), mix(19, 8, f)));
-          wquad(qn, qf, 0, 0.22, side, rgb(mix(20, 8, f), mix(9, 4, f), mix(10, 5, f)));                    // dark wainscot
-          wquad(qn, qf, 1.30, 1.35, side, rgb(mix(214, 70, f), mix(160, 46, f), mix(80, 24, f)));
-          wquad(qn, qf, 0.22, 0.245, side, rgb(mix(214, 70, f), mix(160, 46, f), mix(80, 24, f)));            // gold trim
-          wquad(qn, qf, 1.2, 1.22, side, rgb(mix(214, 70, f), mix(160, 46, f), mix(80, 24, f), 0.8));
-          // crimson banner hung in the middle of the panel
-          var zb = zc + PER / 2, zh = 0.44, sb = 1 / zb;
-          if (zb - zh > 0.6 && zb < 26) {
-            var bf = clamp(zb / 22, 0, 1), top = 1.08, bot = 0.45, nt = 0.55;
-            poly([wp(zb - zh, side, top), wp(zb + zh, side, top), wp(zb + zh, side, bot), wp(zb, side, nt), wp(zb - zh, side, bot)], rgb(mix(130, 36, bf), mix(18, 6, bf), mix(28, 8, bf)), rgb(mix(226, 80, bf), mix(172, 52, bf), mix(88, 26, bf)), Math.max(0.7, 2 * sb * (W / 340)));
-            var dm = wp(zb, side, 0.78), dw = 0.13 * W * sb * 0.9;
-            ctx.fillStyle = rgb(mix(226, 80, bf), mix(172, 52, bf), mix(88, 26, bf)); ctx.beginPath(); ctx.moveTo(dm[0], dm[1] - dw); ctx.lineTo(dm[0] + dw * 0.6, dm[1]); ctx.lineTo(dm[0], dm[1] + dw); ctx.lineTo(dm[0] - dw * 0.6, dm[1]); ctx.closePath(); ctx.fill();
-          }
-        }
-        // pillar
-        var pn = Math.max(0.6, zc - 0.24), pf = Math.min(28, zc + 0.24);
-        if (pn < pf) {
-          f = clamp(pn / 22, 0, 1);
-          wquad(pn, pf, 0, 1.35, side, rgb(mix(62, 20, f), mix(34, 10, f), mix(34, 12, f)));
-          wquad(pn, Math.min(pf, pn + 0.07), 0, 1.35, side, rgb(mix(96, 30, f), mix(58, 16, f), mix(52, 16, f)));  // lit edge
-          wquad(pn, pf, 0.88, 0.93, side, rgb(mix(214, 70, f), mix(160, 46, f), mix(80, 24, f)));
-          wquad(pn, pf, 0, 0.06, side, rgb(mix(214, 70, f), mix(160, 46, f), mix(80, 24, f)));
-          // candle sconce
-          if (zc > 0.7) {
-            var sp = wp(zc, side, 0.44), ss = 1 / zc, fl = 0.9 + 0.1 * Math.sin(S.t * 9 + n * 2 + side), gx = sp[0] - side * 0.025 * W * ss, gr = 0.2 * (H - y0) * ss * 0.5 * fl;
-            ctx.save(); ctx.globalCompositeOperation = 'lighter';
-            var rg = ctx.createRadialGradient(gx, sp[1], 0, gx, sp[1], gr * 2.4); rg.addColorStop(0, 'rgba(255,190,100,.8)'); rg.addColorStop(.35, 'rgba(255,150,60,.28)'); rg.addColorStop(1, 'rgba(255,130,40,0)');
-            ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(gx, sp[1], gr * 2.4, 0, 6.3); ctx.fill(); ctx.restore();
-            ctx.fillStyle = rgb(mix(226, 90, f), mix(214, 80, f), mix(180, 60, f)); ctx.fillRect(gx - gr * 0.12, sp[1] - gr * 0.1, gr * 0.24, gr * 0.9);
-            ctx.fillStyle = '#ffd890'; ctx.beginPath(); ctx.ellipse(gx, sp[1] - gr * 0.3, gr * 0.14, gr * 0.36 * fl, 0, 0, 6.3); ctx.fill();
-          }
-        }
+    var im = imgs.wall; if (!im.naturalWidth) return;
+    var hh = H - y0, TW = im.naturalWidth, TH = im.naturalHeight, TILE = BAY * 2, side, z, zn, dz, s1, s2, x1, x2, xl, xw, u, sx, sw, yt, yb, a;
+    for (side = -1; side <= 1; side += 2) {
+      z = 26;
+      while (z > 0.62) {
+        dz = Math.max(0.004, 1.6 * z * z / (XW * W)); zn = Math.max(0.62, z - dz);
+        s1 = 1 / z; s2 = 1 / zn;
+        x1 = cxAt(s1) + side * XW * W * s1; x2 = cxAt(s2) + side * XW * W * s2;
+        u = ((((z + zn) / 2 + S.scrollZ) / TILE) % 1 + 1) % 1;
+        sx = u * TW; sw = Math.max(1, (z - zn) / TILE * TW); if (sx + sw > TW) sw = TW - sx;
+        yt = y0 + hh * s2 * (1 - HN); yb = y0 + hh * s2;
+        xl = Math.min(x1, x2); xw = Math.abs(x2 - x1) + 0.8;
+        if (sw > 0.5) ctx.drawImage(im, sx, 0, sw, TH, xl, yt, xw, yb - yt);
+        a = clamp((z - 3) / 22, 0, 1); a = a * a * 0.78;
+        if (a > 0.01) { ctx.fillStyle = 'rgba(2,0,1,' + a + ')'; ctx.fillRect(xl, yt, xw, yb - yt); }
+        z = zn;
       }
     }
+    // the brass candelabra on every bay: a live flame glow over the picture
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    var k0 = Math.floor(S.scrollZ / BAY), k, zc, fl, p, rad, rg;
+    for (k = k0 + 8; k >= k0; k--) {
+      zc = k * BAY + BAY / 2 - S.scrollZ; if (zc < 0.9 || zc > 24) continue;
+      for (side = -1; side <= 1; side += 2) {
+        p = wp(zc, side, HN * 0.44); rad = 0.085 * hh / zc * (0.9 + 0.1 * Math.sin(S.t * 9 + k * 2.3 + side));
+        rg = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], rad * 2.4); rg.addColorStop(0, 'rgba(255,200,110,.55)'); rg.addColorStop(.4, 'rgba(255,150,60,.18)'); rg.addColorStop(1, 'rgba(255,120,40,0)');
+        ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(p[0], p[1], rad * 2.4, 0, 6.3); ctx.fill();
+      }
+    }
+    ctx.restore();
   }
-
   function shadow(x, y, w) { ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.ellipse(x, y, w, w * 0.22, 0, 0, 6.3); ctx.fill(); ctx.restore(); }
 
   function drawBox(e) {
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (!im.naturalWidth || y > H + 80) return;
-    var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.30 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth;
+    var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.36 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth;
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, bw * 0.55);
     ctx.drawImage(im, x - bw / 2, y - bh * 0.9, bw, bh);
@@ -274,7 +258,7 @@
   function drawCoin(e) {
     if (e.got) return;
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (!im.naturalWidth || y > H + 60) return;
-    var x = cxAt(s) + e.lane * LANE * W * s, cw = 0.15 * W * s, cy = y - cw * 0.85 - Math.sin(S.t * 4 + e.ph) * cw * 0.06;
+    var x = cxAt(s) + e.lane * LANE * W * s, cw = 0.17 * W * s, cy = y - cw * 0.85 - Math.sin(S.t * 4 + e.ph) * cw * 0.06;
     var fr = Math.floor(S.t * 10 + e.ph) % 20, fx = (fr % 5) * 192, fy = ((fr / 5) | 0) * 192;
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, cw * 0.32);
@@ -290,7 +274,7 @@
   function drawPlayer() {
     var hh = H - y0, y = y0 + SP * hh, x = cxAt(SP) + S.px * LANE * W * SP, jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0;
     var im = (Math.floor(S.run) % 2 === 0) ? imgs.runA : imgs.runB; if (!im.naturalWidth) return;
-    var sh = H * 0.27, sw = sh * im.naturalWidth / im.naturalHeight, bob = (S.mode === 'dead' ? 0 : Math.abs(Math.sin(S.run * Math.PI)) * sh * 0.025);
+    var sh = H * 0.25, sw = sh * im.naturalWidth / im.naturalHeight, bob = (S.mode === 'dead' ? 0 : Math.abs(Math.sin(S.run * Math.PI)) * sh * 0.025);
     var lift = jh * H * 0.11 + bob, tilt = clamp(S.vx * 0.012, -0.16, 0.16);
     shadow(x, y, sw * 0.34 * (1 - jh * 0.35));
     ctx.save(); ctx.translate(x, y - lift); ctx.rotate(tilt);
@@ -300,6 +284,15 @@
     ctx.restore();
   }
 
+  /* the big coin hanging in the smoke at the far end keeps spinning (frames from the rotating-coin video, blended so it turns smoothly) */
+  function drawFarCoin(bx, bw, bh) {
+    var ci = imgs.coin; if (!ci.naturalWidth) return;
+    var x = bx + 375 / 752 * bw, y = 298 / 500 * bh + Math.sin(S.t * 0.9) * 2, D = 176 / 752 * bw / 0.80, ph = (S.t / 8) * 20, i0 = Math.floor(ph) % 20, f = ph - Math.floor(ph), i1 = (i0 + 1) % 20;
+    ctx.save();
+    ctx.drawImage(ci, (i0 % 5) * 192, ((i0 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
+    ctx.globalAlpha = f; ctx.drawImage(ci, (i1 % 5) * 192, ((i1 / 5) | 0) * 192, 192, 192, x - D / 2, y - D / 2, D, D);
+    ctx.restore();
+  }
   function render() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = '#030102'; ctx.fillRect(0, 0, W, H);
@@ -309,7 +302,7 @@
     ctx.translate(W / 2, H * 0.72); ctx.rotate(S.curve * 0.010 + S.sway * 0.003); ctx.translate(-W / 2, -H * 0.72);
     // far end of the hall (the artwork), sliding a little against the road as it bends
     var bi = imgs.back;
-    if (bi.naturalWidth) { var bh = y0 + 4, bw = bh * bi.naturalWidth / bi.naturalHeight, bx = (W - bw) / 2 - S.curve * 0.05 * W - S.camX * 0.6; ctx.drawImage(bi, bx, 0, bw, bh); }
+    if (bi.naturalWidth) { var bh = y0 + 4, bw = bh * bi.naturalWidth / bi.naturalHeight, bx = (W - bw) / 2 - S.curve * 0.05 * W - S.camX * 0.6; ctx.drawImage(bi, bx, 0, bw, bh); drawFarCoin(bx, bw, bh); }
     drawFloor(); drawWalls(); drawLines();
     // everything on the road, far to near
     var list = [], j;

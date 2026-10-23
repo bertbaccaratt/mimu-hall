@@ -101,7 +101,7 @@
   .iline { font-size: clamp(11px, 1.3vw, 15px); letter-spacing: .34em; color: #d9ac5c; text-shadow: 0 0 12px rgba(217,172,92,.35); line-height: 1.8; }
   .isoon { margin-top: 18px; font-size: clamp(16px, 2vw, 24px); letter-spacing: .5em; padding-left: .5em; color: #f1d9a0; text-shadow: 0 0 18px rgba(232,198,115,.45); animation: breathe 2.8s ease-in-out infinite; }
   /* Games: a locked phone in the middle of the hall (placeholder, it does not unlock) */
-  .phone { --h: min(calc(100vh - 150px), 720px); --h: min(calc(100dvh - 150px), 720px); position: fixed; left: 50%; top: calc(50% + 38px); z-index: 3; height: var(--h); width: calc(var(--h) * .478); padding: calc(var(--h) * .012); border-radius: calc(var(--h) * .085);
+  .phone { --h: min(calc(100vh - 118px), 1000px); --h: min(calc(100dvh - 118px), 1000px); position: fixed; left: 50%; top: calc(50% + 40px); z-index: 3; height: var(--h); width: calc(var(--h) * .478); padding: calc(var(--h) * .012); border-radius: calc(var(--h) * .085);
     background: linear-gradient(145deg, #3a2f2a 0%, #14100f 38%, #070505 100%); border: 1px solid rgba(217,172,92,.7); box-shadow: 0 0 0 calc(var(--h) * .004) #0a0707, 0 0 0 calc(var(--h) * .006) rgba(217,172,92,.25), 0 30px 90px rgba(0,0,0,.85), 0 0 70px rgba(150,15,25,.28), inset 0 0 calc(var(--h) * .03) rgba(217,172,92,.2);
     opacity: 0; visibility: hidden; transform: translate(-50%, calc(-50% + 26px)) scale(.97); transition: opacity .55s ease, transform .65s cubic-bezier(.2,.8,.2,1), visibility 0s .65s; }
   .phone.open { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); transition-delay: 0s; }
