@@ -110,3 +110,26 @@
 .camgal .cgg { flex: 1; overflow: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; align-content: start; scrollbar-width: none; } .camgal .cgg::-webkit-scrollbar { display: none; } .camgal .cgg button { aspect-ratio: 1; overflow: hidden; padding: 0; border: 0; background: #111; cursor: pointer; } .camgal .cgg img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .camgal .cgv { flex: 1; display: grid; place-items: center; overflow: hidden; touch-action: pan-y; } .camgal .cgv img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
 .camgal .cga { position: absolute; top: 50%; width: calc(var(--h) * .042); height: calc(var(--h) * .042); border-radius: 50%; background: rgba(0,0,0,.55); border: 0; color: #fff; font-size: calc(var(--h) * .03); line-height: 1; transform: translateY(-50%); cursor: pointer; } .camgal .cga.l { left: 2%; } .camgal .cga.r { right: 2%; }
+/* widgets, second edition: color, depth and a 3D lean */
+.agrid { perspective: calc(var(--h) * 1.2); }
+.wid { --rx: 0deg; --ry: 0deg; --sx: 50%; transform-style: preserve-3d; transform: rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .18s ease-out, box-shadow .2s; border-width: 1.5px; will-change: transform; }
+.wid > * { transform: translateZ(calc(var(--h) * .012)); }
+.wid::before { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(circle at var(--sx) -10%, rgba(255,255,255,.42), transparent 55%), linear-gradient(115deg, transparent 38%, rgba(255,255,255,.12) 48%, transparent 58%); mix-blend-mode: screen; }
+.wid::after { height: 2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent); }
+.wid:hover, .wid:focus-visible { transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(calc(var(--h) * .014)); }
+.wid.wlb { --a: #ffc65a; --e1: #8a4a10; --e2: #6a3408; --e3: #3a1a04; border-color: #ffc65a;
+  background: radial-gradient(ellipse at 100% 0%, rgba(255,190,90,.55), transparent 58%), linear-gradient(150deg, #8a410c 0%, #4e1a0a 48%, #1e0807 100%);
+  box-shadow: inset 0 1px 0 rgba(255,235,190,.6), inset 0 -3px 8px rgba(0,0,0,.55), 0 calc(var(--h) * .0035) 0 var(--e1), 0 calc(var(--h) * .007) 0 var(--e2), 0 calc(var(--h) * .0105) 0 var(--e3), 0 calc(var(--h) * .022) calc(var(--h) * .024) rgba(0,0,0,.75), 0 0 calc(var(--h) * .03) rgba(255,160,50,.45); }
+.wid.wdk { --a: #5eead4; --e1: #0d6a68; --e2: #0a4d52; --e3: #06282f; border-color: #5eead4;
+  background: radial-gradient(ellipse at 100% 0%, rgba(80,230,210,.5), transparent 58%), linear-gradient(150deg, #0e5a60 0%, #0a2f3d 48%, #070f19 100%);
+  box-shadow: inset 0 1px 0 rgba(200,255,250,.6), inset 0 -3px 8px rgba(0,0,0,.55), 0 calc(var(--h) * .0035) 0 var(--e1), 0 calc(var(--h) * .007) 0 var(--e2), 0 calc(var(--h) * .0105) 0 var(--e3), 0 calc(var(--h) * .022) calc(var(--h) * .024) rgba(0,0,0,.75), 0 0 calc(var(--h) * .03) rgba(60,230,210,.4); }
+.wid .wt { color: var(--a); font-weight: 700; text-shadow: 0 0 10px var(--a), 0 1px 2px rgba(0,0,0,.8); }
+.wid small { color: rgba(255,255,255,.72); }
+.wlb .wrk i { color: #fff; text-shadow: 0 0 14px #ffb347, 0 0 28px rgba(255,160,50,.8), 0 2px 3px rgba(0,0,0,.8); font-size: calc(var(--h) * .034); }
+.wlb .wrk small { color: #ffe3a8; }
+.wlb .wst span { border-top-color: rgba(255,255,255,.3); } .wlb .wst span:nth-child(1) b { color: #ffd36b; text-shadow: 0 0 8px rgba(255,200,90,.7); } .wlb .wst span:nth-child(2) b { color: #7dffa8; text-shadow: 0 0 8px rgba(100,255,160,.7); } .wlb .wst span:nth-child(3) b { color: #8fd2ff; text-shadow: 0 0 8px rgba(110,190,255,.7); }
+.wst b { font-size: calc(var(--h) * .0125); font-weight: 700; }
+.wdk .wring .rb { stroke: rgba(255,255,255,.18); } .wdk .wring .rf { stroke: #5eead4; filter: drop-shadow(0 0 4px #2dd4bf) drop-shadow(0 0 8px rgba(45,212,191,.7)); }
+.wdk .wpc { color: #fff; font-weight: 700; text-shadow: 0 0 8px #2dd4bf; }
+.wdk .wcn b { color: #fff; text-shadow: 0 0 10px rgba(94,234,212,.8), 0 2px 3px rgba(0,0,0,.8); } .wdk .wcn b small { color: #9ff3e6; } .wdk .wcn small { color: #bff7ee; }
+.wdk .wtb span { background: rgba(255,255,255,.16); box-shadow: inset 0 1px 2px rgba(0,0,0,.6); height: calc(var(--h) * .0065); } .wdk .wtb i { box-shadow: 0 0 6px rgba(255,255,255,.35); }

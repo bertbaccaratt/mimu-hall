@@ -201,6 +201,11 @@
       '<button type="button" class="wid wdk" id="wDk" aria-label="My deck"><span class="wt">THE FULL DECK</span><span class="wmid"><svg viewBox="0 0 44 44" class="wring"><circle cx="22" cy="22" r="18" class="rb"/><circle cx="22" cy="22" r="18" class="rf" id="wRf" stroke-dasharray="' + CIRC.toFixed(2) + '" stroke-dashoffset="' + CIRC.toFixed(2) + '"/></svg><span class="wpc" id="wPc">0%</span><span class="wcn"><b id="wCn">0<small>/120</small></b><small id="wLeft">120 TO GO</small></span></span><span class="wtb" id="wTb"></span></button>');
     $('wLb').addEventListener('click', function () { var b = $('lbIcon'); if (b) b.click(); });
     $('wDk').addEventListener('click', function () { var b = $('collIcon'); if (b) b.click(); });
+    /* 3D tilt: the widget leans toward the pointer, and springs back when it leaves */
+    Array.prototype.forEach.call(g.querySelectorAll('.wid'), function (w) {
+      w.addEventListener('pointermove', function (e) { var r = w.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5; w.style.setProperty('--ry', (px * 18).toFixed(1) + 'deg'); w.style.setProperty('--rx', (-py * 18).toFixed(1) + 'deg'); w.style.setProperty('--sx', (50 + px * 100).toFixed(0) + '%'); });
+      w.addEventListener('pointerleave', function () { w.style.setProperty('--ry', '0deg'); w.style.setProperty('--rx', '0deg'); w.style.setProperty('--sx', '50%'); });
+    });
     paintWidgets();
   }
   function paintWidgets() {
