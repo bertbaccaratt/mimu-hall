@@ -18,7 +18,8 @@
     },
     pack: { firstSec: 8100, everySec: 9000, slowPct: 20, slowSec: 60 },  // the black pack: 2:15, then every 2.5 hours alive; slows you 20% for 60 s
     hp: { segments: 6, dmg: { plain: 2, red: 6, blue: 3 } },             // plain box 3 hits, blue 2, red 1
-    coinPoints: 25
+    coinPoints: 25,
+    life: { share: 0.10 }                                                // after a crash a player may buy ONE extra life per run for 10% of their points (not coins)
   };
   var TEST = { sight: { everySec: 12 }, pack: { firstSec: 40, everySec: 70 } };   // admin test mode: everything happens quickly, nothing is saved
 
@@ -62,6 +63,8 @@
     messages: function () { return adapter && adapter.messages ? adapter.messages : null; },   // { threads(), thread(id), send(id, body), block(id, on), players() }
     mail: function () { return adapter && adapter.mail ? adapter.mail : null; },   // { inbox(), read(id) }
     market: function () { return adapter && adapter.market ? adapter.market : null; },   // { listings(), sellable(), buy(n), sell(n) }
+    lifeCost: function () { var pts = Math.floor((adapter && adapter.totals ? adapter.totals().lifetime : 0) || 0); return Math.max(1, Math.ceil(pts * CONFIG.life.share)); },
+    buyLife: function (cost) { if (!adapter) return Promise.resolve({ demo: true }); return adapter.buyLife ? Promise.resolve(adapter.buyLife(cost)) : Promise.reject(new Error('NOT AVAILABLE YET')); },   // the server takes the points and answers; rejects with a message
     deckBoard: function () { return adapter && adapter.deckBoard ? adapter.deckBoard() : Promise.resolve([]); },   // top 10 by deck progress: [{ username, owned, rarest, family, runs, best }]
     leaderboard: function (kind) { return adapter && adapter.leaderboard ? adapter.leaderboard(kind) : Promise.resolve([]); },   // kind: 'lifetime' | 'best' | 'last'
     onChange: function (fn) { listeners.push(fn); },

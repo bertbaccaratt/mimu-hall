@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261022x"><link rel="stylesheet" href="assets/game/comms.css?v=20261022x"><link rel="stylesheet" href="assets/game/admin.css?v=20261022x">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261022zk"><link rel="stylesheet" href="assets/game/comms.css?v=20261022zk"><link rel="stylesheet" href="assets/game/admin.css?v=20261022zk">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -118,14 +118,14 @@
   .pscreen { position: relative; width: 100%; height: 100%; border-radius: calc(var(--h) * .074); overflow: hidden; background: #000; color: #e9c77d; cursor: not-allowed; user-select: none; -webkit-user-select: none; }
   .pwall { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,.25) 100%), url("assets/phone-wall.webp") center / cover no-repeat #1a0508; }
   .island { position: absolute; left: 50%; top: 2.2%; transform: translateX(-50%); width: 30%; height: 3.6%; border-radius: 99px; background: #000; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
-  .pstatus { position: absolute; left: 0; right: 0; top: 2.5%; display: flex; justify-content: space-between; align-items: center; padding: 0 9%; font-size: calc(var(--h) * .0165); letter-spacing: .24em; color: #d9ac5c; }
+  .pstatus { position: absolute; left: 0; right: 0; top: 2.5%; display: flex; justify-content: space-between; align-items: center; padding: 0 9%; font-size: max(8px, calc(var(--h) * .0165)); letter-spacing: .24em; color: #d9ac5c; }
   .pright { display: flex; align-items: center; gap: calc(var(--h) * .012); }
   .bars { display: flex; align-items: flex-end; gap: 2px; height: calc(var(--h) * .016); } .bars b { width: calc(var(--h) * .004); background: #d9ac5c; } .bars b:nth-child(1) { height: 35%; } .bars b:nth-child(2) { height: 55%; } .bars b:nth-child(3) { height: 78%; } .bars b:nth-child(4) { height: 100%; }
   .batt { width: calc(var(--h) * .03); height: calc(var(--h) * .0145); border: 1px solid #d9ac5c; border-radius: 3px; position: relative; } .batt::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: calc(69% - 1px); background: #d9ac5c; border-radius: 1px; } .bpct { letter-spacing: .06em; }
   .plock { position: absolute; left: 50%; top: 11.5%; transform: translateX(-50%); width: calc(var(--h) * .036); height: calc(var(--h) * .036); color: #d9ac5c; filter: drop-shadow(0 0 8px rgba(217,172,92,.5)); }
-  .pdate { position: absolute; left: 0; right: 0; top: 17%; text-align: center; font-size: calc(var(--h) * .0175); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
+  .pdate { position: absolute; left: 0; right: 0; top: 17%; text-align: center; font-size: max(8px, calc(var(--h) * .0175)); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
   .pclock small, .hclock small { font-size: .26em; letter-spacing: .12em; margin-left: .3em; vertical-align: .5em; }
-  .pclock { position: absolute; left: 0; right: 0; top: 19.5%; text-align: center; font-weight: 500; font-size: calc(var(--h) * .118); letter-spacing: .04em; line-height: 1.1; filter: drop-shadow(0 3px 12px rgba(0,0,0,.85)); }
+  .pclock { position: absolute; left: 0; right: 0; top: 19.5%; text-align: center; font-weight: 500; font-size: max(8px, calc(var(--h) * .118)); letter-spacing: .04em; line-height: 1.1; filter: drop-shadow(0 3px 12px rgba(0,0,0,.85)); }
   .pquick { position: absolute; left: 0; right: 0; bottom: 6.5%; display: flex; justify-content: space-between; padding: 0 10%; }
   .pquick i { width: calc(var(--h) * .068); height: calc(var(--h) * .068); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d9ac5c; background: rgba(0,0,0,.45); border: 1px solid rgba(217,172,92,.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); } .pquick svg { width: 46%; height: 46%; }
   .phome { position: absolute; left: 50%; bottom: 2.3%; transform: translateX(-50%); width: 34%; height: calc(var(--h) * .0125); border-radius: 99px; background: #fff; box-shadow: 0 0 6px rgba(255,255,255,.45); display: flex; align-items: center; justify-content: center; } .phome::after { content: "HOME"; position: static; font: 700 calc(var(--h) * .0062)/1 'Cinzel', Georgia, serif; letter-spacing: .34em; padding-left: .34em; color: #000; pointer-events: none; }
@@ -139,7 +139,7 @@
   .pscreen.unlocked .pwall:not(.pwall-h) { opacity: 0; transition: opacity .6s ease; }
   .lk { position: absolute; inset: 0; z-index: 2; transition: transform .6s cubic-bezier(.4,0,.2,1), opacity .5s ease; }
   .pscreen.unlocked .lk { transform: translateY(-12%); opacity: 0; pointer-events: none; }
-  .pswipe { position: absolute; left: 0; right: 0; bottom: 13.5%; display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .004); font-size: calc(var(--h) * .0135); letter-spacing: .3em; color: #f1d9a0; text-shadow: 0 2px 8px #000; animation: swipehint 2.2s ease-in-out infinite; }
+  .pswipe { position: absolute; left: 0; right: 0; bottom: 13.5%; display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .004); font-size: max(8px, calc(var(--h) * .0135)); letter-spacing: .3em; color: #f1d9a0; text-shadow: 0 2px 8px #000; animation: swipehint 2.2s ease-in-out infinite; }
   .pswipe.nudge { animation: swipenudge .5s ease; }
   @keyframes swipehint { 0%, 100% { transform: translateY(0); opacity: .75; } 50% { transform: translateY(calc(var(--h) * -.008)); opacity: 1; } }
   @keyframes swipenudge { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(calc(var(--h) * -.03)); } 70% { transform: translateY(calc(var(--h) * -.012)); } }
@@ -147,10 +147,10 @@
   .hm { position: absolute; inset: 0; z-index: 1; opacity: 0; transform: scale(1.05); pointer-events: none; transition: opacity .55s ease .12s, transform .55s ease .12s; }
   .pscreen.unlocked .hm { opacity: 1; transform: none; pointer-events: auto; }
   .pscreen.inapp .hm { opacity: 0; transform: scale(.9); pointer-events: none; transition-delay: 0s; }
-  .hdate { position: absolute; left: 0; right: 0; top: 9%; text-align: center; font-size: calc(var(--h) * .0165); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
-  .hclock { position: absolute; left: 0; right: 0; top: 11.6%; text-align: center; font-weight: 500; font-size: calc(var(--h) * .092); letter-spacing: .04em; line-height: 1.1; filter: drop-shadow(0 3px 12px rgba(0,0,0,.85)); }
+  .hdate { position: absolute; left: 0; right: 0; top: 9%; text-align: center; font-size: max(8px, calc(var(--h) * .0165)); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
+  .hclock { position: absolute; left: 0; right: 0; top: 11.6%; text-align: center; font-weight: 500; font-size: max(8px, calc(var(--h) * .092)); letter-spacing: .04em; line-height: 1.1; filter: drop-shadow(0 3px 12px rgba(0,0,0,.85)); }
   .agrid { position: absolute; left: 8%; right: 8%; top: 28%; display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--h) * .03) calc(var(--h) * .012); }
-  .aic { display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .009); padding: 0; background: none; border: 0; color: #f1d9a0; font: 500 calc(var(--h) * .0112) 'Cinzel', Georgia, serif; letter-spacing: .1em; text-shadow: 0 1px 6px #000; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .aic { display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .009); padding: 0; background: none; border: 0; color: #f1d9a0; font: 500 max(8px, calc(var(--h) * .0112)) 'Cinzel', Georgia, serif; letter-spacing: .1em; text-shadow: 0 1px 6px #000; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .aic img { display: block; width: calc(var(--h) * .082); height: calc(var(--h) * .082); border-radius: 22%; object-fit: cover; border: 1px solid rgba(217,172,92,.55); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 14px rgba(217,172,92,.18); transition: transform .2s ease, box-shadow .2s; }
   .aic .atile { display: flex; align-items: center; justify-content: center; width: calc(var(--h) * .082); height: calc(var(--h) * .082); border-radius: 22%; color: #e8c673; background: linear-gradient(160deg, #35171b 0%, #170a0c 70%); border: 1px solid rgba(217,172,92,.5); box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,235,190,.16); transition: transform .2s ease, box-shadow .2s; }
   #giveIcon { grid-column: 4; } .aic.off { cursor: not-allowed; pointer-events: none; opacity: .5; filter: grayscale(1); } .aic.off .atile { color: #9b9b9b; background: linear-gradient(160deg, #2a2a2a 0%, #141414 70%); border-color: rgba(190,190,190,.35); } .aic.off .atile svg { filter: none; } .aic.off span { color: #9b9b9b; }
@@ -169,20 +169,30 @@
   .hcv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
   .hhud { position: absolute; left: 0; right: 0; top: 8.4%; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 7%; color: #f6dc95; font-family: 'Cinzel', Georgia, serif; text-shadow: 0 2px 6px #000, 0 0 14px rgba(0,0,0,.8); pointer-events: none; z-index: 3; }
 .hhp { display: flex; gap: calc(var(--h) * .005); margin-top: calc(var(--h) * .009); } .hhp i { width: calc(var(--h) * .0245); height: calc(var(--h) * .0085); border-radius: 2px; background: linear-gradient(90deg, #b3171f, #e8c673); box-shadow: 0 0 6px rgba(232,198,115,.5); transition: opacity .25s, background .25s; } .hhp i.off { background: rgba(255,255,255,.13); box-shadow: none; }
-  .hhud .hs small { display: block; font-size: calc(var(--h) * .0118); letter-spacing: .3em; color: #d9ac5c; }
-  .hhud .hs b { font-size: calc(var(--h) * .034); letter-spacing: .08em; font-weight: 700; }
-  .hhud .hc { display: flex; align-items: center; gap: calc(var(--h) * .009); font-size: calc(var(--h) * .03); font-weight: 700; }
+  .hhud .hs small { display: block; font-size: max(8px, calc(var(--h) * .0118)); letter-spacing: .3em; color: #d9ac5c; }
+  .hhud .hs b { font-size: max(8px, calc(var(--h) * .034)); letter-spacing: .08em; font-weight: 700; }
+  .hhud .hc { display: flex; align-items: center; gap: calc(var(--h) * .009); font-size: max(8px, calc(var(--h) * .03)); font-weight: 700; }
   .hcoin { width: calc(var(--h) * .03); height: calc(var(--h) * .03); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b8, #e0a93f 55%, #8f5f1d); box-shadow: 0 0 10px rgba(246,220,149,.6); border: 1px solid #6a4510; }
   .hov { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--h) * .02); padding: 0 8%; text-align: center; font-family: 'Cinzel', Georgia, serif; color: #d9ac5c; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.42), rgba(0,0,0,.78)); }
-  .hov .ht { font-size: calc(var(--h) * .056); font-weight: 500; letter-spacing: .26em; padding-left: .26em; line-height: 1.1; filter: drop-shadow(0 3px 14px rgba(0,0,0,.9)); }
+  .hov .ht { font-size: max(8px, calc(var(--h) * .056)); font-weight: 500; letter-spacing: .26em; padding-left: .26em; line-height: 1.1; filter: drop-shadow(0 3px 14px rgba(0,0,0,.9)); }
   .hov .hline { width: 62%; height: 1px; background: linear-gradient(90deg, transparent, #d9ac5c, transparent); }
-  .hov .hsub { font-size: calc(var(--h) * .0122); letter-spacing: .24em; line-height: 1.8; color: #c9a15a; text-shadow: 0 2px 8px #000; }
-  .hov .hbest { font-size: calc(var(--h) * .0165); letter-spacing: .3em; color: #f1d9a0; } .hov .hbest b { font-weight: 700; }
-  .hov .htap { margin-top: calc(var(--h) * .01); font-size: calc(var(--h) * .0185); letter-spacing: .5em; padding-left: .5em; color: #f6dc95; text-shadow: 0 0 16px rgba(232,198,115,.6); animation: breathe 1.8s ease-in-out infinite; }
-  .hov .hkeys { font-size: calc(var(--h) * .0108); letter-spacing: .2em; line-height: 1.7; color: #9a7a45; }
+  .hov .hsub { font-size: max(8px, calc(var(--h) * .0122)); letter-spacing: .24em; line-height: 1.8; color: #c9a15a; text-shadow: 0 2px 8px #000; }
+  .hov .hbest { font-size: max(8px, calc(var(--h) * .0165)); letter-spacing: .3em; color: #f1d9a0; } .hov .hbest b { font-weight: 700; }
+  .hov .htap { margin-top: calc(var(--h) * .01); font-size: max(8px, calc(var(--h) * .0185)); letter-spacing: .5em; padding-left: .5em; color: #f6dc95; text-shadow: 0 0 16px rgba(232,198,115,.6); animation: breathe 1.8s ease-in-out infinite; }
+  .hov .hkeys { font-size: max(8px, calc(var(--h) * .0108)); letter-spacing: .2em; line-height: 1.7; color: #9a7a45; }
   .hdead { background: radial-gradient(ellipse at 50% 55%, rgba(60,6,10,.55), rgba(20,2,4,.85)); }
-  .hdead .hres { display: flex; justify-content: space-between; width: 70%; font-size: calc(var(--h) * .0165); letter-spacing: .24em; color: #b9904f; } .hdead .hres b { color: #f6dc95; font-weight: 700; }
-  .hagain { margin-top: calc(var(--h) * .02); font: 500 calc(var(--h) * .0185) 'Cinzel', Georgia, serif; letter-spacing: .4em; padding: calc(var(--h) * .02) calc(var(--h) * .04) calc(var(--h) * .02) calc(var(--h) * .044); color: #ecca82; border: 1px solid #d9ac5c; background: rgba(0,0,0,.45); box-shadow: 0 0 24px rgba(217,172,92,.28); cursor: pointer; }
+  .hdead .hres { display: flex; justify-content: space-between; width: 70%; font-size: max(8px, calc(var(--h) * .0165)); letter-spacing: .24em; color: #b9904f; } .hdead .hres b { color: #f6dc95; font-weight: 700; }
+  .hagain { margin-top: calc(var(--h) * .02); font: 500 max(8px, calc(var(--h) * .0185)) 'Cinzel', Georgia, serif; letter-spacing: .4em; padding: calc(var(--h) * .02) calc(var(--h) * .04) calc(var(--h) * .02) calc(var(--h) * .044); color: #ecca82; border: 1px solid #d9ac5c; background: rgba(0,0,0,.45); box-shadow: 0 0 24px rgba(217,172,92,.28); cursor: pointer; }
+  .hlife { background: radial-gradient(ellipse at 50% 55%, rgba(8,40,26,.6), rgba(3,14,10,.9)); }
+  .hlife { gap: calc(var(--h) * .014); } .hlife .ht { font-size: max(12px, calc(var(--h) * .029)); letter-spacing: .12em; padding-left: .12em; }
+  .hlife .hlt { font-size: max(8px, calc(var(--h) * .0122)); letter-spacing: .2em; line-height: 1.8; color: #cfe9d8; }
+  .hlife .hcost { display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * .004); padding: calc(var(--h) * .014) calc(var(--h) * .03); border: 1px solid rgba(94,224,138,.55); background: rgba(0,0,0,.4); box-shadow: 0 0 24px rgba(94,224,138,.18); }
+  .hlife .hcost span { font-size: max(8px, calc(var(--h) * .0105)); letter-spacing: .3em; color: #8fd2a8; } .hlife .hcost b { font-size: max(8px, calc(var(--h) * .03)); font-weight: 700; letter-spacing: .1em; color: #8dffb8; text-shadow: 0 0 14px rgba(94,224,138,.6); } .hlife .hcost em { font-style: normal; font-size: max(8px, calc(var(--h) * .0098)); letter-spacing: .22em; color: #a9cdb6; }
+  .hlife .hpts { font-size: max(8px, calc(var(--h) * .0125)); letter-spacing: .24em; color: #a9cdb6; } .hlife .hpts b { color: #f1d9a0; font-weight: 700; }
+  .hlife button { font: 500 max(8px, calc(var(--h) * .0165)) 'Cinzel', Georgia, serif; letter-spacing: .32em; padding: calc(var(--h) * .016) calc(var(--h) * .036); cursor: pointer; }
+  .hlife .hbuy { color: #04210f; background: linear-gradient(180deg, #7dffa8, #2fb866); border: 0; box-shadow: 0 0 22px rgba(94,224,138,.45); } .hlife .hbuy:disabled { opacity: .45; cursor: default; box-shadow: none; }
+  .hlife .hno { color: #cfe9d8; background: transparent; border: 1px solid rgba(207,233,216,.4); padding-top: calc(var(--h) * .01); padding-bottom: calc(var(--h) * .01); font-size: max(8px, calc(var(--h) * .0125)); }
+  .hlife .hmsg { min-height: calc(var(--h) * .016); font-size: max(8px, calc(var(--h) * .0105)); letter-spacing: .18em; color: #ffd36b; } .hlife .hnote { font-size: max(8px, calc(var(--h) * .0095)); letter-spacing: .16em; color: #7fa28d; }
   .hagain:hover { color: #fff0c4; border-color: #f6dc95; }
   /* the phone's real buttons: silent switch, volume up and down (left), lock (right) */
   button.pbtn { padding: 0; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .1s ease, box-shadow .15s, filter .15s; }
@@ -191,7 +201,7 @@
   .pb1.pressed, .pb2.pressed, .pb3.pressed { transform: translateX(calc(var(--h) * .004)); filter: brightness(.7); }
   .pb4.pressed { transform: translateX(calc(var(--h) * -.004)); filter: brightness(.7); }
   .pb1.silent { background: linear-gradient(90deg, #b3171f, #5a0d12); box-shadow: 0 0 8px rgba(200,30,40,.6); }
-  .osd { position: absolute; left: 50%; top: 8.2%; transform: translate(-50%, -8px); z-index: 8; min-width: 44%; display: flex; align-items: center; gap: calc(var(--h) * .012); padding: calc(var(--h) * .011) calc(var(--h) * .02); border-radius: 99px; background: rgba(12,5,6,.78); border: 1px solid rgba(217,172,92,.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: calc(var(--h) * .012); letter-spacing: .24em; color: #f1d9a0; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; box-shadow: 0 6px 20px rgba(0,0,0,.6); }
+  .osd { position: absolute; left: 50%; top: 8.2%; transform: translate(-50%, -8px); z-index: 8; min-width: 44%; display: flex; align-items: center; gap: calc(var(--h) * .012); padding: calc(var(--h) * .011) calc(var(--h) * .02); border-radius: 99px; background: rgba(12,5,6,.78); border: 1px solid rgba(217,172,92,.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: max(8px, calc(var(--h) * .012)); letter-spacing: .24em; color: #f1d9a0; opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; box-shadow: 0 6px 20px rgba(0,0,0,.6); }
   .osd.on { opacity: 1; transform: translate(-50%, 0); }
   .osdbar { flex: 1; height: calc(var(--h) * .006); border-radius: 99px; background: rgba(217,172,92,.25); overflow: hidden; } .osdbar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #b3171f, #e8c673); transition: width .15s ease; }
   .psleep { position: absolute; inset: 0; z-index: 9; background: #000; opacity: 0; pointer-events: none; transition: opacity .4s ease; } .pscreen.asleep .psleep { opacity: 1; pointer-events: auto; cursor: pointer; }  /* Hall Rules: the how-to-play sheet */
@@ -314,6 +324,7 @@
   <div class="ibody" id="infoBody" style="display:none"></div>
 </section>
 <div class="ashade" id="gamesShade"></div>
+<button class="gclose" id="gClose" type="button" aria-label="Close the phone">&times;</button>
 <section class="phone" id="phone" role="dialog" aria-label="Games" aria-hidden="true">
   <button type="button" class="pbtn pb1" id="bMute" aria-label="Silent switch" title="Silent switch"></button><button type="button" class="pbtn pb2" id="bUp" aria-label="Volume up" title="Volume up"></button><button type="button" class="pbtn pb3" id="bDown" aria-label="Volume down" title="Volume down"></button><button type="button" class="pbtn pb4" id="bPower" aria-label="Lock" title="Lock"></button>
   <div class="pscreen" id="pScreen">
@@ -324,7 +335,8 @@
       <svg class="plock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/></svg>
       <div class="pdate" id="pDate"></div>
       <div class="pclock gold" id="pClock">0:00</div>
-      <div class="lknote" id="lkNote" role="status"><span class="lki"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.8 3 2.8 6.6 2.8 11.2c0 2.2 1 4.2 2.6 5.7L4.700 21l4.300-2.100c1 .3 2 .4 3 .4 5.200 0 9.200-3.600 9.200-8.100S17.200 3 12 3z"/></svg></span><div class="lkt"><div class="lkh"><b>HYPE</b><em>now</em></div><p>If you get them all it might matter &#128588;</p></div></div>
+      <div class="lknotes"><div class="lknote" id="lkNote" role="status"><span class="lki"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.8 3 2.8 6.6 2.8 11.2c0 2.2 1 4.2 2.6 5.7L4.700 21l4.300-2.100c1 .3 2 .4 3 .4 5.200 0 9.200-3.600 9.200-8.100S17.200 3 12 3z"/></svg></span><div class="lkt"><div class="lkh"><b>HYPE</b><em>now</em></div><p>If you get them all it might matter &#128588;</p></div></div>
+      <div class="lknote tm" id="lkTm" role="status"><span class="lki"><svg viewBox="0 0 40 40" aria-hidden="true"><path fill="#fff" d="M7 11h18v5.2h-6.2V30h-5.6V16.2H7z"/><circle cx="29.5" cy="13.6" r="2" fill="#fff"/><circle cx="34" cy="13.6" r="2" fill="#fff"/></svg></span><div class="lkt"><div class="lkh"><b>T-Mobile</b><em>now</em></div><p>Your bill of $139.99 is due. Pay today to avoid a $20 restore fee.</p></div></div></div>
       <div class="pswipe" id="pSwipe"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg><span>SWIPE UP TO UNLOCK</span></div>
       <div class="pquick"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l-1 6 2.5 3v2h-9v-2L10 9z"/><path d="M12 14v7"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.6-2.4h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg></i></div>
     </div>
@@ -467,10 +479,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261022x" defer></script>
-<script src="assets/game/hall-runner.js?v=20261022x" defer></script>
-<script src="assets/game/comms.js?v=20261022x" defer></script> <script src="assets/game/apps.js?v=20261022x" defer></script>
-<script src="assets/game/admin-docs.js?v=20261022x" defer></script> <script src="assets/game/admin.js?v=20261022x" defer></script>
+<script src="assets/game/profile.js?v=20261022zk" defer></script>
+<script src="assets/game/hall-runner.js?v=20261022zk" defer></script>
+<script src="assets/game/comms.js?v=20261022zk" defer></script> <script src="assets/game/apps.js?v=20261022zk" defer></script>
+<script src="assets/game/admin-docs.js?v=20261022zk" defer></script> <script src="assets/game/admin.js?v=20261022zk" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -649,8 +661,8 @@ window.MIMUAudio = (function () {
     $('hClock').innerHTML = clockEl.innerHTML; $('hDate').textContent = dateEl.textContent;
   }
   setInterval(tickClock, 15000); tickClock();
-  function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp') && $('pScreen').dataset.app === 'hall') HallRunner.open(); }
-  function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
+  function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); document.body.classList.add('phone-open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp') && $('pScreen').dataset.app === 'hall') HallRunner.open(); }
+  function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); document.body.classList.remove('phone-open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
   // Hall Rules and About are placeholders for now ("coming soon")
   var RULES = [
     '<h3>The basics</h3>',
@@ -676,11 +688,16 @@ window.MIMUAudio = (function () {
     '<ul><li>The collectible is the rotating coin. Run through one to pick it up: it chimes, adds to your coin count, and is worth <strong>25 points</strong>.</li>',
     '<li>Coins come in rows, zigzags that make you change lane, and double lines. Some sit right next to a box, so choose your lane early.</li>',
     '<li><strong>Every coin you ever collect is counted.</strong> Your profile keeps two coin numbers: <strong>coins earned</strong>, which only ever goes up, and your <strong>coin balance</strong>, which is what you have not spent yet. Coins are spent in the Marketplace.</li></ul>',
+    '<h3>One extra life</h3>',
+    '<ul><li>When you crash, a window offers you <strong>one extra life</strong> for this run. It costs <strong>10% of your points</strong> (your leaderboard points, never coins). Buy it and you carry on with full health and a moment of safety.</li>',
+    '<li>You can buy <strong>only one</strong> extra life per run. If you crash again, the run ends for good.</li>',
+    '<li>If you say no, or leave the game, the run simply ends. In a demo run the extra life is free and nothing is spent or saved.</li></ul>',
     '<h3>The black pack</h3>',
     '<ul><li>Every <strong>2 hours 30 minutes</strong> you stay alive, a black Mudwater pack floats into <strong>one lane</strong>, always a different lane from the last pack. The first one comes at 2 hours 15 minutes.</li>',
     '<li><strong>Jump into it.</strong> It slows the whole run by about <strong>20% for 60 seconds</strong>, easing in and easing out. That is all it does: no points, no cards.</li>',
     '<li>When the 60 seconds are over you are back at the speed you had when you grabbed it. The speed climb waits while you are slowed, so you lose no progress.</li></ul>',
     '<h3>Cards</h3>',
+    '<div class="rnote" style="margin:0 0 12px">In-game cards only. They are pictures that stand for real cards, not the real cards, and they are not real-world assets. THE HALL is a mini game and a friendly competition made by the community. It has no affiliation with the makers of the real cards. A real version of each card exists and may have monetary value, but those real cards are not being given away or collected here, and nothing you collect in this game is a real-world asset.</div>',
     '<p>There are <strong>120 cards</strong> to find. Every <strong>30 minutes</strong> you stay alive in a run, a card floats into one lane, a little higher than the boxes. <strong>Jump to collect it.</strong> Nothing interrupts the run: no pop-up, no flip, no slowdown, only a soft chime and the card count on your screen.</p>',
     '<ul><li><strong>Dying resets the 30-minute clock,</strong> but you keep every card you have already collected.</li>',
     '<li>A card you miss scrolls past and is gone. The next one comes 30 minutes after the last.</li>',
@@ -706,6 +723,7 @@ window.MIMUAudio = (function () {
     '<li>There is also a very small lucky chance in shorter runs: after 1 hour alive, a sighting has a tiny chance of being a Prestige or a Legendary even if it has not opened for you yet.</li>',
     '<li>The whole set is meant to take a long time, and the Legendaries come last.</li></ul>',
     '<h3>The Collected app</h3>',
+    '<p>Collected shows your in-game cards. They are not real cards and not real-world assets.</p>',
     '<p>The top of the COLLECTED app has a short how-to of its own with an example card, face down and flipped.</p>',
     '<ul><li>Open <strong>COLLECTED</strong> on the phone home screen to see all 120 cards laid out <strong>face down</strong>. When you earn a card it flips over and shows its picture.</li>',
     '<li>You can filter by tier, by family, and by collected or missing, and the progress bars show how far you are in every tier and family.</li></ul>',
@@ -716,6 +734,7 @@ window.MIMUAudio = (function () {
     '<li>Under the main list is the <strong>Top 10 &middot; The Full Deck</strong> board. It shows, by username, how close each of the ten leading collectors is to all 120 cards, with a progress bar and simple numbers: cards collected, rarest tier, favorite family, runs and best run.</li>',
     '<li>Points from <strong>selling cards</strong> in the Marketplace are added to your score, so they count on the leaderboard too.</li></ul>',
     '<h3>The Marketplace</h3>',
+    '<p>The Marketplace trades in-game cards only, using in-game coins and points. In-game cards only. They are pictures that stand for real cards, not the real cards, and they are not real-world assets.</p>',
     '<ul><li>Open <strong>MARKETPLACE</strong> on the phone home screen. It has two tabs: <strong>BUY</strong> and <strong>SELL</strong>. The top shows your coin balance and your coins earned.</li>',
     '<li><strong>Face down cards come from the Hall.</strong> They are cards you do not have yet and they cost <strong>coins</strong>. The price is high on purpose, so running stays the best way to build a deck. Buy one and it flips into your Collected.</li>',
     '<li><strong>Face up cards come from players.</strong> They are cards other players have already collected, and they cost <strong>points</strong>, dramatically more than a face down card. The seller sets the price. The points you spend come off your leaderboard score and go to the seller.</li>',
@@ -760,10 +779,11 @@ window.MIMUAudio = (function () {
     '<p class="rdate">Last updated: October 22, 2026</p>',
     '<p>This page describes what mimu.games is, how it operates, and the terms on which it is offered. By opening, viewing or playing anything on this site you confirm that you have read this page and agree to it. If you do not agree, please do not use the site.</p>',
     '<h3>1 &middot; About this site</h3>',
-    '<p>mimu.games (the &ldquo;Site&rdquo;) is an entertainment product and community project created for holders and friends of Mimu On Ape. It contains an arcade game called THE HALL, a collection of 120 cards, leaderboards (including a Top 10 board of the closest collectors to a full deck), a Marketplace for buying and selling cards, text messages between players, mail from MIMU, an information panel about the Apechain NFT market, and related pages. The Site is presented as a phone; its Phone keypad is for fun and does not place real calls, and some icons are shown in gray because they are not available yet. It is built and operated by Bert Baccaratt (together with Mimu On Ape, &ldquo;we&rdquo;, &ldquo;us&rdquo; or &ldquo;our&rdquo;).</p>',
+    '<p>mimu.games (the &ldquo;Site&rdquo;) is an entertainment product and community project created for holders and friends of Mimu On Ape. It contains an arcade game called THE HALL, a collection of 120 cards, leaderboards (including a Top 10 board of the closest collectors to a full deck), a Marketplace for buying and selling cards, text messages between players, mail from MIMU, an information panel about the Apechain NFT market, and related pages. The cards in the Site are fictional, in-game pictures that stand for real cards. They are not the real cards, they are not real-world assets, and nothing in the Site gives you ownership of, or a claim to, any real card. The Site is presented as a phone; its Phone keypad is for fun and does not place real calls, and some icons are shown in gray because they are not available yet. It is built and operated by Bert Baccaratt (together with Mimu On Ape, &ldquo;we&rdquo;, &ldquo;us&rdquo; or &ldquo;our&rdquo;).</p>',
     '<h3>2 &middot; Independence and no affiliation</h3>',
-    '<ul><li>The Site is an independent community project. It is not created, operated, endorsed, sponsored or approved by <strong>Yuga Labs</strong>, its affiliates, officers, employees, contractors or licensors, or by any other company whose products, tokens, collections or marks are mentioned on the Site.</li>',
-    '<li><strong>Yuga Labs is not responsible, and has no obligation or liability of any kind, for the Site, for any prize, reward, giveaway, recognition or card, or for anything that happens in connection with the Site or your use of it.</strong> The same applies to Glyph, OpenSea, Apechain, and every other third party named here.</li>',
+    '<ul><li>The Site is an independent community project and a mini game. It has no affiliation with the makers of the real cards that its in-game cards represent.</li>',
+    '<li>The Site is an independent community project. It is not created, operated, endorsed, sponsored or approved by <strong>Yuga Labs</strong>, its affiliates, officers, employees, contractors or licensors, or by any other company whose products, tokens, collections or marks are mentioned on the Site.</li>',
+    '<li><strong>Yuga Labs is not responsible, and has no obligation or liability of any kind, for the Site, for any prize, reward, recognition or card, or for anything that happens in connection with the Site or your use of it.</strong> The same applies to Glyph, OpenSea, Apechain, and every other third party named here.</li>',
     '<li>Any reference to a third party is for identification only and does not mean that the third party takes part in, supports or has reviewed the Site.</li></ul>',
     '<h3>3 &middot; Eligibility</h3>',
     '<p>You must be old enough to enter a binding agreement where you live, and at least 18 years old to be considered for any prize or reward. You must not be located in, or a resident of, a place where taking part in a promotion, using a digital wallet, or receiving digital items is restricted or prohibited. You are solely responsible for knowing and following the laws that apply to you, including tax laws. We may refuse or end access for anyone, at any time, for any reason.</p>',
@@ -778,12 +798,14 @@ window.MIMUAudio = (function () {
     '<p>Digital assets and blockchain networks carry real risks, including price swings and total loss of value, software defects, network outages and congestion, forks, hacks, scams, regulatory change and irreversible transactions. Nothing on the Site is a recommendation to buy, sell, hold or use any digital asset. Information shown about collections, floor prices, volume or any market comes from third-party sources, may be delayed or wrong, and must not be relied on. You use the Site and any digital asset entirely at your own risk and should do your own research.</p>',
     '<h3>7 &middot; No financial, legal or tax advice</h3>',
     '<p>The Site and its content are provided for entertainment and general information only. Nothing here is investment, financial, legal, tax, accounting or other professional advice. Speak to a qualified professional before making any decision that matters to you.</p>',
-    '<h3>8 &middot; Prizes, giveaways and recognition</h3>',
+    '<h3>8 &middot; Prizes and recognition</h3>',
+    '<p>A real version of each card exists and may have monetary value. The cards in this game are not those cards: collecting them in THE HALL is a fictional, in-game activity that does not award any real card or other real-world asset.</p>',
     '<ul><li>Taking part in THE HALL, collecting cards or ranking on a leaderboard does not entitle anyone to a prize, a payment, an allowlist spot, an NFT, a token, or any other item or benefit. Scores, ranks, cards and badges are cosmetic.</li>',
-    '<li>If any prize, giveaway or recognition is ever offered, it will be announced separately, and whether it exists, what it is, how many there are, who is considered and when it is given are decided solely by us, at our discretion, and may change or end at any time. We may require eligibility checks and may disqualify anyone.</li>',
+    '<li>If any prize or recognition is ever offered, it will be announced separately, and whether it exists, what it is, how many there are, who is considered and when it is given are decided solely by us, at our discretion, and may change or end at any time. We may require eligibility checks and may disqualify anyone.</li>',
     '<li><strong>Prizes are provided by us alone, if at all. Yuga Labs and its affiliates are not sponsors or providers of any prize and are not responsible for any prize, its delivery, its value, its availability, or any dispute about it.</strong> Recipients are responsible for any taxes, fees, gas costs and legal obligations that come with a prize.</li></ul>',
     '<h3>9 &middot; Cards, scores and virtual items</h3>',
-    '<p>The 120 cards, the packs, the coins, the points and every other item in THE HALL are virtual items for gameplay only. They have no cash value, cannot be redeemed, are not tokens or digital assets, and are not a claim to anything in the real world. Signed-in players may use the Marketplace inside the Site: coins collected in runs can be spent to buy face down cards offered by us, and points can be spent to buy face up cards that other players have listed for sale at the price each seller sets. Points spent on a purchase are deducted from the buyer&rsquo;s score and credited to the seller, and buyers and sellers may text each other to ask questions or to negotiate a lower price. Any card a player has collected, whether earned in a run or bought, can be sold to us for points that count on the leaderboard or listed face up at a price in points that the player chooses. Coins and points can be exchanged only through the Marketplace as it is offered, never for money. Face down cards are priced in coins by us and are priced high on purpose; prices of face up player listings are set by the sellers; sale values, limits and availability are set by us and may change at any time. We are not a party to deals between players and do not guarantee any seller, price or outcome, and you must never offer or accept money or anything outside the Site in a negotiation. Purchases and sales are final, and a sold card leaves your collection. Every coin you collect is added to your lifetime coins earned, and your coin balance is your coins earned minus your coins spent. Your score is calculated from the runs you finish, plus any points from cards you sell, and each finished run is added to your lifetime total. Features that are shown as unavailable, such as The Giving, are not offered at this time and may never be. Your best run and your last run are shown as well. Rarity, drop rates, unlock conditions, speed, health, scoring and every other rule of the game may be changed, reset or removed at any time, and the game as it behaves on the Site always takes priority over any description of it.</p>',
+    '<p>Every card in the Site is a fake, in-game representation of a real card. It is not the real card and has no real-world value or legal standing. THE HALL is a mini game and a competition between players, and what players collect in it stays inside the game.</p>',
+    '<p>The 120 cards, the packs, the coins, the points and every other item in THE HALL are virtual items for gameplay only. They have no cash value, cannot be redeemed, are not tokens or digital assets, and are not a claim to anything in the real world. Signed-in players may use the Marketplace inside the Site: coins collected in runs can be spent to buy face down cards offered by us, and points can be spent to buy face up cards that other players have listed for sale at the price each seller sets. Points spent on a purchase are deducted from the buyer&rsquo;s score and credited to the seller, and buyers and sellers may text each other to ask questions or to negotiate a lower price. Any card a player has collected, whether earned in a run or bought, can be sold to us for points that count on the leaderboard or listed face up at a price in points that the player chooses. Coins and points can be exchanged only through the Marketplace as it is offered, never for money. Face down cards are priced in coins by us and are priced high on purpose; prices of face up player listings are set by the sellers; sale values, limits and availability are set by us and may change at any time. We are not a party to deals between players and do not guarantee any seller, price or outcome, and you must never offer or accept money or anything outside the Site in a negotiation. Purchases and sales are final, and a sold card leaves your collection. During a run, a player who crashes may spend 10% of their points (not coins) on one extra life per run; crashing again ends the run, and the points spent are final. Every coin you collect is added to your lifetime coins earned, and your coin balance is your coins earned minus your coins spent. Your score is calculated from the runs you finish, plus any points from cards you sell, and each finished run is added to your lifetime total. Features that are shown as unavailable, such as The Giving, are not offered at this time and may never be. Your best run and your last run are shown as well. Rarity, drop rates, unlock conditions, speed, health, scoring and every other rule of the game may be changed, reset or removed at any time, and the game as it behaves on the Site always takes priority over any description of it.</p>',
     '<h3>10 &middot; Fair play</h3>',
     '<p>Do not use bots, scripts, automation, modified code, exploits, multiple identities or any other method to gain an unfair advantage, to interfere with the Site, or to affect other players. This includes abusing the Marketplace, for example by exploiting a price or pricing error, moving cards or points between your own accounts, or using any trick to create coins, cards or points that were not earned. The game has no pause: a run ends the moment you leave it, and an interrupted run does not count. We may review, adjust or remove scores, cards, rankings and accounts, and restrict access, wherever we reasonably suspect cheating, error or misuse.</p>',
     '<h3>11 &middot; Third-party services</h3>',
@@ -874,7 +896,7 @@ window.MIMUAudio = (function () {
   });
   document.querySelector('.brand').addEventListener('click', function (ev) { ev.preventDefault(); closeApe(); closeGames(); closeInfo(); });
   infoShade.addEventListener('click', function () { closeInfo(); }); $('infoClose').addEventListener('click', function () { closeInfo(); });
-  apeClose.addEventListener('click', function () { closeApe(); }); apeShade.addEventListener('click', function () { closeApe(); }); gShade.addEventListener('click', function () { closeGames(); });
+  apeClose.addEventListener('click', function () { closeApe(); }); apeShade.addEventListener('click', function () { closeApe(); }); gShade.addEventListener('click', function () { closeGames(); }); $('gClose').addEventListener('click', function () { closeGames(); });
   window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { if (panel.classList.contains('open')) closeApe(); if (phoneEl.classList.contains('open')) closeGames(); if (infoEl.classList.contains('open')) closeInfo(); } });
 
   // The loading beeps can only play after the visitor does something on the page (browser rule), so the loader waits behind one

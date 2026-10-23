@@ -53,6 +53,7 @@
       ['SCORING', 'distance + ' + c.coinPoints + ' per coin; every run adds to the lifetime total'],
       ['COINS', 'every coin adds to lifetime coins earned; the balance is earned minus spent'],
       ['MARKETPLACE', 'buy cards with coins; sell any collected card for leaderboard points'],
+      ['EXTRA LIFE', 'after a crash, one extra life per run for ' + Math.round(c.life.share * 100) + '% of the player\'s points (not coins); crash again and the run ends'],
       ['NO PAUSE', 'leaving the game in any way ends the run'],
       ['SAVING', P.isSignedIn() ? 'signed in: runs, cards, coins and messages are saved' : 'nobody signed in: demo runs, nothing saved, nothing ranked']
     ];

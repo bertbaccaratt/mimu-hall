@@ -18,7 +18,7 @@
     '<li><b>FILTER</b> USE THE BUTTONS TO SHOW ONE TIER, ONE FAMILY, ONLY CARDS YOU HAVE COLLECTED, OR ONLY THE ONES YOU ARE MISSING.</li>' +
     '<li><b>GET CARDS</b> JUMP THE FLOATING CARD IN THE HALL. OR USE THE MARKETPLACE: FACE DOWN CARDS FROM THE HALL COST COINS, AND FACE UP CARDS FROM OTHER PLAYERS COST POINTS.</li>' +
     '<li><b>EXTRA COPIES</b> ANY CARD YOU HAVE COLLECTED CAN BE SOLD OR LISTED IN THE MARKETPLACE.</li>' +
-    '<li>UNTIL SIGN-IN OPENS THE HALL RUNS AS A DEMO, SO NOTHING IS SAVED HERE YET.</li></ol></div>';
+    '<li>UNTIL SIGN-IN OPENS THE HALL RUNS AS A DEMO, SO NOTHING IS SAVED HERE YET.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>';
   var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set();
   function tierDot(t) { return t.grad ? '<i class="dm" style="background:' + t.grad + '"></i>' : '<i class="dm" style="background:' + t.color + '"></i>'; }
   function buildCollected() {

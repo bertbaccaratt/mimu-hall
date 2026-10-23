@@ -24,8 +24,9 @@
   var hpSegs = hud.querySelectorAll('.hhp i'), elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b'), elCards = hud.querySelector('.hk b'), elSlow = hud.querySelector('.hsl');
   var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
   var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>CARDS</span><b class="rk">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
-  root.appendChild(ovStart); root.appendChild(ovDead);
-  ovDead.style.display = 'none';
+  var ovLife = el('div', 'hov hlife', '<div class="ht gold">ANOTHER LIFE?</div><div class="hline"></div><div class="hlt">YOU CRASHED. KEEP THIS RUN GOING WITH ONE EXTRA LIFE.</div><div class="hcost"><span>COST</span><b class="lc">0</b><em>10% OF YOUR POINTS</em></div><div class="hpts">YOUR POINTS <b class="lp">0</b></div><button type="button" class="hbuy">BUY A LIFE</button><button type="button" class="hno">NO THANKS</button><div class="hmsg"></div><div class="hnote">ONE EXTRA LIFE PER RUN &middot; CRASH AGAIN AND THE RUN ENDS</div>');
+  root.appendChild(ovStart); root.appendChild(ovDead); root.appendChild(ovLife);
+  ovDead.style.display = 'none'; ovLife.style.display = 'none';
 
   /* ---------- artwork ---------- */
   var imgs = {}, pending = 0;
@@ -159,6 +160,28 @@
   }
   function die(silent) {
     S.mode = 'dead'; S.flash = 1; S.shake = 1; if (!silent && window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
+    if (!silent && !S.lifeUsed) { showOffer(); return; }   // the first crash of a run: offer the one extra life
+    finalize();
+  }
+  /* ---------- the one extra life: bought after the first crash, for 10% of the player's points ---------- */
+  function fmtN(n) { return Math.floor(n || 0).toLocaleString('en-US'); }
+  function showOffer() {
+    S.offer = true;
+    var signed = HallProfile.isSignedIn(), pts = Math.floor((HallProfile.totals().lifetime) || 0), cost = HallProfile.lifeCost();
+    S.lifeCost = cost; ovLife.querySelector('.lc').textContent = signed ? fmtN(cost) + ' PTS' : 'FREE (DEMO)';
+    ovLife.querySelector('.lp').textContent = signed ? fmtN(pts) : '—';
+    var buy = ovLife.querySelector('.hbuy'), msg = ovLife.querySelector('.hmsg'); buy.disabled = signed && pts < cost; msg.textContent = signed ? (pts < cost ? 'NOT ENOUGH POINTS FOR A LIFE' : '') : 'DEMO RUN · NOTHING IS SPENT OR SAVED';
+    setTimeout(function () { if (S.mode === 'dead' && S.offer) ovLife.style.display = 'flex'; }, 650);
+  }
+  function revive() {
+    S.offer = false; S.lifeUsed = true; S.mode = 'run'; S.hp = 6; showHp(); S.inv = 2.6; S.flash = 0.7; S.shake = 0; S.jt = -1; S.sl = -1;
+    for (var i = S.ents.length - 1; i >= 0; i--) if (S.ents[i].k === 'box' && S.ents[i].z < PZ + 2.5) S.ents.splice(i, 1);   // clear the boxes right in front so the new life gets a fair start
+    ovLife.style.display = 'none';
+    if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card();
+  }
+  function decline() { if (!S.offer) return; S.offer = false; ovLife.style.display = 'none'; finalize(); }
+  function leave() { forfeit(); decline(); }
+  function finalize() {
     var sc = Math.floor(S.score), isBest = sc > bestScore;
     if (isBest) bestScore = sc;
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rk').textContent = S.cards.length; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
@@ -169,6 +192,11 @@
   }
   // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
   function forfeit() { if (S.mode === 'run') die(true); }
+  ovLife.querySelector('.hno').addEventListener('click', function () { decline(); });
+  ovLife.querySelector('.hbuy').addEventListener('click', function () {
+    var b = this, signed = HallProfile.isSignedIn(), msg = ovLife.querySelector('.hmsg'); b.disabled = true; msg.textContent = signed ? 'BUYING…' : '';
+    (signed ? HallProfile.buyLife(S.lifeCost) : Promise.resolve()).then(function () { if (S.offer) revive(); }, function (e) { msg.textContent = String((e && e.message) || 'COULD NOT BUY A LIFE').toUpperCase(); b.disabled = false; });
+  });
 
   // Boxes hurt by kind: health is six segments. A plain box takes 2 (three hits end the run), a blue box 3 (two hits), a red box all 6 (one hit).
   var DMG = [2, 6, 3];
@@ -467,7 +495,7 @@
     if (!active) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
     var raw = (now - last) / 1000 || 0.016, dt = Math.min(0.05, raw); last = now;
-    if (raw > 0.5 && S.mode === 'run') forfeit();   // the page stalled or was frozen: no pausing by freezing it
+    if (raw > 0.5 && S.mode === 'run') leave();   // the page stalled or was frozen: no pausing by freezing it
     if (!W) { resize(); if (!W) return; }
     if (pending > 0) return;
     update(dt); render();
@@ -497,18 +525,18 @@
     if (!active) return; var k = e.key;
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { lane(-1); e.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { lane(1); e.preventDefault(); }
-    else if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { if (S.mode === 'idle' || S.mode === 'dead') { start(); } else jump(); e.preventDefault(); }
+    else if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { if (S.mode === 'idle' || (S.mode === 'dead' && !S.offer)) { start(); } else jump(); e.preventDefault(); }
     else if (k === 'ArrowDown' || k === 's' || k === 'S') { slide(); e.preventDefault(); }
   });
 
   /* ---------- the phone calls these ---------- */
-  document.addEventListener('visibilitychange', function () { if (document.hidden) forfeit(); });
-  window.addEventListener('pagehide', forfeit);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) leave(); });
+  window.addEventListener('pagehide', leave);
   window.HallRunner = {
-    open: function () { forfeit(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
-    close: function () { forfeit(); active = false; },
+    open: function () { leave(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
+    close: function () { leave(); active = false; },
     state: function () { return S; },
     // what the admin page shows about the run in progress on this device
-    live: function () { return { mode: S.mode, score: Math.floor(S.score), alive: Math.floor(S.alive), speed: S.v, hp: S.hp, cards: S.cards.length, coins: S.coins, slow: S.slowT > 0 }; }
+    live: function () { return { mode: S.mode, score: Math.floor(S.score), alive: Math.floor(S.alive), speed: S.v, hp: S.hp, cards: S.cards.length, coins: S.coins, slow: S.slowT > 0, life: !!S.lifeUsed }; }
   };
 })();
