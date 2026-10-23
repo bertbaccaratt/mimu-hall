@@ -219,7 +219,7 @@
 
   /* ---------- CAMERA: a viewfinder, a shutter that flashes and clicks, and a photo gallery with a full-screen viewer ---------- */
   var cam = { n: 0, built: false };
-  var PICS = [1, 2, 3, 4, 5, 6, 7, 11, 9, 8, 10, 12].map(function (i) { return 'assets/game/photos/p' + i + '.webp'; });
+  var PICS = [1, 2, 6, 3, 4, 10, 5].map(function (i) { return 'assets/game/photos/p' + i + '.webp'; });
   function camToast(txt) { var t = $('camToast'); if (!t) return; t.innerHTML = txt; t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
   function buildCamera() {
     var el = $('camApp'); if (!el || cam.built) { if (el) closeGallery(); return; } cam.built = true; el.classList.add('page');
