@@ -119,6 +119,7 @@
   .batt { width: calc(var(--h) * .03); height: calc(var(--h) * .0145); border: 1px solid #d9ac5c; border-radius: 3px; position: relative; } .batt::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: 70%; background: #d9ac5c; border-radius: 1px; }
   .plock { position: absolute; left: 50%; top: 11.5%; transform: translateX(-50%); width: calc(var(--h) * .036); height: calc(var(--h) * .036); color: #d9ac5c; filter: drop-shadow(0 0 8px rgba(217,172,92,.5)); }
   .pdate { position: absolute; left: 0; right: 0; top: 17%; text-align: center; font-size: calc(var(--h) * .0175); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
+  .pclock small, .hclock small { font-size: .26em; letter-spacing: .12em; margin-left: .3em; vertical-align: .5em; }
   .pclock { position: absolute; left: 0; right: 0; top: 19.5%; text-align: center; font-weight: 500; font-size: calc(var(--h) * .118); letter-spacing: .04em; line-height: 1.1; filter: drop-shadow(0 3px 12px rgba(0,0,0,.85)); }
   .pquick { position: absolute; left: 0; right: 0; bottom: 6.5%; display: flex; justify-content: space-between; padding: 0 10%; }
   .pquick i { width: calc(var(--h) * .068); height: calc(var(--h) * .068); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d9ac5c; background: rgba(0,0,0,.45); border: 1px solid rgba(217,172,92,.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); } .pquick svg { width: 46%; height: 46%; }
@@ -258,7 +259,7 @@
   @keyframes wiggle { 0%, 34%, 100% { transform: rotate(0); } 6% { transform: rotate(-3.2deg) translateX(-2px); } 12% { transform: rotate(3.2deg) translateX(2px); } 18% { transform: rotate(-2.4deg) translateX(-1px); } 24% { transform: rotate(2.4deg) translateX(1px); } 29% { transform: rotate(-1deg); } }
   @keyframes ring { 0%, 34%, 100% { opacity: .35; transform: scale(1); } 12% { opacity: .9; transform: scale(1.04); } }
 
-  @media (max-width: 520px) { .enter { padding: 20px 40px 20px 52px; letter-spacing: .45em; } .status { letter-spacing: .26em; } .bar::before { left: -13px; } .bar::after { right: -13px; } #hex { min-width: 0; } }
+  @media (max-width: 520px) { .enter .inner { font-size: 15px; letter-spacing: .3em; } .enter { padding: 20px 40px 20px 52px; letter-spacing: .45em; } .status { letter-spacing: .26em; } .bar::before { left: -13px; } .bar::after { right: -13px; } #hex { min-width: 0; } }
   @media (prefers-reduced-motion: reduce) { .bg { display: none; } body { background: #000 url("assets/poster.webp") center / cover no-repeat; } .enter.show .inner, .enter::before, .fill::after, .sheen::after { animation: none; } }
 </style>
 </head>
@@ -280,7 +281,7 @@
       <div class="bar"><div class="fill" id="fill"></div><div class="sheen"></div><div class="spark" id="spark"></div></div>
       <div class="meta"><span id="pct">000%</span><span class="pips" id="pips"></span><span id="hex">SEAL 0000-0000</span></div>
     </div>
-    <a class="enter" id="enter" href="#"><span class="inner">ENTER</span></a>
+    <a class="enter" id="enter" href="#"><span class="inner">CONNECT GLYPH</span></a>
   </div>
 </main>
 
@@ -626,7 +627,12 @@ window.MIMUAudio = (function () {
   }
   function setActive(t) { tabs.forEach(function (o) { o.classList.toggle('active', o === t); }); }
   var gamesTab = document.querySelector('a[href="#games"]'), phoneEl = $('phone'), gShade = $('gamesShade'), clockEl = $('pClock'), dateEl = $('pDate');
-  function tickClock() { var d = new Date(), TZ = 'America/Los_Angeles'; clockEl.textContent = d.toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit', hour12: false }).replace(/^24:/, '00:'); dateEl.textContent = d.toLocaleDateString('en-US', { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase(); $('hClock').textContent = clockEl.textContent; $('hDate').textContent = dateEl.textContent; }
+  function tickClock() {
+    var d = new Date(), TZ = 'America/Los_Angeles', parts = d.toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit', hour12: true }).split(' ');
+    clockEl.innerHTML = parts[0] + '<small class="ampm">' + (parts[1] || '') + '</small>';
+    dateEl.textContent = d.toLocaleDateString('en-US', { timeZone: TZ, weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase();
+    $('hClock').innerHTML = clockEl.innerHTML; $('hDate').textContent = dateEl.textContent;
+  }
   setInterval(tickClock, 15000); tickClock();
   function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp') && $('pScreen').dataset.app === 'hall') HallRunner.open(); }
   function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
