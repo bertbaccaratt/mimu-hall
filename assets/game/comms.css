@@ -248,7 +248,7 @@ body .top { padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)); 
 .sklab { display: flex; gap: 3px; margin-top: 3px; } .sklab span { flex: 1; text-align: center; font: 400 max(7px, calc(var(--h) * .0082)) 'Cinzel', Georgia, serif; letter-spacing: .04em; color: var(--dim); font-variant-numeric: tabular-nums; } .sklab span.done { color: #8dffb8; }
 .bdg .skf { display: flex; justify-content: space-between; gap: 8px; margin-top: calc(var(--h) * .006); font: 400 max(7px, calc(var(--h) * .0085)) 'Cinzel', Georgia, serif; letter-spacing: .1em; color: var(--dim); } .bdg .skf em { margin: 0; text-align: right; }
 /* Easter egg: the pack on the table, and the RGB frame it switches on */
-.eggpack { position: fixed; z-index: 1; width: var(--w, 100px); aspect-ratio: 1; margin: 0; padding: 0; transform: translate(-50%, -50%); border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; perspective: 400px; }
+.eggpack { position: fixed; z-index: 3; width: var(--w, 100px); aspect-ratio: 1; margin: 0; padding: 0; transform: translate(-50%, -50%); border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; perspective: 400px; }
 .eggpack img { display: block; width: 100%; height: auto; transform: rotateX(68deg) rotateZ(-74deg); filter: brightness(.62) contrast(1.05) drop-shadow(0 4px 3px rgba(0,0,0,.8)); transition: filter .3s; pointer-events: none; }
 .eggpack:hover img { filter: brightness(.85) contrast(1.05) drop-shadow(0 4px 3px rgba(0,0,0,.8)); }
 .eggpack.tap img { animation: eggtap .35s ease; } @keyframes eggtap { 40% { transform: rotateX(68deg) rotateZ(-74deg) translateY(-6px) scale(1.08); } }
@@ -259,3 +259,5 @@ body .top { padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)); 
 .phone.rgb::after { filter: blur(calc(var(--h) * .012)); opacity: .9; }
 @keyframes rgbspin { to { --rgbA: 360deg; } } @keyframes rgbhue { to { filter: hue-rotate(360deg); } }
 .phone.rgb::after { animation-name: rgbspin, rgbhueb; } @keyframes rgbhueb { from { filter: blur(calc(var(--h) * .012)) hue-rotate(0deg); } to { filter: blur(calc(var(--h) * .012)) hue-rotate(360deg); } }
+/* with the phone open the pack sits above the dimming layer, so clicking it never closes the phone; it is dimmed by hand instead */
+body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shadow(0 4px 3px rgba(0,0,0,.8)); } body.phone-open .eggpack:hover img { filter: brightness(.5) contrast(1.05) drop-shadow(0 4px 3px rgba(0,0,0,.8)); }

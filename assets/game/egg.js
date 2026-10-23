@@ -1,7 +1,7 @@
 /* A hidden Easter egg: a black pack lying on the nearest table in the hall. Click it to switch the RGB lights around the phone on, click it again to switch them off. */
 (function () {
   'use strict';
-  var KEY = 'mimu-rgb', IW = 1920, IH = 1080, CX = 452, CY = 892, W = 118;   // where the pack sits in the 1920 x 1080 picture, and how wide it is there
+  var KEY = 'mimu-rgb', IW = 1920, IH = 1080, CX = 428, CY = 884, W = 104;   // where the pack sits in the 1920 x 1080 picture, and how wide it is there
   var veil = document.querySelector('.veil'), phone = document.getElementById('phone'); if (!veil || !phone) return;
   var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'eggpack'; btn.setAttribute('aria-hidden', 'true'); btn.tabIndex = -1;
   btn.innerHTML = '<img src="assets/game/pack.webp" alt="" draggable="false">';
