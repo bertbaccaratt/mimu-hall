@@ -59,6 +59,7 @@
     addCard: function (n) { if (!adapter || !adapter.addCard) return false; var r = adapter.addCard(n); emit('cards'); return r; },
     recordRun: function (run) { if (!adapter || !adapter.recordRun) return false; var r = adapter.recordRun(run); emit('scores'); return r; },
     totals: function () { return adapter && adapter.totals ? adapter.totals() : { lifetime: 0, best: 0, last: 0 }; },
+    deckBoard: function () { return adapter && adapter.deckBoard ? adapter.deckBoard() : Promise.resolve([]); },   // top 10 by deck progress: [{ username, owned, rarest, family, runs, best }]
     leaderboard: function (kind) { return adapter && adapter.leaderboard ? adapter.leaderboard(kind) : Promise.resolve([]); },   // kind: 'lifetime' | 'best' | 'last'
     onChange: function (fn) { listeners.push(fn); },
     connect: function (a) { adapter = a; emit('connect'); },

@@ -62,7 +62,9 @@
     lEl = $('lbApp'); if (!lEl || lBuilt) return; lBuilt = true; lEl.classList.add('page');
     lEl.innerHTML = '<div class="pg"><div class="pgh"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTALS</div></div>' +
       '<div class="tabs3" id="lTabs"><button class="on" data-k="lifetime">LIFETIME</button><button data-k="best">BEST RUN</button><button data-k="last">LAST RUN</button></div>' +
-      '<div class="sec" id="lList"></div></div>';
+      '<div class="sec" id="lList"></div>' +
+      '<div class="pgh dk"><h2 class="gold">TOP 10 &middot; THE FULL DECK</h2><div class="pgsub">HOW CLOSE EACH RUNNER IS TO ALL 120 CARDS</div></div>' +
+      '<div class="sec" id="dList"></div></div>';
     $('lTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; kind = b.getAttribute('data-k'); Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); refreshLeaderboard(); });
   }
   function refreshLeaderboard() {
@@ -72,6 +74,21 @@
       var box = $('lList');
       if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + TROPHY + '<br>NO RANKED RUNS YET<br><span style="opacity:.7">DEMO RUNS ARE NOT RANKED</span></div>'; return; }
       box.innerHTML = rows.slice(0, 100).map(function (r, i) { return '<div class="lbrow"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || r.name || 'RUNNER') + '</span><span class="sc">' + fmt(r.score) + '</span></div>'; }).join('');
+    });
+    refreshDeck();
+  }
+  /* top 10 by deck progress; names come from Glyph once it is connected (P.deckBoard), until then the ten places are empty */
+  function refreshDeck() {
+    var total = (P.cards && P.cards().length) || 120;
+    P.deckBoard().then(function (rows) {
+      rows = (rows || []).slice(0, 10); var out = '', i, r, pct, dash = '&mdash;';
+      for (i = 0; i < 10; i++) {
+        r = rows[i];
+        if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0%</span></div><div class="dkb"><i style="width:0"></i></div><div class="dka"><span>CARDS ' + dash + '/' + total + '</span><span>RAREST ' + dash + '</span><span>FAMILY ' + dash + '</span><span>RUNS ' + dash + '</span><span>BEST ' + dash + '</span></div></div>'; continue; }
+        pct = Math.min(100, Math.round((r.owned || 0) / total * 1000) / 10);
+        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + pct + '%</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dka"><span>CARDS ' + fmt(r.owned || 0) + '/' + total + '</span><span>RAREST ' + esc((r.rarest || dash).toString().toUpperCase()) + '</span><span>FAMILY ' + esc((r.family || dash).toString().toUpperCase()) + '</span><span>RUNS ' + (r.runs == null ? dash : fmt(r.runs)) + '</span><span>BEST ' + (r.best == null ? dash : fmt(r.best)) + '</span></div></div>';
+      }
+      $('dList').innerHTML = out + (rows.length ? '' : '<div class="dknote">USERNAMES APPEAR HERE ONCE GLYPH IS CONNECTED</div>');
     });
   }
 
