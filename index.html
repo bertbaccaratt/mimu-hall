@@ -639,10 +639,9 @@ window.MIMUAudio = (function () {
   bUp.addEventListener('click', function () { pressed(bUp); if (!A) return; var v = A.setVolume(A.getVolume() + 0.125); paintSilent(); showOsd('VOLUME', v); });
   bDown.addEventListener('click', function () { pressed(bDown); if (!A) return; var v = A.setVolume(A.getVolume() - 0.125); paintSilent(); showOsd(v === 0 ? 'VOLUME 0' : 'VOLUME', v); });
   document.getElementById('sound').addEventListener('click', function () { setTimeout(paintSilent, 0); });
-  function sleepPhone() { pscreen.classList.remove('unlocked', 'inapp'); pscreen.classList.add('asleep'); if (window.HallRunner) HallRunner.close(); }
-  function wakePhone() { pscreen.classList.remove('asleep'); tickClock(); }
-  bPower.addEventListener('click', function () { pressed(bPower); if (pscreen.classList.contains('asleep')) wakePhone(); else sleepPhone(); });
-  pSleep.addEventListener('click', wakePhone);  window.addEventListener('keydown', function (ev) {
+  // the lock button: on the lock screen it unlocks straight to the home screen; anywhere else it locks the phone to the lock screen
+  function lockPhone() { pscreen.classList.remove('unlocked', 'inapp'); if (window.HallRunner) HallRunner.close(); tickClock(); }
+  bPower.addEventListener('click', function () { pressed(bPower); if (isLocked()) unlockPhone(); else lockPhone(); });  window.addEventListener('keydown', function (ev) {
     if (!phoneEl.classList.contains('open') || !isLocked() || pscreen.classList.contains('asleep')) return;
     if (ev.key === 'ArrowUp' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); unlockPhone(); }
   });

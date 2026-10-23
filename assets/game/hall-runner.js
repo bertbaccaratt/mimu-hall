@@ -23,7 +23,7 @@
   var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b></div><button type="button" class="hpause" aria-label="Pause"><i></i><i></i></button><div class="hc"><span class="hcoin"></span><b>0</b></div>');
   root.appendChild(hud);
   var elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b'), btnPause = hud.querySelector('.hpause');
-  var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; SWIPE UP TO JUMP</div>');
+  var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
   var ovPause = el('div', 'hov hpaused', '<div class="ht gold">PAUSED</div><div class="htap">TAP TO KEEP RUNNING</div>');
   var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
   root.appendChild(ovStart); root.appendChild(ovPause); root.appendChild(ovDead);
@@ -66,7 +66,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', paused: false, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
+    return { mode: 'idle', paused: false, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -130,6 +130,7 @@
       var target = S.lane, k = 1 - Math.exp(-dt * 13), nx = S.px + (target - S.px) * k;
       S.vx = (nx - S.px) / Math.max(dt, 0.001); S.px = nx;
       if (S.jt >= 0) { S.jt += dt / 0.62; if (S.jt >= 1) S.jt = -1; }
+      if (S.sl >= 0) { S.sl += dt / 0.7; if (S.sl >= 1) S.sl = -1; }
       // world
       for (var i = S.ents.length - 1; i >= 0; i--) {
         var e = S.ents[i], pz = e.z; e.z -= step;
@@ -289,7 +290,9 @@
     var sh = H * 0.25, sw = sh * im.naturalWidth / im.naturalHeight, bob = (S.mode === 'dead' ? 0 : Math.abs(Math.sin(S.run * Math.PI)) * sh * 0.025);
     var lift = jh * H * 0.11 + bob, tilt = clamp(S.vx * 0.012, -0.16, 0.16);
     shadow(x, y, sw * 0.34 * (1 - jh * 0.35));
-    ctx.save(); ctx.translate(x, y - lift); ctx.rotate(tilt);
+    // sliding: the runner drops low, stretches out and leans into it, then springs back up
+    var env = S.sl < 0 ? 0 : (S.sl < 0.12 ? S.sl / 0.12 : S.sl > 0.8 ? (1 - S.sl) / 0.2 : 1);
+    ctx.save(); ctx.translate(x, y - lift); ctx.rotate(tilt + env * 0.16); ctx.scale(1 + env * 0.16, 1 - env * 0.45);
     if (S.mode === 'dead') ctx.globalAlpha = 0.9;
     // a soft gold edge light so the runner sits in the hall's light
     ctx.drawImage(im, -sw / 2, -sh * 0.97, sw, sh);
@@ -344,7 +347,8 @@
 
   /* ---------- controls ---------- */
   function lane(d) { if (S.mode !== 'run' || S.paused) return; S.lane = clamp(S.lane + d, -1, 1); }
-  function jump() { if (S.mode !== 'run' || S.paused || S.jt >= 0) return; S.jt = 0; }
+  function jump() { if (S.mode !== 'run' || S.paused || S.jt >= 0) return; S.sl = -1; S.jt = 0; }
+  function slide() { if (S.mode !== 'run' || S.paused || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; }
   var down = null;
   root.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; down = { x: e.clientX, y: e.clientY, t: Date.now(), used: false }; });
   root.addEventListener('pointermove', function (e) {
@@ -352,6 +356,7 @@
     var dx = e.clientX - down.x, dy = e.clientY - down.y, th = Math.max(22, W * 0.07);
     if (Math.abs(dx) > th && Math.abs(dx) > Math.abs(dy)) { lane(dx > 0 ? 1 : -1); down.used = true; }
     else if (dy < -th && Math.abs(dy) > Math.abs(dx)) { jump(); down.used = true; }
+    else if (dy > th && Math.abs(dy) > Math.abs(dx)) { slide(); down.used = true; }
   });
   function up() {
     if (!down) return; var d = down; down = null;
@@ -366,6 +371,7 @@
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { lane(-1); e.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { lane(1); e.preventDefault(); }
     else if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { if (S.mode === 'idle' || S.mode === 'dead') { start(); } else jump(); e.preventDefault(); }
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') { slide(); e.preventDefault(); }
     else if (k === 'p' || k === 'P') { setPaused(!S.paused); }
   });
 
