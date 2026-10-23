@@ -58,7 +58,10 @@
     owned: function () { return adapter && adapter.owned ? adapter.owned() : new Set(); },       // a Set of card numbers
     addCard: function (n) { if (!adapter || !adapter.addCard) return false; var r = adapter.addCard(n); emit('cards'); return r; },
     recordRun: function (run) { if (!adapter || !adapter.recordRun) return false; var r = adapter.recordRun(run); emit('scores'); return r; },
-    totals: function () { return adapter && adapter.totals ? adapter.totals() : { lifetime: 0, best: 0, last: 0 }; },
+    totals: function () { return adapter && adapter.totals ? adapter.totals() : { lifetime: 0, best: 0, last: 0, coins: 0, balance: 0 }; },   // coins = every coin ever collected, balance = coins earned minus coins spent
+    messages: function () { return adapter && adapter.messages ? adapter.messages : null; },   // { threads(), thread(id), send(id, body), block(id, on), players() }
+    mail: function () { return adapter && adapter.mail ? adapter.mail : null; },   // { inbox(), read(id) }
+    market: function () { return adapter && adapter.market ? adapter.market : null; },   // { listings(), sellable(), buy(n), sell(n) }
     deckBoard: function () { return adapter && adapter.deckBoard ? adapter.deckBoard() : Promise.resolve([]); },   // top 10 by deck progress: [{ username, owned, rarest, family, runs, best }]
     leaderboard: function (kind) { return adapter && adapter.leaderboard ? adapter.leaderboard(kind) : Promise.resolve([]); },   // kind: 'lifetime' | 'best' | 'last'
     onChange: function (fn) { listeners.push(fn); },

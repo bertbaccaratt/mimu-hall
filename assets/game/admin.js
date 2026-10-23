@@ -11,7 +11,8 @@
   function dur(sec) { if (sec == null || isNaN(sec)) return '—'; sec = Math.floor(sec); var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + 'h ' : '') + (h || m ? m + 'm ' : '') + (h ? '' : s + 's'); }
   function hms(sec) { var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return (h ? h + ' h ' : '') + (m ? m + ' min' : (h ? '' : sec + ' s')); }
 
-  var feed = null, tick = 0, fails = 0, lockUntil = 0;
+  var feed = null, handlers = {}, tick = 0, fails = 0, lockUntil = 0;
+  function stamp(ts) { try { return new Date(ts).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase(); } catch (e) { return ''; } }
   function sha(s) { var b = new TextEncoder().encode(SALT + s); return crypto.subtle.digest('SHA-256', b).then(function (d) { return Array.prototype.map.call(new Uint8Array(d), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }); }
 
   /* ---------- the link and the login box ---------- */
@@ -87,13 +88,44 @@
       '<div class="adm-top"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="live" id="admLive"><i></i><span id="admLiveTxt">FEED NOT CONNECTED</span></div></div>' +
       '<div class="tiles" id="admTiles"></div>' +
       '<div class="cols2"><div class="box"><h4>TOP 9 LIVE RUNS</h4><div class="live9" id="admLive9"></div></div><div class="box"><h4>THE 120 CARDS</h4>' + cardBars() + '</div></div>' +
+      '<div class="cols2"><div class="box"><h4>TEXT AS HYPE</h4><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl">' + ((feed && feed.players) || []).slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join('') + '</datalist><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div><div class="sent" id="admHList"></div></div></div>' +
+      '<div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
+      '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="4" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></div>' +
       '<div class="box" style="margin-bottom:16px"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div>' +
       '<div class="box"><h4>TOOLS</h4><div class="tools"><button type="button" class="sw' + (P.isTest() ? ' on' : '') + '" id="admTest"><i></i>TEST MODE</button><div class="hint">Test mode makes card sightings come every few seconds, opens every tier, and brings the pack after 40 seconds, so you can see every rarity and the slowdown without playing for hours. Nothing is saved while it is on. It only changes this browser.</div></div></div></div>';
     shade.querySelector('.adm-x').addEventListener('click', close);
     $('admTest').addEventListener('click', function () { var on = !P.isTest(); P.setTest(on); this.classList.toggle('on', on); });
     function refresh() { $('admTiles').innerHTML = tiles(); $('admLive9').innerHTML = liveRows(); var live = $('admLive'); live.classList.toggle('on', !!feed); $('admLiveTxt').textContent = feed ? 'LIVE FEED CONNECTED' : 'FEED NOT CONNECTED'; }
-    refresh(); clearInterval(tick); tick = setInterval(refresh, 1000);
+    var mtab = 'c';
+    function lists() {
+      var h = (feed && feed.hypes) || [], m = (feed && feed.mails) || [], r = (feed && feed.replies) || [];
+      $('admHList').innerHTML = h.length ? h.slice(0, 8).map(function (x) { return '<div class="srow2"><b>' + esc(x.to || x.rn || '') + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NOTHING SENT YET</div>';
+      var box = $('admML'); if (mtab === 's') box.innerHTML = m.length ? m.slice(0, 12).map(function (x) { return '<div class="srow2"><b>' + esc(x.subject) + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NO MAIL SENT YET</div>';
+      if (mtab === 'r') box.innerHTML = r.length ? r.slice(0, 12).map(function (x) { return '<div class="srow2"><b>' + esc(x.from || '') + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NOTHING RECEIVED &middot; MAIL IS ONE-WAY FROM MIMU</div>';
+    }
+    function done(el, p, okText) {
+      el.className = 'cmsg'; if (!p) { el.textContent = 'NOT CONNECTED YET · NOTHING WAS SENT'; el.classList.add('bad'); return; }
+      el.textContent = 'SENDING…'; p.then(function () { el.textContent = okText; el.classList.add('ok'); lists(); }, function (e) { el.textContent = String((e && e.message) || 'COULD NOT SEND').toUpperCase(); el.classList.add('bad'); });
+    }
+    $('admHSend').addEventListener('click', function () {
+      var to = $('admHTo').value.trim(), body = $('admHBody').value.trim(), el = $('admHMsg');
+      if (!to || !body) { el.className = 'cmsg bad'; el.textContent = 'PICK A PLAYER AND WRITE A MESSAGE'; return; }
+      done(el, handlers.hype ? handlers.hype(to, body) : null, 'SENT AS HYPE'); if (handlers.hype) $('admHBody').value = '';
+    });
+    $('admMSend').addEventListener('click', function () {
+      var s = $('admMS').value.trim(), b = $('admMB').value.trim(), el = $('admMMsg');
+      if (!s || !b) { el.className = 'cmsg bad'; el.textContent = 'WRITE A SUBJECT AND A MESSAGE'; return; }
+      done(el, handlers.mail ? handlers.mail(s, b) : null, 'SENT TO EVERYONE SIGNED IN'); if (handlers.mail) { $('admMS').value = ''; $('admMB').value = ''; }
+    });
+    $('admMT').addEventListener('click', function (ev) {
+      var b = ev.target.closest('button'); if (!b) return; mtab = b.getAttribute('data-k');
+      Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); });
+      $('admMC').style.display = mtab === 'c' ? '' : 'none'; $('admML').style.display = mtab === 'c' ? 'none' : ''; lists();
+    });
+    lists();
+    refresh(); clearInterval(tick); tick = setInterval(function () { refresh(); lists(); }, 1000);
   }
   /* later: HallAdmin.setFeed({ visitors:{today,total}, runs:{today,total}, live:[{name,score,alive,cards}], cardsFound, topScore, longest }) */
-  window.HallAdmin = { setFeed: function (f) { feed = f; }, open: openPanel };
+  /* later: HallAdmin.setHandlers({ hype(to, body) -> Promise, mail(subject, body) -> Promise }) and the feed also carries players:[{name}], hypes:[{to,body,ts}], mails:[{subject,body,ts}], replies:[{from,body,ts}] */
+  window.HallAdmin = { setFeed: function (f) { feed = f; }, setHandlers: function (h) { handlers = h || {}; }, open: openPanel };
 })();
