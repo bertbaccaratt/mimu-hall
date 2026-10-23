@@ -371,7 +371,7 @@
     }
   }
   function buildPanel() {
-    shade.classList.add('open');
+    apprSig = ''; flagSig = ''; wSig = ''; shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
       '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
