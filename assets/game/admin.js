@@ -122,12 +122,14 @@
       ['MARKETPLACE', ok(!!(P.market && P.market())), P.market && P.market() ? 'CONNECTED' : 'WAITS FOR SIGN-IN'],
       ['HYPE AND MAIL SENDING', ok(!!(handlers.hype && handlers.mail)), handlers.hype && handlers.mail ? 'READY' : 'NOT CONNECTED YET'],
       ['SOUND', 'ok', A && A.isMuted() ? 'MUTED' : 'ON · VOLUME ' + Math.round((A ? A.getVolume() : 0) * 8) + ' OF 8'],
+      ['BUILD', DOCS.commit ? 'ok' : 'warn', DOCS.commit ? 'COMMIT ' + esc(DOCS.commit) + ' · ' + esc(DOCS.commits) + ' CHANGES · GUIDE ' + esc(DOCS.built) : 'GUIDE NOT LOADED'],
       ['TEST MODE', P.isTest() ? 'warn' : 'ok', P.isTest() ? 'ON (THIS BROWSER ONLY)' : 'OFF'],
       ['THIS BROWSER', 'ok', 'WINDOW ' + vw]
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['tools', 'TOOLS']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST'], ['log', 'CHANGELOG'], ['files', 'FILES'], ['tools', 'TOOLS']];
+  var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
     try { buildPanel(); }
@@ -151,10 +153,16 @@
       '<section data-p="eco"><div class="box"><h4>COINS AND THE MARKETPLACE</h4><div id="admEco"></div><div class="hint" style="margin-top:14px">Coins collected in runs are spent on cards in the Marketplace. Any collected card can be sold for leaderboard points. Prices and sale values are served by the Marketplace service once it is connected.</div></div></section>' +
       '<section data-p="cards"><div class="box"><h4>THE 120 CARDS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
+      '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
+      '<section data-p="sys">' + (DOCS.pages.sys || '') + '</section>' +
+      '<section data-p="data">' + (DOCS.pages.data || '') + '</section>' +
+      '<section data-p="road">' + (DOCS.pages.road || '') + '</section>' +
+      '<section data-p="log">' + (DOCS.pages.log || '') + '</section>' +
+      '<section data-p="files">' + (DOCS.pages.files || '') + '</section>' +
       '<section data-p="tools"><div class="box"><h4>TOOLS</h4><div class="tools"><button type="button" class="sw' + (P.isTest() ? ' on' : '') + '" id="admTest"><i></i>TEST MODE</button><div class="hint">Test mode makes card sightings come every few seconds, opens every tier, and brings the pack after 40 seconds, so you can see every rarity and the slowdown without playing for hours. Nothing is saved while it is on. It only changes this browser.</div></div>' +
       '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admSnap">DOWNLOAD SNAPSHOT</button><div class="hint">Saves the numbers on this page (and the current game settings) as a file on this computer.</div></div>' +
       '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admOut">LOCK THE CONTROL ROOM</button><div class="hint">Forgets this login on this browser, so the password is asked again.</div></div></div></section>' +
-      '</main></div><div class="cr-foot">KEYS &nbsp; 1&ndash;8 SWITCH PAGE &nbsp;&middot;&nbsp; ESC CLOSES</div></div>';
+      '</main></div><div class="cr-foot">KEYS &nbsp; 1&ndash;9 SWITCH PAGE &nbsp;&middot;&nbsp; ESC CLOSES &nbsp;&middot;&nbsp; GUIDE BUILT ' + esc(DOCS.built || '') + ' &middot; COMMIT ' + esc(DOCS.commit || '') + '</div></div>';
     var root = shade.querySelector('.adm');
     function show(t) {
       curTab = t;
@@ -165,7 +173,7 @@
     show(curTab);
     shade.querySelector('.adm-x').addEventListener('click', close);
     $('admNav').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b) show(b.getAttribute('data-t')); });
-    shade.onkeydown = function (ev) { if (/^[1-8]$/.test(ev.key) && !/INPUT|TEXTAREA/.test((ev.target || {}).tagName || '')) show(NAV[+ev.key - 1][0]); };
+    shade.onkeydown = function (ev) { if (/^[1-9]$/.test(ev.key) && !/INPUT|TEXTAREA/.test((ev.target || {}).tagName || '')) show(NAV[+ev.key - 1][0]); };
     shade.tabIndex = -1; shade.focus();
     $('admTest').addEventListener('click', function () { var on = !P.isTest(); P.setTest(on); this.classList.toggle('on', on); });
     $('admSnap').addEventListener('click', function () {
