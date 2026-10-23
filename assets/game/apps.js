@@ -69,7 +69,7 @@
   var TROPHY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 5H5a2 2 0 0 0 0 4h3M16 5h3a2 2 0 0 1 0 4h-3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg>';
   function buildLeaderboard() {
     lEl = $('lbApp'); if (!lEl || lBuilt) return; lBuilt = true; lEl.classList.add('page');
-    lEl.innerHTML = '<div class="pg"><div class="pgh"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTALS</div></div>' +
+    lEl.innerHTML = '<div class="pg"><div class="pgh"><img class="lbbox" src="assets/game/box.webp" alt="The black box you jump over in THE HALL" width="360" height="262" decoding="async"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTALS</div></div>' +
       '<div class="tabs3" id="lTabs"><button class="on" data-k="lifetime">LIFETIME</button><button data-k="best">BEST RUN</button><button data-k="last">LAST RUN</button></div>' +
       '<div class="sec" id="lList"></div>' +
       '<div class="pgh dk"><h2 class="gold">TOP 10 &middot; THE FULL DECK</h2><div class="pgsub">HOW CLOSE EACH RUNNER IS TO ALL 120 CARDS</div></div>' +

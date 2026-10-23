@@ -49,7 +49,7 @@
     { g: 'loy', k: 'bestStreak', n: 'DAY STREAK', t: [2, 3, 7, 14, 30, 60], names: ['Two in a Row', 'Three-Day Run', 'Weekly Habit', 'Fortnight Flame', 'Monthly Flame', 'Sixty Straight'], d: function (n) { return 'Play ' + n + ' days in a row'; } },
     { g: 'loy', k: 'signedIn', n: 'WELCOME', t: [1], names: ['Welcome to the Hall'], d: function () { return 'Sign in with Glyph'; } }
   ];
-  var METAL = ['bronze', 'silver', 'gold', 'amethyst', 'diamond'], METAL_NAME = { bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD', amethyst: 'AMETHYST', diamond: 'DIAMOND' };
+  var METAL = ['bronze', 'silver', 'gold', 'ruby', 'diamond'], METAL_NAME = { bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD', ruby: 'RUBY', diamond: 'DIAMOND' };
   var ALL = [];
   CATS.forEach(function (c) { c.t.forEach(function (n, i) { var r = c.t.length > 1 ? i / (c.t.length - 1) : 0; ALL.push({ id: c.k + ':' + n, cat: c, n: n, name: c.names[i], desc: c.d(n), metal: METAL[r < 0.2 ? 0 : r < 0.45 ? 1 : r < 0.7 ? 2 : r < 0.9 ? 3 : 4], rank: i + 1 }); }); });
 
@@ -63,8 +63,8 @@
     return v;
   }
 
-  /* ---------- the app ---------- */
-  var built = false, st = { group: 'all', show: 'all' };
+  /* ---------- the app: a dial for every category, tap a dial to open its badges ---------- */
+  var built = false, st = { group: 'all', show: 'all', open: null };
   function icon(b, got) {
     var roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'][b.rank] || b.rank;
     return '<span class="bdi ' + (got ? b.metal : 'locked') + '"><svg viewBox="0 0 40 46" aria-hidden="true"><path d="M20 2 37 11v18L20 44 3 29V11z"/></svg><b>' + (got ? roman : '&#128274;') + '</b></span>';
@@ -73,28 +73,57 @@
     var val = v[b.cat.k] || 0, got = val >= b.n, f = b.cat.f || nf(''), pct = Math.min(100, Math.floor(val / b.n * 100));
     return '<div class="bdr ' + (got ? 'got ' + b.metal : '') + '">' + icon(b, got) + '<div class="bdt"><b>' + esc(b.name.toUpperCase()) + '</b><span>' + esc(b.desc) + '</span><div class="bdb"><i style="width:' + pct + '%"></i></div></div><div class="bdv">' + (got ? '<em>EARNED</em>' : f(Math.min(val, b.n)) + '<small>OF ' + (b.cat.f ? b.cat.f(b.n) : fmt(b.n)) + '</small>') + '</div></div>';
   }
+  /* a tachometer: the gold arc is how many steps are earned, the ticks are the steps, the thin red arc is the way to the next one, the needle points at where you are */
+  function gauge(frac, ticks, nextFrac, big) {
+    var cx = 60, cy = 58, r = 46, i, a, p, q, s = '';
+    function pt(an, rr) { return [cx + rr * Math.cos(an), cy - rr * Math.sin(an)]; }
+    function arc(f, rr) { var sp = pt(Math.PI, rr), ep = pt(Math.PI * (1 - f), rr); return 'M' + sp[0].toFixed(2) + ' ' + sp[1].toFixed(2) + ' A' + rr + ' ' + rr + ' 0 0 1 ' + ep[0].toFixed(2) + ' ' + ep[1].toFixed(2); }
+    s += '<path class="gtr" d="' + arc(0.9999, r) + '"/>';
+    if (frac > 0) s += '<path class="gfl" d="' + arc(Math.min(frac, 0.9999), r) + '"/>';
+    if (nextFrac != null) { s += '<path class="gnt" d="' + arc(0.9999, r - 11) + '"/>'; if (nextFrac > 0) s += '<path class="gnf" d="' + arc(Math.min(nextFrac, 0.9999), r - 11) + '"/>'; }
+    for (i = 0; i <= ticks; i++) { a = Math.PI * (1 - i / ticks); p = pt(a, r - 5); q = pt(a, r + 3); s += '<line class="gtk' + (i / ticks <= frac + 0.0001 ? ' on' : '') + '" x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '"/>'; }
+    a = Math.PI * (1 - Math.min(frac, 1)); p = pt(a, r - 14);
+    s += '<line class="gnd" x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '"/><circle class="ghub" cx="' + cx + '" cy="' + cy + '" r="4.2"/>';
+    return '<svg class="gsvg' + (big ? ' big' : '') + '" viewBox="0 0 120 66" aria-hidden="true">' + s + '</svg>';
+  }
   function draw() {
-    var el = $('badgeApp'); if (!el) return; el.classList.add('page'); var v = values(), signed = P.isSignedIn();
+    var el = $('badgeApp'); if (!el) return; el.classList.add('page'); var oldPg = el.querySelector('.pg'), keep = oldPg ? oldPg.scrollTop : 0, v = values(), signed = P.isSignedIn();
     var got = ALL.filter(function (b) { return (v[b.cat.k] || 0) >= b.n; }), metals = {}; METAL.forEach(function (m) { metals[m] = 0; }); got.forEach(function (b) { metals[b.metal]++; });
     var pct = Math.round(got.length / ALL.length * 1000) / 10;
-    var next = ALL.filter(function (b) { return (v[b.cat.k] || 0) < b.n; }).map(function (b) { return { b: b, p: (v[b.cat.k] || 0) / b.n }; }).sort(function (a, c) { return c.p - a.p; });
+    var next = ALL.filter(function (b) { return (v[b.cat.k] || 0) < b.n; }).map(function (b) { return { b: b, p: (v[b.cat.k] || 0) / b.n }; }).sort(function (x, y) { return y.p - x.p; });
     var seenCat = {}, upnext = []; next.forEach(function (x) { if (upnext.length < 3 && !seenCat[x.b.cat.k] && x.p > 0) { seenCat[x.b.cat.k] = 1; upnext.push(x.b); } });
     var groups = '<button class="chip' + (st.group === 'all' ? ' on' : '') + '" data-g="all">ALL</button>' + GROUPS.map(function (g) { return '<button class="chip' + (st.group === g[0] ? ' on' : '') + '" data-g="' + g[0] + '">' + g[1] + '</button>'; }).join('');
     var shows = [['all', 'ALL'], ['got', 'EARNED'], ['todo', 'LOCKED']].map(function (s) { return '<button class="chip' + (st.show === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('');
-    var list = '', shown = 0;
-    CATS.forEach(function (c) {
-      if (st.group !== 'all' && c.g !== st.group) return; var bs = ALL.filter(function (b) { return b.cat === c && (st.show === 'all' || (st.show === 'got') === ((v[c.k] || 0) >= b.n)); }); if (!bs.length) return;
-      var earned = ALL.filter(function (b) { return b.cat === c && (v[c.k] || 0) >= b.n; }).length;
-      list += '<div class="bdc"><div class="bdch"><b>' + esc(c.n) + '</b><span>' + earned + ' / ' + c.t.length + '</span></div>' + bs.map(function (b) { shown++; return row(b, v); }).join('') + '</div>';
+    function cardFor(c) {
+      var ts = ALL.filter(function (b) { return b.cat === c; }), val = v[c.k] || 0, done = ts.filter(function (b) { return val >= b.n; }).length, nb = ts.filter(function (b) { return val < b.n; })[0];
+      var nfrac = nb ? Math.min(1, val / nb.n) : null, f = c.f || nf('');
+      return '<button type="button" class="bdg' + (st.open === c.k ? ' open' : '') + (done === ts.length ? ' full' : '') + '" data-c="' + c.k + '" aria-expanded="' + (st.open === c.k) + '">' + gauge(done / ts.length, ts.length, nfrac) + '<span class="gnum">' + done + '<small>/' + ts.length + '</small></span><b>' + esc(c.n) + '</b><em>' + (nb ? 'NEXT &middot; ' + Math.round(nfrac * 100) + '%' : 'COMPLETE') + '</em><i class="gch" aria-hidden="true"></i></button>';
+    }
+    function panelFor(c) {
+      var bs = ALL.filter(function (b) { return b.cat === c && (st.show === 'all' || (st.show === 'got') === ((v[c.k] || 0) >= b.n)); });
+      return '<div class="bdp">' + (bs.length ? bs.map(function (b) { return row(b, v); }).join('') : '<div class="empty">NOTHING IN THIS FILTER</div>') + '</div>';
+    }
+    var body = '';
+    GROUPS.forEach(function (g) {
+      if (st.group !== 'all' && st.group !== g[0]) return;
+      var cs = CATS.filter(function (c) { return c.g === g[0]; }), earned = ALL.filter(function (b) { return b.cat.g === g[0] && (v[b.cat.k] || 0) >= b.n; }).length, tot = ALL.filter(function (b) { return b.cat.g === g[0]; }).length, i;
+      body += '<div class="bdgrp"><div class="bdch"><b>' + g[1] + '</b><span>' + earned + ' / ' + tot + '</span></div><div class="bdgrid">';
+      for (i = 0; i < cs.length; i += 2) {
+        body += cardFor(cs[i]) + (cs[i + 1] ? cardFor(cs[i + 1]) : '');
+        var openC = cs.slice(i, i + 2).filter(function (c) { return c.k === st.open; })[0]; if (openC) body += panelFor(openC);
+      }
+      body += '</div></div>';
     });
     el.innerHTML = '<div class="pg bd"><div class="pgh"><h2 class="gold">BADGES</h2><div class="pgsub">MILESTONES &middot; NOT RANKED &middot; NO VALUE</div></div>' +
-      '<div class="bdsum"><div class="bdbig"><b>' + got.length + '</b><span>OF ' + ALL.length + ' EARNED</span></div><div class="bdbar"><i style="width:' + pct + '%"></i></div><div class="bdm">' + METAL.map(function (m) { return '<span class="' + m + '"><i></i>' + metals[m] + '<small>' + METAL_NAME[m] + '</small></span>'; }).join('') + '</div></div>' +
+      '<div class="bdsum"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>' + gauge(got.length / ALL.length, 10, null, true) + '<div class="bdbig"><b>' + got.length + '</b><span>OF ' + ALL.length + ' EARNED &middot; ' + pct + '%</span></div><div class="bdm">' + METAL.map(function (m) { return '<span class="' + m + '"><i></i>' + metals[m] + '<small>' + METAL_NAME[m] + '</small></span>'; }).join('') + '</div></div>' +
       '<div class="bdnote">' + (signed ? 'Badges are only milestones to keep track of what you have done in the Hall. They do not change the leaderboard and they are worth nothing.' : 'SIGN IN WITH GLYPH TO START EARNING BADGES. UNTIL THEN EVERY BADGE IS LOCKED. BADGES ARE ONLY MILESTONES: THEY NEVER CHANGE THE LEADERBOARD AND ARE WORTH NOTHING.') + '</div>' +
       (upnext.length ? '<div class="sec"><div class="sech">UP NEXT</div>' + upnext.map(function (b) { return row(b, v); }).join('') + '</div>' : '') +
       '<div class="sec"><div class="chips" id="bdG">' + groups + '</div><div class="chips" id="bdS" style="margin-top:6px">' + shows + '</div></div>' +
-      '<div class="sec" id="bdL">' + (list || '<div class="empty">NOTHING TO SHOW HERE YET</div>') + '</div></div>';
-    $('bdG').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.group = b.getAttribute('data-g'); draw(); });
+      '<div class="sec" id="bdL">' + (body || '<div class="empty">NOTHING TO SHOW HERE YET</div>') + '</div></div>';
+    var pg = el.querySelector('.pg'); pg.scrollTop = keep;
+    $('bdG').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.group = b.getAttribute('data-g'); st.open = null; draw(); });
     $('bdS').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.show = b.getAttribute('data-s'); draw(); });
+    $('bdL').addEventListener('click', function (e) { var b = e.target.closest('.bdg'); if (!b) return; var k = b.getAttribute('data-c'); st.open = st.open === k ? null : k; draw(); });
   }
   window.HallBadges = {
     open: function (name) { if (name !== 'badges') return; built = true; draw(); var pg = document.querySelector('#badgeApp .pg'); if (pg) pg.scrollTop = 0; },
