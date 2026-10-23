@@ -277,3 +277,5 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 @keyframes geblink { 0%, 92%, 100% { height: .75em; } 96% { height: 0; } }
 @media (max-width: 520px) { #gate .gcover { padding: 20px 40px 20px 52px; } }
 @media (prefers-reduced-motion: reduce) { #gate .geye { animation: none; } #gate:hover .gcover, #gate:focus-visible .gcover, #gate.peek .gcover { transform: none; } }
+/* the Mudwater icon: the black pack on a dark tile, opens the Mudwater site */
+.aic.ic-mud .atile { overflow: hidden; background: linear-gradient(160deg, #f6dc95 0%, #d9ac5c 55%, #8f5f1d 100%); border-color: rgba(255,235,190,.7); } .aic.ic-mud .atile img { display: block; width: 78%; height: 78%; object-fit: contain; border: 0; border-radius: 0; box-shadow: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.8)); } .aic.ic-mud:hover .atile { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.6), 0 0 16px rgba(232,198,115,.35); }
