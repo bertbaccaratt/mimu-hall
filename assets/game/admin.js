@@ -148,6 +148,80 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-tf]'), function (el) { var v = bt[+el.getAttribute('data-tf')]; el.textContent = 'FOUND ' + (v == null ? '—' : fmt(v)); });
     Array.prototype.forEach.call(document.querySelectorAll('.cth[data-cn]'), function (el) { var v = cc[el.getAttribute('data-cn')]; el.classList.toggle('hot', v != null && v > 0); var b = el.querySelector('span'); b.textContent = v ? v : el.getAttribute('data-cn'); });
   }
+  /* ---------- the OVERVIEW page: a mind map to learn the control room, then everything about the visitors ---------- */
+  var MAP = [
+    ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['cards', 'CARDS', 'the 120 cards, pictured']]],
+    ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text a player as HYPE'], ['mail', 'MIMU MAIL', 'email everyone as MIMU']]],
+    ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points and trades']]],
+    ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works'], ['data', 'DATA CONTRACT', 'what the server sends'], ['road', 'CHECKLIST', 'what is done and next'], ['log', 'CHANGELOG', 'every change made'], ['files', 'FILES', 'what is in the site']]],
+    ['DO', 'g5', [['tools', 'TOOLS', 'test mode and snapshot']]]
+  ];
+  function mindMap() {
+    return '<div class="box mmbox"><h4>HOW TO USE THE CONTROL ROOM</h4>' +
+      '<div class="mm"><div class="mmc"><i></i><b>CONTROL ROOM</b><small>PRESS ANY BOX TO JUMP THERE</small></div><div class="mmrail"></div><div class="mmgs">' +
+      MAP.map(function (g) { return '<div class="mmg ' + g[1] + '"><div class="mmh">' + g[0] + '</div>' + g[2].map(function (l) { return '<button type="button" class="mml" data-go="' + l[0] + '"><b>' + l[1] + '</b><span>' + l[2] + '</span></button>'; }).join('') + '</div>'; }).join('') + '</div></div>' +
+      '<ol class="mmsteps"><li><b>SIGN IN</b> with the ADMIN link at the bottom left of the site. Three wrong tries lock it for 30 seconds.</li>' +
+      '<li><b>MOVE AROUND</b> with the menu (left side, or the strip at the top on a phone), or press the keys 1 to 9. Esc closes the control room.</li>' +
+      '<li><b>READ THE LIGHTS</b> at the top: green means connected, gray means waiting. The Live Runs frame is red when nobody plays and green when somebody does.</li>' +
+      '<li><b>NO NUMBERS YET?</b> Dashes mean the live feed is not connected. The system check and the guide pages are always real.</li>' +
+      '<li><b>SEND</b> texts as HYPE and emails as MIMU from their own pages. They say NOT CONNECTED until the server is live.</li>' +
+      '<li><b>STALE PAGE?</b> Press Ctrl+Shift+R once to load the newest files. Tools has a snapshot download. LOG OUT under the menu signs you out.</li></ol></div>';
+  }
+  function bars24(a) {
+    var mx = Math.max.apply(null, (a || []).concat([1])), out = '', i, v;
+    for (i = 0; i < 24; i++) { v = a && a[i] != null ? a[i] : null; out += '<span title="' + (i % 12 || 12) + (i < 12 ? ' AM' : ' PM') + (v != null ? ' · ' + fmt(v) : '') + '"><i style="height:' + (v == null ? 4 : Math.max(4, v / mx * 100)) + '%"></i><em>' + (i % 6 === 0 ? (i % 12 || 12) + (i < 12 ? 'A' : 'P') : '') + '</em></span>'; }
+    return '<div class="hbars">' + out + '</div>';
+  }
+  function rankList(rows, ph) {
+    rows = (rows || []).slice(0, 8); var mx = Math.max.apply(null, rows.map(function (r) { return r.n || 0; }).concat([1]));
+    if (!rows.length) return '<div class="rk none">' + ph + '</div>';
+    return rows.map(function (r) { return '<div class="rk"><span>' + esc(r.name) + '</span><div class="tr"><i style="width:' + ((r.n || 0) / mx * 100) + '%"></i></div><b>' + fmt(r.n) + '</b></div>'; }).join('');
+  }
+  var FUN = [['loaded', 'CLICKED TO LOAD'], ['finished', 'FINISHED LOADING'], ['entered', 'ENTERED THE HALL'], ['unlocked', 'UNLOCKED THE PHONE'], ['played', 'STARTED A RUN'], ['finishedRun', 'FINISHED A RUN'], ['signedIn', 'SIGNED IN']];
+  function funnel(f) {
+    var base = f && f.loaded ? f.loaded : 0;
+    return FUN.map(function (s, i) { var v = f ? f[s[0]] : null, pct = v != null && base ? Math.round(v / base * 100) : null, prev = i && f && f[FUN[i - 1][0]] ? Math.round((v || 0) / f[FUN[i - 1][0]] * 100) : null;
+      return '<div class="fn"><span>' + s[1] + '</span><div class="tr"><i style="width:' + (pct == null ? 0 : pct) + '%"></i></div><b>' + (v == null ? '—' : fmt(v)) + '</b><em>' + (pct == null ? '' : pct + '%' + (prev != null && i ? ' · ' + prev + '% OF PREVIOUS' : '')) + '</em></div>'; }).join('');
+  }
+  function visTiles() {
+    var v = (feed && feed.visitors) || {}, none = feed ? '' : 'WAITING FOR LIVE FEED', sr = (feed && feed.series) || {}, signed = v.signedInShare != null ? v.signedInShare : (v.funnel && v.funnel.loaded ? Math.round((v.funnel.signedIn || 0) / v.funnel.loaded * 100) : null);
+    var t = [
+      ['VISITORS TODAY', fmt(v.today), v.newToday != null ? fmt(v.newToday) + ' new · ' + fmt(v.returningToday) + ' returning' : none, sr.visitors],
+      ['ON THE SITE NOW', fmt(v.now), v.now != null ? 'right now' : none],
+      ['THIS WEEK', fmt(v.week), v.week != null ? 'last 7 days' : none],
+      ['THIS MONTH', fmt(v.month), v.month != null ? 'last 30 days' : none],
+      ['ALL TIME', fmt(v.total), v.total != null ? 'every visitor' : none],
+      ['AVERAGE VISIT', v.avgSession != null ? dur(v.avgSession) : '—', v.avgSession != null ? 'time on the site' : none],
+      ['LEFT QUICKLY', v.bounce != null ? v.bounce + '%' : '—', v.bounce != null ? 'left without entering' : none],
+      ['SIGNED IN', signed == null ? '—' : signed + '%', signed != null ? 'of visitors' : none],
+      ['PLAYED A RUN', v.funnel && v.funnel.loaded ? Math.round((v.funnel.played || 0) / v.funnel.loaded * 100) + '%' : '—', v.funnel ? 'of visitors' : none],
+      ['RETURN RATE', v.today ? Math.round((v.returningToday || 0) / v.today * 100) + '%' : '—', v.today ? 'came back today' : none]
+    ];
+    return t.map(function (x) { return '<div class="tile"><small>' + x[0] + '</small><b>' + x[1] + '</b><em>' + esc(x[2]) + '</em>' + (x[3] ? spark(x[3]) : '') + '</div>'; }).join('');
+  }
+  function thisBrowser() {
+    var n = navigator, ua = n.userAgent || '', tz = '', dark = false, touch = (n.maxTouchPoints || 0) > 0;
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
+    try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+    var br = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Other', os = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Mac/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'Other';
+    var rows = [['BROWSER', br + ' on ' + os], ['SCREEN', window.screen.width + ' x ' + window.screen.height + ' · window ' + window.innerWidth + ' x ' + window.innerHeight], ['DEVICE TYPE', touch && window.innerWidth < 820 ? 'PHONE OR TABLET' : 'COMPUTER'], ['PIXEL RATIO', String(window.devicePixelRatio || 1)], ['LANGUAGE', n.language || '—'], ['TIME ZONE', tz || '—'], ['COLOR MODE', dark ? 'DARK' : 'LIGHT'], ['ONLINE', n.onLine ? 'YES' : 'NO'], ['PAGE LOADED', stamp(Date.now() - Math.round((window.performance && performance.now()) || 0))]];
+    return '<div class="works">' + rows.map(function (r) { return '<div class="wk"><small>' + r[0] + '</small><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
+  }
+  function visPanels() {
+    var v = (feed && feed.visitors) || {}, hint = feed ? 'NO DATA YET' : 'WAITING FOR THE LIVE FEED';
+    var days = v.byDay || [];
+    return '<div class="cols2"><div class="box"><h4>VISITORS BY HOUR (LOS ANGELES)</h4>' + bars24(v.byHour) + '</div><div class="box"><h4>LAST 14 DAYS</h4>' + (days.length ? '<div class="dbars">' + days.slice(-14).map(function (d) { var mx = Math.max.apply(null, days.map(function (x) { return x.n || 0; }).concat([1])); return '<span title="' + esc(d.d) + ' · ' + fmt(d.n) + '"><i style="height:' + Math.max(4, (d.n || 0) / mx * 100) + '%"></i><em>' + esc(String(d.d).slice(-2)) + '</em></span>'; }).join('') + '</div>' : '<div class="rk none">' + hint + '</div>') + '</div></div>' +
+      '<div class="box" style="margin-bottom:16px"><h4>THE VISITOR FUNNEL</h4><div class="fns">' + funnel(v.funnel) + '</div></div>' +
+      '<div class="cols3"><div class="box"><h4>WHERE FROM</h4>' + rankList(v.countries, hint) + '</div><div class="box"><h4>HOW THEY ARRIVED</h4>' + rankList(v.referrers, hint) + '</div><div class="box"><h4>DEVICES</h4>' + rankList(v.devices, hint) + '</div></div>' +
+      '<div class="cols3"><div class="box"><h4>BROWSERS</h4>' + rankList(v.browsers, hint) + '</div><div class="box"><h4>TOP BAR TABS OPENED</h4>' + rankList(v.tabs, hint) + '</div><div class="box"><h4>PHONE APPS OPENED</h4>' + rankList(v.apps, hint) + '</div></div>';
+  }
+  function ovHtml() {
+    return '<section data-p="ov">' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
+      '<div class="tiles" id="admVT"></div><div id="admVis"></div>' +
+      '<div class="box dbox"><h4>THE GAME AT A GLANCE</h4><div class="tiles" id="admTiles"></div></div>' +
+      '<div class="cols2"><div class="box"><h4>SYSTEM CHECK</h4><div class="sys one" id="admSys"></div></div><div class="box"><h4>THIS BROWSER</h4>' + thisBrowser() + '</div></div>' +
+      '<div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></section>';
+  }
   function tiles() {
     var f = feed || {}, v = f.visitors || {}, r = f.runs || {}, e = f.economy || {}, none = feed ? '' : 'WAITING FOR LIVE FEED', sr = f.series || {};
     var traded = (e.cardsBought != null || e.cardsSold != null) ? (e.cardsBought || 0) + (e.cardsSold || 0) : null;
@@ -213,9 +287,9 @@
     shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
-      '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '</nav>' +
+      '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
       '<main class="cr-main">' +
-      '<section data-p="ov"><div class="livebox off" id="admLB"></div>' + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK BELOW IS REAL</div>') + '<div class="box" style="margin-bottom:16px"><h4>SYSTEM CHECK</h4><div class="sys" id="admSys"></div></div><div class="tiles" id="admTiles"></div><div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></section>' +
+      ovHtml() +
       '<section data-p="live"><div class="livebox off" id="admLB2"></div></section>' +
       '<section data-p="msg"><div class="box"><h4>TEXT AS HYPE</h4><div class="hint" style="margin-bottom:12px">A one-on-one text from the HYPE account to a signed-in player. Players cannot reply to HYPE.</div><div class="cmp"><input id="admHTo" list="admPl" maxlength="40" placeholder="PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><textarea id="admHBody" maxlength="280" rows="4" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div><div class="box" style="margin-top:16px"><h4>RECENTLY SENT</h4><div class="sent" id="admHList"></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button><button type="button" data-k="r">RECEIVED</button></div>' +
@@ -231,7 +305,7 @@
       '<section data-p="files">' + (DOCS.pages.files || '') + '</section>' +
       '<section data-p="tools"><div class="box"><h4>TOOLS</h4><div class="tools"><button type="button" class="sw' + (P.isTest() ? ' on' : '') + '" id="admTest"><i></i>TEST MODE</button><div class="hint">Test mode makes card sightings come every few seconds, opens every tier, and brings the pack after 40 seconds, so you can see every rarity and the slowdown without playing for hours. Nothing is saved while it is on. It only changes this browser.</div></div>' +
       '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admSnap">DOWNLOAD SNAPSHOT</button><div class="hint">Saves the numbers on this page (and the current game settings) as a file on this computer.</div></div>' +
-      '<div class="tools" style="margin-top:18px"><button type="button" class="sw" id="admOut">LOCK THE CONTROL ROOM</button><div class="hint">Forgets this login on this browser, so the password is asked again.</div></div></div></section>' +
+      '</div></section>' +
       '</main></div><div class="cr-foot">KEYS &nbsp; 1&ndash;9 SWITCH PAGE &nbsp;&middot;&nbsp; ESC CLOSES &nbsp;&middot;&nbsp; GUIDE BUILT ' + esc(DOCS.built || '') + ' &middot; COMMIT ' + esc(DOCS.commit || '') + '</div></div>';
     var root = shade.querySelector('.adm');
     function show(t) {
@@ -242,7 +316,8 @@
     }
     show(curTab);
     shade.querySelector('.adm-x').addEventListener('click', close);
-    $('admNav').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b) show(b.getAttribute('data-t')); });
+    root.addEventListener('click', function (ev) { var g = ev.target.closest('[data-go]'); if (g) show(g.getAttribute('data-go')); });
+    $('admNav').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (b && b.getAttribute('data-t')) show(b.getAttribute('data-t')); });
     shade.onkeydown = function (ev) { if (/^[1-9]$/.test(ev.key) && !/INPUT|TEXTAREA/.test((ev.target || {}).tagName || '')) show(NAV[+ev.key - 1][0]); };
     shade.tabIndex = -1; shade.focus();
     $('admTest').addEventListener('click', function () { var on = !P.isTest(); P.setTest(on); this.classList.toggle('on', on); });
@@ -280,7 +355,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false;
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admTiles').innerHTML = tiles(); paintLive('admLB'); paintLive('admLB2'); $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); $('admAct').innerHTML = activity(); $('admEco').innerHTML = economy(); $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists();
     }
