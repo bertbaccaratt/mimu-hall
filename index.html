@@ -160,6 +160,7 @@
   .pscreen.inapp .app { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
   .hcv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
   .hhud { position: absolute; left: 0; right: 0; top: 8.4%; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 7%; color: #f6dc95; font-family: 'Cinzel', Georgia, serif; text-shadow: 0 2px 6px #000, 0 0 14px rgba(0,0,0,.8); pointer-events: none; z-index: 3; }
+.hhp { display: flex; gap: calc(var(--h) * .005); margin-top: calc(var(--h) * .009); } .hhp i { width: calc(var(--h) * .0245); height: calc(var(--h) * .0085); border-radius: 2px; background: linear-gradient(90deg, #b3171f, #e8c673); box-shadow: 0 0 6px rgba(232,198,115,.5); transition: opacity .25s, background .25s; } .hhp i.off { background: rgba(255,255,255,.13); box-shadow: none; }
   .hhud .hs small { display: block; font-size: calc(var(--h) * .0118); letter-spacing: .3em; color: #d9ac5c; }
   .hhud .hs b { font-size: calc(var(--h) * .034); letter-spacing: .08em; font-weight: 700; }
   .hhud .hc { display: flex; align-items: center; gap: calc(var(--h) * .009); font-size: calc(var(--h) * .03); font-weight: 700; }
@@ -199,6 +200,7 @@
   .rtab > div { padding: 8px 12px; border-bottom: 1px solid rgba(217,172,92,.15); } .rtab > div:nth-last-child(-n+3) { border-bottom: 0; }
   .rtab .rh { font: 500 10px 'Cinzel', Georgia, serif; letter-spacing: .28em; color: #b9904f; background: rgba(217,172,92,.08); } .rtab .rk { color: #f1d9a0; }
   .rnote { margin-top: 22px; padding: 12px 16px; border: 1px solid rgba(217,172,92,.3); background: rgba(217,172,92,.06); font-size: 13px; color: #c9a15a; }
+  .rbox { margin-top: 12px; }
   .kind { display: inline-block; width: .8em; height: .8em; margin: 0 .35em 0 .1em; vertical-align: -1px; border: 1px solid rgba(217,172,92,.6); background: #0b0708; } .kind.red { box-shadow: 0 0 8px 2px rgba(255,40,50,.8); } .kind.blue { box-shadow: 0 0 8px 2px rgba(90,150,255,.85); }
   @media (max-width: 640px) { .ipanel.rules { padding: 34px 16px 20px; } .ibody { font-size: 13px; } .rtab { grid-template-columns: 1fr 1fr; } .rtab > div:nth-child(3n) { display: none; } }  /* Apechain panel: see-through glass over the hall */
   .ashade { position: fixed; inset: 0; z-index: 2; background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,.30), rgba(0,0,0,.70)); opacity: 0; pointer-events: none; transition: opacity .6s ease; }
@@ -436,6 +438,7 @@ window.MIMUAudio = (function () {
     progress: function (v) { var k = Math.floor(v / 2.5); if (k !== lastTick) { lastTick = k; blip(PENT[(Math.random() * PENT.length) | 0], 0.05, 0.075); } },
     stage: function (i) { blip(660 + i * 110, 0.09, 0.09, 'sine'); blip(990 + i * 110, 0.13, 0.08, 'sine', 0.09); },
     coin: function () { blip(1318.5, 0.09, 0.2, 'sine'); blip(1760, 0.22, 0.17, 'sine', 0.07); blip(2637, 0.3, 0.06, 'sine', 0.07); },
+    hurt: function () { blip(160, 0.2, 0.26, 'triangle'); blip(98, 0.3, 0.22, 'sine', 0.02); },
     hit: function () { blip(130, 0.28, 0.32, 'triangle'); blip(82, 0.4, 0.3, 'sine', 0.03); },
     done: function () { [523.3, 659.3, 784, 1046.5].forEach(function (f, i) { blip(f, 0.5, 0.07, 'sine', i * 0.11); }); },
     toggleMute: toggleMute, isMuted: function () { return muted; }, setVolume: setVolume, getVolume: function () { return vol; },
@@ -641,9 +644,14 @@ window.MIMUAudio = (function () {
     '<ul><li>The collectible is the rotating coin. Run through one to pick it up: it chimes, adds to your coin count, and is worth <strong>25 points</strong>.</li>',
     '<li>Coins come in rows, zigzags that make you change lane, and double lines. Some sit right next to a box, so choose your lane early.</li></ul>',
     '<h3>Boxes</h3>',
-    '<ul><li>The obstacles are black Mudwater boxes in random sizes and lanes. <strong>Hit one and the run is over.</strong></li>',
+    '<ul><li>The obstacles are black Mudwater boxes in random sizes and lanes. A box you hit breaks and costs you some of your health, and you flash for a moment during which nothing can hurt you.</li>',
     '<li>Change lanes to go around a box, or <strong>jump</strong> over it. Sliding does not get you past a box.</li>',
-    '<li>There are three kinds of box. <span class="kind"></span>The plain black box, <span class="kind red"></span>the box with a red glow, and <span class="kind blue"></span>the box with a blue glow. Right now all three end your run. The red and blue glows are reserved for point values that will be announced.</li></ul>',
+    '<li>You have a <strong>health bar of six segments</strong> under your score. It does not come back during a run, and damage from different boxes adds up.</li>',
+    '<li>There are three kinds of box, all black, and they hurt differently:</li></ul>',
+    '<div class="rtab rbox"><div class="rh">BOX</div><div class="rh">HITS YOU CAN TAKE</div><div class="rh">DAMAGE</div>',
+    '<div class="rk"><span class="kind"></span>Plain black</div><div><strong>3 hits</strong>, the third ends the run</div><div>2 of 6 segments</div>',
+    '<div class="rk"><span class="kind blue"></span>Blue glow</div><div><strong>2 hits</strong>, the second ends the run</div><div>3 of 6 segments</div>',
+    '<div class="rk"><span class="kind red"></span>Red glow</div><div><strong>1 hit</strong>, it ends the run at once</div><div>all 6 segments</div></div>',
     '<h3>Score</h3>',
     '<ul><li>Your score grows with the <strong>distance</strong> you run, plus <strong>25 points for every coin</strong>.</li>',
     '<li>When the run ends you see your score, your coins and your best. A new record is marked <strong>NEW</strong>. Your best score is saved on this device.</li></ul>',

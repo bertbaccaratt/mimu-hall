@@ -20,9 +20,9 @@
   /* ---------- screen furniture (score, start / game over cards) ---------- */
   var cv = el('canvas', 'hcv'); root.appendChild(cv);
   var ctx = cv.getContext('2d');
-  var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b></div><div class="hc"><span class="hcoin"></span><b>0</b></div>');
+  var hud = el('div', 'hhud', '<div class="hs"><small>SCORE</small><b>00000</b><div class="hhp"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="hc"><span class="hcoin"></span><b>0</b></div>');
   root.appendChild(hud);
-  var elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b');
+  var hpSegs = hud.querySelectorAll('.hhp i'), elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b');
   var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
   var ovDead = el('div', 'hov hdead', '<div class="ht gold">GAME OVER</div><div class="hline"></div><div class="hres"><span>SCORE</span><b class="rs">0</b></div><div class="hres"><span>COINS</span><b class="rc">0</b></div><div class="hres"><span>BEST</span><b class="rb">0</b></div><button type="button" class="hagain">RUN AGAIN</button>');
   root.appendChild(ovStart); root.appendChild(ovDead);
@@ -66,7 +66,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -98,7 +98,7 @@
 
   /* ---------- update ---------- */
   function start() {
-    S = fresh(); S.mode = 'run'; S.v = 4.6;
+    S = fresh(); S.mode = 'run'; S.v = 4.6; showHp();
     ovStart.style.display = 'none'; ovDead.style.display = 'none';
   }
   function die(silent) {
@@ -112,6 +112,15 @@
   // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
   function forfeit() { if (S.mode === 'run') die(true); }
 
+  // Boxes hurt by kind: health is six segments. A plain box takes 2 (three hits end the run), a blue box 3 (two hits), a red box all 6 (one hit).
+  var DMG = [2, 6, 3];
+  function showHp() { for (var i = 0; i < hpSegs.length; i++) hpSegs[i].classList.toggle('off', i >= S.hp); }
+  function hurt(e) {
+    S.hp = Math.max(0, S.hp - DMG[e.tier || 0]); showHp();
+    if (S.hp <= 0) { die(); return; }
+    S.inv = 1.3; S.flash = 0.6; S.shake = 0.7;
+    if (window.MIMUAudio && MIMUAudio.hurt) MIMUAudio.hurt();
+  }
   function update(dt) {
     S.t += dt;
     var running = S.mode === 'run';
@@ -139,7 +148,7 @@
           var cross = pz >= PZ - 0.10 && e.z <= PZ + 0.10;
           if (cross) {
             if (e.k === 'coin' && !e.got) { e.got = true; S.coins++; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
-            else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42) { die(); break; } }
+            else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } }
           }
         }
         if (e.z < 0.55 || (e.got && e.z < PZ - 0.2)) S.ents.splice(i, 1);
@@ -154,7 +163,7 @@
     }
     S.sway = Math.sin(S.t * 0.9) * 0.6 + Math.sin(S.t * 0.37 + 1) * 0.4;
     S.camX = S.sway * 0.012 * W + S.curve * 0.012 * W;
-    S.flash = Math.max(0, S.flash - dt * 1.6); S.shake = Math.max(0, S.shake - dt * 3);
+    S.inv = Math.max(0, S.inv - dt); S.flash = Math.max(0, S.flash - dt * 1.6); S.shake = Math.max(0, S.shake - dt * 3);
     for (var m = 0; m < embers.length; m++) { var em = embers[m]; em.y -= em.v * dt; em.x += Math.sin(S.t * 0.6 + em.p) * 0.01 * dt; if (em.y < -0.02) { em.y = 1.02; em.x = Math.random(); } }
     // hud
     var sc2 = pad(S.score, 5); if (elScore.textContent !== sc2) elScore.textContent = sc2;
@@ -251,7 +260,7 @@
 
   var AURA = [null, { c: 'rgba(255,36,48,', rim: 'rgba(255,70,80,' }, { c: 'rgba(70,140,255,', rim: 'rgba(110,170,255,' }];
   function drawBox(e) {
-    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (!im.naturalWidth || y > H + 90) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (e.z < 0.3 || !im.naturalWidth || y > H + 90) return;
     var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.42 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth, au = AURA[e.tier], pulse = 0.82 + 0.18 * Math.sin(S.t * 5 + e.z * 2);
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, bw * 0.55);
@@ -271,7 +280,7 @@
   }
   function drawCoin(e) {
     if (e.got) return;
-    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (!im.naturalWidth || y > H + 60) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.coin; if (e.z < 0.3 || !im.naturalWidth || y > H + 60) return;
     var x = cxAt(s) + e.lane * LANE * W * s, cw = 0.17 * W * s, cy = y - cw * 0.85 - Math.sin(S.t * 4 + e.ph) * cw * 0.06;
     var fr = Math.floor(S.t * 10 + e.ph) % 20, fx = (fr % 5) * 192, fy = ((fr / 5) | 0) * 192;
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
@@ -294,7 +303,7 @@
     // sliding: the runner throws himself down on his side and skims along on one hand and one foot (his own sliding picture),
     // blending in from the running frame and springing back up at the end
     var env = S.sl < 0 ? 0 : (S.sl < 0.14 ? S.sl / 0.14 : S.sl > 0.8 ? (1 - S.sl) / 0.2 : 1), sim = imgs.slide;
-    ctx.save(); if (S.mode === 'dead') ctx.globalAlpha = 0.9;
+    ctx.save(); if (S.mode === 'dead') ctx.globalAlpha = 0.9; else if (S.inv > 0 && Math.floor(S.t * 14) % 2) ctx.globalAlpha = 0.42;
     if (env > 0 && sim.naturalWidth) {
       var ssw = sw * 1.36, ssh = ssw * sim.naturalHeight / sim.naturalWidth, a = env * env * (3 - 2 * env);
       // dust kicked up behind the slide
