@@ -18,14 +18,14 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027d"><link rel="stylesheet" href="assets/game/comms.css?v=20261027d"><link rel="stylesheet" href="assets/game/admin.css?v=20261027d">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027e"><link rel="stylesheet" href="assets/game/comms.css?v=20261027e"><link rel="stylesheet" href="assets/game/admin.css?v=20261027e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   :root { --gold-hi: #f6dc95; --gold: #d9ac5c; --gold-lo: #8f5f1d; --crimson: #6b0b11; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overscroll-behavior: none; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { font-family: 'Cinzel', 'Trajan Pro', Georgia, serif; color: var(--gold); }
 
   /* the looping hall */
@@ -524,10 +524,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027d" defer></script>
-<script src="assets/game/hall-runner.js?v=20261027d" defer></script>
-<script src="assets/game/eyes.js?v=20261027d" defer></script> <script src="assets/game/comms.js?v=20261027d" defer></script> <script src="assets/game/campaign.js?v=20261027d" defer></script> <script src="assets/game/xbonus.js?v=20261027d" defer></script> <script src="assets/game/hunt.js?v=20261027d" defer></script> <script src="assets/game/net.js?v=20261027d" defer></script> <script src="assets/game/egg.js?v=20261027d" defer></script> <script src="assets/game/badges.js?v=20261027d" defer></script> <script src="assets/game/apps.js?v=20261027d" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027d" defer></script> <script src="assets/game/admin.js?v=20261027d" defer></script>
+<script src="assets/game/profile.js?v=20261027e" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027e" defer></script>
+<script src="assets/game/eyes.js?v=20261027e" defer></script> <script src="assets/game/comms.js?v=20261027e" defer></script> <script src="assets/game/campaign.js?v=20261027e" defer></script> <script src="assets/game/xbonus.js?v=20261027e" defer></script> <script src="assets/game/hunt.js?v=20261027e" defer></script> <script src="assets/game/net.js?v=20261027e" defer></script> <script src="assets/game/egg.js?v=20261027e" defer></script> <script src="assets/game/badges.js?v=20261027e" defer></script> <script src="assets/game/apps.js?v=20261027e" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027e" defer></script> <script src="assets/game/admin.js?v=20261027e" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -711,6 +711,7 @@ window.MIMUAudio = (function () {
     $('hClock').innerHTML = clockEl.innerHTML; $('hDate').textContent = dateEl.textContent;
   }
   setInterval(tickClock, 15000); tickClock();
+  function reopenPhone() { if (window.matchMedia && matchMedia('(max-width: 700px)').matches) return; openGames(); }
   function openGames() { closeApe(true); if (typeof closeInfo === 'function') closeInfo(true); setActive(gamesTab); phoneEl.classList.add('open'); gShade.classList.add('open'); document.body.classList.add('phone-open'); phoneEl.setAttribute('aria-hidden', 'false'); tickClock(); if (window.HallRunner && $('pScreen').classList.contains('inapp') && $('pScreen').dataset.app === 'hall') HallRunner.open(); }
   function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); document.body.classList.remove('phone-open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
   // Hall Rules and About are placeholders for now ("coming soon")
@@ -1069,16 +1070,16 @@ window.MIMUAudio = (function () {
   tabs.forEach(function (t) {
     t.addEventListener('click', function (ev) {
       ev.preventDefault();
-      if (t === apeTab) { if (panel.classList.contains('open')) { closeApe(); openGames(); } else openApe(); }
+      if (t === apeTab) { if (panel.classList.contains('open')) { closeApe(); reopenPhone(); } else openApe(); }
       else if (t === gamesTab) { if (!phoneEl.classList.contains('open')) openGames(); }
-      else { if (infoEl.classList.contains('open') && t.classList.contains('active')) { closeInfo(); openGames(); } else openInfo(t); }
+      else { if (infoEl.classList.contains('open') && t.classList.contains('active')) { closeInfo(); reopenPhone(); } else openInfo(t); }
     });
   });
   document.querySelector('.brand').addEventListener('click', function (ev) { ev.preventDefault(); closeApe(); closeGames(); closeInfo(); });
   // the phone is always up: closing Hall Rules, About or Apechain brings it back. Only the MIMU in the top menu clears the page.
-  infoShade.addEventListener('click', function () { closeInfo(); openGames(); }); $('infoClose').addEventListener('click', function () { closeInfo(); openGames(); });
-  apeClose.addEventListener('click', function () { closeApe(); openGames(); }); apeShade.addEventListener('click', function () { closeApe(); openGames(); }); $('gClose').addEventListener('click', function () { closeGames(); });
-  window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { if (panel.classList.contains('open')) { closeApe(); openGames(); } else if (infoEl.classList.contains('open')) { closeInfo(); openGames(); } } });
+  infoShade.addEventListener('click', function () { closeInfo(); reopenPhone(); }); $('infoClose').addEventListener('click', function () { closeInfo(); reopenPhone(); });
+  apeClose.addEventListener('click', function () { closeApe(); reopenPhone(); }); apeShade.addEventListener('click', function () { closeApe(); reopenPhone(); }); $('gClose').addEventListener('click', function () { closeGames(); });
+  window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { if (panel.classList.contains('open')) { closeApe(); reopenPhone(); } else if (infoEl.classList.contains('open')) { closeInfo(); reopenPhone(); } } });
 
   // The loading beeps can only play after the visitor does something on the page (browser rule), so the loader waits behind one
   // BEGIN click. Set GATE to false to go back to loading straight away (the beeps are then silent until the first click).

@@ -511,3 +511,16 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .huntbadge.found { background: linear-gradient(135deg, #0c7a42, #053a20); border-color: #3ddc84; box-shadow: 0 0 18px rgba(60,230,130,.4); }
 .huntbadge.mine { background: linear-gradient(135deg, #b9801f, #5a3a08); border-color: #ffe08a; box-shadow: 0 0 26px rgba(255,205,90,.8); animation: t5glow 2.2s ease-in-out infinite; }
 #badgeApp .huntbadge, #badgeApp .huntbadge * { color: #fff !important; }
+
+/* PHONES: Hall Rules, About and Apechain are full-width sheets under the menu that always scroll, always close and never sit under another layer */
+@media (max-width: 700px) {
+  .ipanel, .ipanel.rules { position: fixed !important; left: 0 !important; right: 0 !important; top: calc(env(safe-area-inset-top, 0px) + 64px) !important; bottom: 0 !important; width: 100% !important; max-width: none !important; max-height: none !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 12 !important; display: flex; flex-direction: column; border-left: 0; border-right: 0; border-radius: 0; outline: none; padding: 40px 14px calc(env(safe-area-inset-bottom, 0px) + 18px) !important; }
+  .ipanel::before, .ipanel::after { display: none !important; }
+  .ipanel .ibody, .ipanel.rules .ibody { flex: 1 1 auto; min-height: 0; overflow-y: auto !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; padding-right: 2px; }
+  .ipanel .iclose { top: 6px; right: 8px; width: 44px; height: 44px; z-index: 3; touch-action: manipulation; }
+  .apanel { position: fixed !important; top: calc(env(safe-area-inset-top, 0px) + 64px) !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; transform: none !important; z-index: 12 !important; }
+  .apanel .alist { overflow-y: auto !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; min-height: 0; }
+  .apanel .aclose { width: 44px; height: 44px; touch-action: manipulation; }
+  .top { z-index: 20; } .tab { min-height: 36px; touch-action: manipulation; }
+  .rfig.xfig { margin-left: 0; margin-right: 0; } .rfig.xfig a { overflow: visible; } .rfig.xfig img { min-width: 0; width: 100%; }
+}

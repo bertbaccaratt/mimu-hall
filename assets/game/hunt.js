@@ -62,6 +62,7 @@
   }
   function build() {
     if (layer || !document.body) return;
+    if (window.matchMedia && (matchMedia('(max-width: 900px)').matches || matchMedia('(pointer: coarse)').matches)) return;   /* a phone shows the phone, not the hall around it: the hidden items are for computers */
     layer = document.createElement('div'); layer.className = 'huntlayer'; layer.setAttribute('aria-hidden', 'true');
     SPOTS.forEach(function (s, i) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'hunthot ' + s.t; b.tabIndex = -1; b.setAttribute('data-k', i);
