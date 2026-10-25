@@ -481,3 +481,9 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .rfig.xfig img { display: block; width: 100%; min-width: 700px; height: auto; border-left: 0; border-right: 0; }
 .rfig.xfig figcaption { padding: 6px 16px 0; line-height: 1.5; font-size: 12px; }
 @media (min-width: 760px) { .rfig.xfig img { min-width: 0; } }
+
+/* every browser: keyboard focus you can see, no auto-zoom on iPhone inputs, calm motion for people who ask for it */
+.aic:focus-visible, .zbtn:focus-visible, .phome:focus-visible, .xbbtn:focus-visible, .cmbtn:focus-visible, .chip:focus-visible, .tabs3 button:focus-visible, .gvgo:focus-visible, .mkmsg:focus-visible { outline: 3px solid #ffd45a; outline-offset: 2px; }
+.aic, .zbtn, .phome, .cmbtn, .xbbtn, .chip, .tabs3 button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+@media (pointer: coarse) { #pScreen input, #pScreen select, #pScreen textarea, .adm-shade input, .adm-shade select, .adm-shade textarea { font-size: 16px !important; } }
+@media (prefers-reduced-motion: reduce) { .xhero.red, .aic.ic-x.xred .atile, .aic.ic-top5 .atile, .xchip.red, .xbchip.red, .fshine, .xbox.red { animation: none !important; } }
