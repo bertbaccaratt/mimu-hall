@@ -66,6 +66,7 @@
     totals: function () { return adapter && adapter.totals ? adapter.totals() : { lifetime: 0, best: 0, last: 0, coins: 0, balance: 0 }; },   // coins = every coin ever collected, balance = coins earned minus coins spent
     messages: function () { return adapter && adapter.messages ? adapter.messages : null; },   // { threads(), thread(id), send(id, body), block(id, on), players() }
     mail: function () { return adapter && adapter.mail ? adapter.mail : null; },   // { inbox(), read(id) }
+    give: function () { return adapter && adapter.give ? adapter.give : null; },   // { status(), players(), send(to, amount) }: The Giving
     market: function () { return adapter && adapter.market ? adapter.market : null; },   // { listings(), sellable(), buy(n), sell(n) }
     lifeCost: function () { var pts = Math.floor((adapter && adapter.totals ? adapter.totals().lifetime : 0) || 0); return Math.max(1, Math.ceil(pts * CONFIG.life.share)); },
     buyLife: function (cost) { if (!adapter) return Promise.resolve({ demo: true }); return adapter.buyLife ? Promise.resolve(adapter.buyLife(cost)) : Promise.reject(new Error('NOT AVAILABLE YET')); },   // the server takes the points and answers; rejects with a message

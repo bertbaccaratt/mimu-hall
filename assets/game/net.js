@@ -71,6 +71,11 @@
       inbox: function () { return call('/mail'); },
       read: function (id) { call('/mail/read', { body: { id: id } }).catch(function () {}); }
     },
+    give: {
+      status: function () { return call('/give/status'); },
+      players: function () { return call('/msg/players'); },
+      send: function (to, amount) { return call('/give', { body: { to: to, amount: amount } }).then(function (r) { return refreshMe().then(function () { return r; }); }); }
+    },
     market: {
       shelf: function () { return call('/market/shelf'); },
       listings: function () { return call('/market/listings'); },
