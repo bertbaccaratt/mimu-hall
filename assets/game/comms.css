@@ -338,3 +338,10 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 #pHomeScr .wfoil { font-size: max(10px, calc(var(--h) * .0128)); }
 
 #pHomeScr .wid .wt { letter-spacing: .12em; white-space: nowrap; } #pHomeScr .wid small { letter-spacing: .06em; } #pHomeScr .wfoil { letter-spacing: .03em; white-space: nowrap; }
+/* Hall Rules: the picture of the box */
+.rfig.boxfig { grid-template-columns: minmax(0, 360px) 1fr; }
+.bx3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 10px 10px; background: radial-gradient(ellipse at 50% 40%, rgba(60,20,26,.8), #050203); border: 1px solid rgba(217,172,92,.6); text-align: center; }
+.bx3 img { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,.8)); } .bx3 .blue img { filter: drop-shadow(0 0 7px rgba(90,150,255,.95)) drop-shadow(0 0 14px rgba(90,150,255,.6)); } .bx3 .red img { filter: drop-shadow(0 0 7px rgba(255,40,50,.95)) drop-shadow(0 0 14px rgba(255,40,50,.6)); }
+.bx3 span { display: block; margin-top: 8px; font: 500 10px 'Cinzel', Georgia, serif; letter-spacing: .16em; color: #fff; }
+.rfig.boxfig figcaption p { margin: 0 0 10px; }
+@media (max-width: 640px) { .rfig.boxfig { grid-template-columns: 1fr; } }
