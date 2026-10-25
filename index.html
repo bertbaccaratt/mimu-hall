@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261026z"><link rel="stylesheet" href="assets/game/comms.css?v=20261026z"><link rel="stylesheet" href="assets/game/admin.css?v=20261026z">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027a"><link rel="stylesheet" href="assets/game/comms.css?v=20261027a"><link rel="stylesheet" href="assets/game/admin.css?v=20261027a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -29,8 +29,12 @@
   body { font-family: 'Cinzel', 'Trajan Pro', Georgia, serif; color: var(--gold); }
 
   /* the looping hall */
-  .bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000 url("assets/poster.webp") center / contain no-repeat; }   /* the whole hall picture is always shown, never cropped (on a tall phone screen the phone fills the page, so it is allowed to fill instead) */
-  @media (max-aspect-ratio: 1/1) { .bg { object-fit: cover; background-size: cover; } }
+  /* the whole hall picture is always shown, never cropped. Where the screen is a different shape, the empty bands are filled with a soft blurred copy of the same picture, so there are no black bars. */
+  .bgfill { position: fixed; inset: -50px; background: #000 url("assets/poster.webp") center / cover no-repeat; filter: blur(30px) brightness(.6) saturate(1.1); }
+  .bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: contain; background: url("assets/poster.webp") center / contain no-repeat; }
+  @media (max-aspect-ratio: 16/9) and (min-aspect-ratio: 1/1) { .bg { --bar: max(0px, calc((100vh - 56.25vw) / 2)); -webkit-mask-image: linear-gradient(to bottom, transparent var(--bar), #000 calc(var(--bar) + 7vh), #000 calc(100% - var(--bar) - 7vh), transparent calc(100% - var(--bar))); mask-image: linear-gradient(to bottom, transparent var(--bar), #000 calc(var(--bar) + 7vh), #000 calc(100% - var(--bar) - 7vh), transparent calc(100% - var(--bar))); } }
+  @media (min-aspect-ratio: 16/9) { .bg { --bar: max(0px, calc((100vw - 177.78vh) / 2)); -webkit-mask-image: linear-gradient(to right, transparent var(--bar), #000 calc(var(--bar) + 7vw), #000 calc(100% - var(--bar) - 7vw), transparent calc(100% - var(--bar))); mask-image: linear-gradient(to right, transparent var(--bar), #000 calc(var(--bar) + 7vw), #000 calc(100% - var(--bar) - 7vw), transparent calc(100% - var(--bar))); } }
+  @media (max-aspect-ratio: 1/1) { .bgfill { display: none; } .bg { object-fit: cover; background-size: cover; background-color: #000; } }
   .veil { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.58) 0%, rgba(0,0,0,.28) 45%, rgba(0,0,0,.68) 100%); }
 
   /* the entrance */
@@ -284,10 +288,11 @@
   @keyframes ring { 0%, 34%, 100% { opacity: .35; transform: scale(1); } 12% { opacity: .9; transform: scale(1.04); } }
 
   @media (max-width: 520px) { .enter .inner { font-size: 15px; letter-spacing: .3em; } .enter { padding: 20px 40px 20px 52px; letter-spacing: .45em; } .status { letter-spacing: .26em; } .bar::before { left: -13px; } .bar::after { right: -13px; } #hex { min-width: 0; } }
-  @media (prefers-reduced-motion: reduce) { .bg { display: none; } body { background: #000 url("assets/poster.webp") center / contain no-repeat; } .enter.show .inner, .enter::before, .fill::after, .sheen::after { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .bg, .bgfill { display: none; } body { background: #000 url("assets/poster.webp") center / contain no-repeat; } .enter.show .inner, .enter::before, .fill::after, .sheen::after { animation: none; } }
 </style>
 </head>
 <body>
+<div class="bgfill" aria-hidden="true"></div>
 <video class="bg" autoplay muted loop playsinline preload="auto" poster="assets/poster.webp" aria-hidden="true" disablepictureinpicture>
   <source src="assets/hall.mp4" type="video/mp4">
   <source src="assets/hall.webm" type="video/webm">
@@ -492,10 +497,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261026z" defer></script>
-<script src="assets/game/hall-runner.js?v=20261026z" defer></script>
-<script src="assets/game/eyes.js?v=20261026z" defer></script> <script src="assets/game/comms.js?v=20261026z" defer></script> <script src="assets/game/campaign.js?v=20261026z" defer></script> <script src="assets/game/xbonus.js?v=20261026z" defer></script> <script src="assets/game/hunt.js?v=20261026z" defer></script> <script src="assets/game/net.js?v=20261026z" defer></script> <script src="assets/game/egg.js?v=20261026z" defer></script> <script src="assets/game/badges.js?v=20261026z" defer></script> <script src="assets/game/apps.js?v=20261026z" defer></script>
-<script src="assets/game/admin-docs.js?v=20261026z" defer></script> <script src="assets/game/admin.js?v=20261026z" defer></script>
+<script src="assets/game/profile.js?v=20261027a" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027a" defer></script>
+<script src="assets/game/eyes.js?v=20261027a" defer></script> <script src="assets/game/comms.js?v=20261027a" defer></script> <script src="assets/game/campaign.js?v=20261027a" defer></script> <script src="assets/game/xbonus.js?v=20261027a" defer></script> <script src="assets/game/hunt.js?v=20261027a" defer></script> <script src="assets/game/net.js?v=20261027a" defer></script> <script src="assets/game/egg.js?v=20261027a" defer></script> <script src="assets/game/badges.js?v=20261027a" defer></script> <script src="assets/game/apps.js?v=20261027a" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027a" defer></script> <script src="assets/game/admin.js?v=20261027a" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
