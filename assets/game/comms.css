@@ -475,3 +475,9 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .aic.ic-x.xgreen .atile { color: #fff; background: linear-gradient(160deg, #3ddc84 0%, #1fa25a 55%, #0b6a38 100%); border-color: rgba(190,255,215,.7); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 18px rgba(60,230,130,.55); }
 .aic.ic-x.xred .atile { color: #fff; background: linear-gradient(160deg, #ff5a52 0%, #d3222b 55%, #8e0f16 100%); border-color: rgba(255,170,160,.8); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 22px rgba(255,70,60,.75); animation: xicwig 1.4s ease-in-out infinite; transform-origin: 50% 60%; }
 .aic.ic-x.xred > span:last-child { color: #ff8d80 !important; }
+/* the two big infographics in Hall Rules: the full width of the section (swipe sideways on a small phone, or tap to open full size) */
+.rfig.xfig { display: block; margin: 12px -16px 18px; grid-template-columns: none; }
+.rfig.xfig a { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.rfig.xfig img { display: block; width: 100%; min-width: 700px; height: auto; border-left: 0; border-right: 0; }
+.rfig.xfig figcaption { padding: 6px 16px 0; line-height: 1.5; font-size: 12px; }
+@media (min-width: 760px) { .rfig.xfig img { min-width: 0; } }
