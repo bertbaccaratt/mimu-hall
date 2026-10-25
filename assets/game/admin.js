@@ -435,7 +435,8 @@
     }
   }
   function buildPanel() {
-    apprSig = ''; flagSig = ''; wSig = ''; shade.classList.add('open');
+    /* the panel is drawn fresh every time it opens, so every page must forget what it last drew; otherwise a page that did not change would stay empty */
+    apprSig = ''; flagSig = ''; wSig = ''; boardSig = ''; xSig = ''; eggSig = ''; hxSig = ''; hxListSig = ''; bq = ''; shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
       '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + (n[0] === 'flag' ? ' <em id=\"admFlagN\"></em>' : '') + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
