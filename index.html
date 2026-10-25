@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261025e"><link rel="stylesheet" href="assets/game/comms.css?v=20261025e"><link rel="stylesheet" href="assets/game/admin.css?v=20261025e">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261025g"><link rel="stylesheet" href="assets/game/comms.css?v=20261025g"><link rel="stylesheet" href="assets/game/admin.css?v=20261025g">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -480,10 +480,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261025e" defer></script>
-<script src="assets/game/hall-runner.js?v=20261025e" defer></script>
-<script src="assets/game/eyes.js?v=20261025e" defer></script> <script src="assets/game/comms.js?v=20261025e" defer></script> <script src="assets/game/net.js?v=20261025e" defer></script> <script src="assets/game/egg.js?v=20261025e" defer></script> <script src="assets/game/badges.js?v=20261025e" defer></script> <script src="assets/game/apps.js?v=20261025e" defer></script>
-<script src="assets/game/admin-docs.js?v=20261025e" defer></script> <script src="assets/game/admin.js?v=20261025e" defer></script>
+<script src="assets/game/profile.js?v=20261025g" defer></script>
+<script src="assets/game/hall-runner.js?v=20261025g" defer></script>
+<script src="assets/game/eyes.js?v=20261025g" defer></script> <script src="assets/game/comms.js?v=20261025g" defer></script> <script src="assets/game/net.js?v=20261025g" defer></script> <script src="assets/game/egg.js?v=20261025g" defer></script> <script src="assets/game/badges.js?v=20261025g" defer></script> <script src="assets/game/apps.js?v=20261025g" defer></script>
+<script src="assets/game/admin-docs.js?v=20261025g" defer></script> <script src="assets/game/admin.js?v=20261025g" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -711,11 +711,11 @@ window.MIMUAudio = (function () {
     '<div class="rtab rdrop"><div class="rh">DROP</div><div class="rh">WHEN</div><div class="rh">WHAT YOU GET</div>',
     '<div class="rk">First card</div><div>30 seconds into a new player&rsquo;s first run, once ever</div><div>Card #1</div>',
     '<div class="rk">Sightings</div><div>Every 15 minutes alive: 15, 30, 45&hellip;</div><div>A <strong>new</strong> card, picked by the rarity lottery below</div>',
-    '<div class="rk">Stagger</div><div>1:05 alive, then every 15 minutes</div><div>A <strong>duplicate</strong> of a card you own (purple glow, marked STAGGER)</div>',
+    '<div class="rk">Stagger</div><div>35 minutes alive, then every 15 minutes</div><div>A <strong>duplicate</strong> of a card you own (purple glow, marked STAGGER)</div>',
     '<div class="rk">Foil</div><div>1 minute of total play, then every 30 minutes</div><div>A glowing <strong>foil half</strong> of a card (see Foil cards)</div>',
     '<div class="rk">Wanted</div><div>When MIMU launches one</div><div>The featured card, for one lucky runner</div></div>',
     '<h3>The rarity lottery (sightings)</h3>',
-    '<p>Every sighting is a lottery. There is <strong>no time limit</strong> on Common, Uncommon and Rare: they can drop from the very first sighting, and each is always a card you do not have yet. <strong>Prestige and Legendary are the rare prizes.</strong> They only join the lottery after you have stayed alive long enough in one run, and even then they are a very small slice, so a 4-hour run does not flood you with them. They can repeat.</p>',
+    '<p>Every sighting is a lottery. There is <strong>no time limit</strong> on Common, Uncommon and Rare: they can drop from the very first sighting, and each is always a card you do not have yet. <strong>Prestige and Legendary are the rare prizes.</strong> They only join the lottery after you have stayed alive long enough in one run, and even then they are a very small slice, so a 4-hour run does not flood you with them. Like every sighting, they are always cards you do not have yet: duplicates are the stagger card&rsquo;s job.</p>',
     '<div class="rtab rcol"><div class="rh">RARITY</div><div class="rh">GLOW</div><div class="rh">CARDS</div><div class="rh">CHANCE</div>',
     '<div class="rk">Common</div><div><span class="swatch" style="background:#fff"></span>White</div><div>55</div><div>62% &middot; from the start</div>',
     '<div class="rk">Uncommon</div><div><span class="swatch" style="background:#5fd37a"></span>Green</div><div>30</div><div>24% &middot; from the start</div>',
@@ -730,7 +730,7 @@ window.MIMUAudio = (function () {
     '<figure class="t5" style="--c:#8aa8ff;--g:rgba(120,170,255,.55)"><div class="fr"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary" loading="lazy"></div><figcaption><b>LEGENDARY</b>Good Boy Gary<br>#049</figcaption></figure></div>',
     '<p>On every card, the diamonds at the top show the rarity (one to five), the badge in the corner shows the family, and the number at the bottom is its place from 1 to 120. The four families are <strong>Club</strong> (62 cards), <strong>Mutant</strong> (22), <strong>Cosmic</strong> (16) and <strong>Arcana</strong> (20).</p>',
     '<h3>Stagger and the wanted card</h3>',
-    '<ul><li><strong>Stagger cards</strong> are your duplicate source. They use the same lottery, but only on rarities you own, so they are never empty and never a new card. They take turns with the sightings, so a drop never lands on top of another.</li><li><strong>The wanted card:</strong> now and then MIMU launches a wanted card and emails every player, with a live countdown. At a random moment it drops into the run of one player who is running then. If they jump it, it goes straight into their deck. If it is missed it can drop again for someone else before time runs out. Only one is live at a time.</li></ul>',
+    '<ul><li><strong>Stagger cards</strong> are your duplicate source, from 35 minutes alive and then every 15 minutes. They use the same lottery, but only on rarities you own, so they are never empty and never a new card. They take turns with the sightings, so a drop never lands on top of another.</li><li><strong>The wanted card:</strong> now and then MIMU launches a wanted card and emails every player, with a live countdown. At a random moment it drops into the run of one player who is running then. If they jump it, it goes straight into their deck. If it is missed it can drop again for someone else before time runs out. Only one is live at a time.</li></ul>',
     '</div></details>',
     '<details class="rs" id="r-foil"><summary>Foil cards</summary><div class="rsb">',
     '<p><strong>Foil is the only way to get foil cards.</strong> Every one of the 120 cards can be ripped down the middle into two halves, so there are <strong>240 foil pieces</strong>. A foil piece looks like the card, but as a glowing, shimmering hollow-foil half with a torn gold edge. The design never changes, only the material.</p>',

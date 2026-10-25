@@ -40,7 +40,7 @@
       ['SPEED CLIMB', '+' + c.climb.pct + '% every ' + hms(c.climb.everySec) + ' alive, compounding, no cap'],
       ['CARD SIGHTING', 'one every ' + hms(s.everySec) + ' alive; jump to collect'],
       ['TIME UNLOCKS (TIME ALIVE IN ONE RUN)', P.tiers.map(function (t, i) { return t.name + ' ' + (s.locksSec[i] ? hms(s.locksSec[i]) : 'from the start'); }).join(' · ')],
-      ['SIGHTING LOTTERY', P.tiers.map(function (t, i) { return t.name + ' ' + s.odds[i] + '%'; }).join(' · ') + ' (Common, Uncommon and Rare are always new cards; Prestige and Legendary can repeat)'],
+      ['SIGHTING LOTTERY', P.tiers.map(function (t, i) { return t.name + ' ' + s.odds[i] + '%'; }).join(' · ') + ' (a sighting is always a new card; duplicates come from stagger cards)'],
       ['STAGGER CARDS', 'a duplicate of a card you own (same lottery, only rarities you own): first at ' + hms(c.stagger.firstSec) + ', then every ' + hms(c.stagger.everySec)],
       ['FOIL PIECES', 'a glowing half of a card after ' + hms(c.foil.firstSec) + ' of total play, then every ' + hms(c.foil.everySec) + ' of total play; 240 pieces; about 1 drop in 7 is both halves; rare cards come less often'],
       ['THE PACK', 'first at ' + hms(pk.firstSec) + ', then every ' + hms(pk.everySec) + '; jump it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' s, no other bonus'],

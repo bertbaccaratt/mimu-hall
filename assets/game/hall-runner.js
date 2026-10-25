@@ -71,7 +71,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netFoilAt: 60, netStaggerAt: 3900, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netFoilAt: 60, netStaggerAt: 2100, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -104,7 +104,7 @@
 
   /* ---------- card sightings and the pack ---------- */
   function cardImg(n) { var im = cardImgs[n]; if (!im) { im = new Image(); im.src = HallProfile.card(n).file; cardImgs[n] = im; } return im; }
-  // which card a sighting is: a lottery with no time limit for Common, Uncommon and Rare (always a card you do not have yet); Prestige joins at 2:00 alive and Legendary at 3:00, at their small odds, and those two can repeat
+  // which card a sighting is: a lottery with no time limit for Common, Uncommon and Rare (always a card you do not have yet); Prestige joins at 2:00 alive and Legendary at 3:00, at their small odds. A sighting is never a duplicate
   function pickCard() {
     var P = HallProfile, cfg = P.config.sight, list = P.cards(); if (!list.length) return null;
     var test = S.rc.test, own = P.owned(), byTier = [[], [], [], [], [], []], i, t;
@@ -114,15 +114,14 @@
     var tier = 0, open = [], w = [], total = 0, r;
     for (t = 1; t <= 5; t++) {
       if (!(test || S.alive >= cfg.locksSec[t - 1])) continue;
-      if (t <= 3 && complete(t)) continue;
+      if (complete(t)) continue;   // a sighting is never a duplicate, so a finished tier drops out
       open.push(t); w.push(cfg.odds[t - 1]);
     }
-    if (!open.length) { open = [4, 5]; w = [cfg.odds[3], cfg.odds[4]]; }
+    if (!open.length) return null;   // every card is collected
     w.forEach(function (x) { total += x; }); r = Math.random() * total;
     for (i = 0; i < open.length; i++) { r -= w[i]; if (r <= 0) { tier = open[i]; break; } }
     if (!tier) tier = open[open.length - 1];
-    var cand = tier <= 3 ? byTier[tier].filter(function (c) { return !have(c); }) : byTier[tier];
-    if (!cand.length) cand = byTier[tier];
+    var cand = byTier[tier].filter(function (c) { return !have(c); });
     return cand[(Math.random() * cand.length) | 0];
   }
     // a lane for something floating ahead: never on top of a box, and (for the pack) never the lane the last pack used
@@ -163,7 +162,7 @@
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
     var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
     if (window.HallNet && HallNet.ev) HallNet.ev('played');
-    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 3900; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function () { if (S === cur) S.net = null; });
+    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 2100; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function () { if (S === cur) S.net = null; });
   }
   /* ---------- cards the server puts in a run: the new-player card, echoes and the wanted card ---------- */
   var elHint = el('div', 'hhint', ''); root.appendChild(elHint);

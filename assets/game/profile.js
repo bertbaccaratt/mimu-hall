@@ -11,9 +11,9 @@
     sight: {
       everySec: 900,                                                     // a card sighting every 15 minutes alive (the first at 15 minutes)
       locksSec: [0, 0, 0, 7200, 10800],                                  // only Prestige (2:00) and Legendary (3:00) wait for time alive in the run; Common, Uncommon and Rare are open from the first sighting
-      odds: [62, 24, 10, 3, 1]                                           // the rarity lottery: Common, Uncommon, Rare, Prestige, Legendary (Common to Rare are always new cards, Prestige and Legendary can repeat)
+      odds: [62, 24, 10, 3, 1]                                           // the rarity lottery: Common, Uncommon, Rare, Prestige, Legendary (a sighting is always a new card: duplicates are the stagger card's job)
     },
-    stagger: { firstSec: 3900, everySec: 900 },                          // a duplicate of a card you own: at 1:05 alive, then every 15 minutes (same lottery, only rarities you own)
+    stagger: { firstSec: 2100, everySec: 900 },                          // a duplicate of a card you own: at 35 minutes alive, then every 15 minutes (same lottery, only rarities you own)
     foil: { firstSec: 60, everySec: 1800, bothChance: 1 / 7 },           // a glowing foil half: after 1 minute of TOTAL play, then every 30 minutes of total play; rare cards come less often
     pack: { firstSec: 3600, everySec: 3600, slowPct: 20, slowSec: 60 },  // the black pack: at 1 hour, then every hour alive; slows you 20% for 60 s
     hp: { segments: 6, dmg: { plain: 2, red: 6, blue: 3 } },             // plain box 3 hits, blue 2, red 1
