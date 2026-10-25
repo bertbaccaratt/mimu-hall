@@ -42,7 +42,7 @@
       ['TIME UNLOCKS (TIME ALIVE IN ONE RUN)', P.tiers.map(function (t, i) { return t.name + ' ' + (s.locksSec[i] ? hms(s.locksSec[i]) : 'from the start'); }).join(' · ')],
       ['SIGHTING LOTTERY', P.tiers.map(function (t, i) { return t.name + ' ' + s.odds[i] + '%'; }).join(' · ') + ' (a sighting is always a new card; duplicates come from stagger cards)'],
       ['STAGGER CARDS', 'a duplicate of a card you own (same lottery, only rarities you own): first at ' + hms(c.stagger.firstSec) + ', then every ' + hms(c.stagger.everySec)],
-      ['FOIL PIECES', 'a glowing half of a card after ' + hms(c.foil.firstSec) + ' of total play, then every ' + hms(c.foil.everySec) + ' of total play; 240 pieces; about 1 drop in 7 is both halves; rare cards come less often'],
+      ['FOIL PIECES', 'a glowing half of a card after ' + hms(c.foil.firstSec) + ' of total play, then every ' + hms(c.foil.everySec) + ' of total play; 240 pieces; about 1 drop in 30 is both halves; rare cards come less often'],
       ['THE PACK', 'first at ' + hms(pk.firstSec) + ', then every ' + hms(pk.everySec) + '; jump it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' s, no other bonus'],
       ['HEALTH', hp.segments + ' segments. Plain box ' + hp.dmg.plain + ' (3 hits), blue ' + hp.dmg.blue + ' (2 hits), red ' + hp.dmg.red + ' (1 hit)'],
       ['SCORING', 'distance + ' + c.coinPoints + ' per coin; every run adds to the lifetime total'],
