@@ -142,3 +142,11 @@
 .adm .fga .fgn { flex: 1 0 100%; margin-top: 6px; font: 400 11px Georgia, serif; color: #b9a070; }
 .adm .tlimg { display: block; width: 100%; height: auto; border: 1px solid rgba(232,198,115,.45); box-shadow: 0 0 24px rgba(0,0,0,.6); }
 .adm .gbox { border: 2px solid #3ddc84; background: linear-gradient(160deg, rgba(20,90,50,.45), rgba(6,24,14,.92)); box-shadow: 0 0 20px rgba(61,220,132,.2); } .adm .gbox h4 { color: #8dffb8; } .adm .gbox p { margin: 6px 0 10px; font: 400 15px/1.7 Georgia, serif; color: #e3f7ea; } .adm .gbox p b { color: #b8ffd5; font-weight: 600; }
+
+/* Player Board */
+.adm .bsearch { margin-bottom: 12px; } .adm .bsearch input { width: min(360px, 100%); padding: 9px 12px; font: 400 13px 'Cinzel', Georgia, serif; letter-spacing: .1em; color: #f1d9a0; background: rgba(0,0,0,.4); border: 1px solid rgba(217,172,92,.4); }
+.adm .btab .dh, .adm .btab .dr { grid-template-columns: 38px 1.4fr 1fr 1fr 1fr 1.5fr 1.6fr .7fr 1.1fr; gap: 10px; align-items: center; }
+.adm .bsort { padding: 0; text-align: left; font: inherit; letter-spacing: inherit; color: #b9904f; background: none; border: 0; cursor: pointer; } .adm .bsort:hover, .adm .bsort.on { color: #fff3c9; }
+.adm .btab .dr.banned { opacity: .55; } .adm .btab .dr em { font-style: normal; font-size: 9px; letter-spacing: .14em; color: #ff6b6b; }
+.adm .bdeck { display: block; } .adm .bdeck .bb { display: block; height: 5px; margin-top: 5px; background: rgba(217,172,92,.15); } .adm .bdeck .bb i { display: block; height: 100%; background: linear-gradient(90deg, #7a1118, #e8c673); } .adm .bdeck.foil .bb i { background: linear-gradient(90deg, #b8862e, #ffd45a, #fff3c9); box-shadow: 0 0 6px rgba(255,205,90,.6); } .adm .bdeck small { display: block; margin-top: 3px; font-size: 10px; letter-spacing: .06em; color: #8a7448; }
+@media (max-width: 900px) { .adm .btab .dr { grid-template-columns: 1fr; } }

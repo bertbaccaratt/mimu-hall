@@ -298,3 +298,23 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .hbuff > div[hidden] { display: none; } .hbuff .hbi { width: calc(var(--h) * .018); height: calc(var(--h) * .018); border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 700; background: #d6203a; box-shadow: 0 0 8px rgba(255,170,60,.7); } .hbuff .hbx .hbi { background: #0b0809; border: 1px solid #d9ac5c; color: #ffd45a; }
 .hbuff b { font-weight: 700; color: #ffd45a; text-shadow: 0 0 6px rgba(255,205,90,.6); } .hbuff .hbx b { font-size: max(11px, calc(var(--h) * .016)); } .hbuff u { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(232,198,115,.18); } .hbuff u i { display: block; height: 100%; background: linear-gradient(90deg, #b8862e, #ffd45a); } .hbuff .cool b, .hbuff .cool span { color: #9a8b6a; text-shadow: none; } .hbuff .cool { border-color: rgba(150,140,120,.4); }
 .hroot.phonedead .hcv, .phonedead .hcv { filter: brightness(.18) saturate(.4); transition: filter 1.2s; }
+
+/* home screen: bigger widget text, white app labels */
+#pHomeScr .wid .wt { font-size: max(9px, calc(var(--h) * .0108)); }
+#pHomeScr .wid small { font-size: max(8px, calc(var(--h) * .0098)); color: rgba(255,255,255,.9); }
+#pHomeScr .wlb .wrk i { font-size: max(12px, calc(var(--h) * .044)); }
+#pHomeScr .wst b { font-size: max(10px, calc(var(--h) * .0165)); }
+#pHomeScr .wdk .wpc { font-size: max(9px, calc(var(--h) * .0145)); width: calc(var(--h) * .062); }
+#pHomeScr .wdk .wcn b { font-size: max(11px, calc(var(--h) * .0215)); } #pHomeScr .wdk .wcn b small { font-size: max(8px, calc(var(--h) * .0125)); }
+#pHomeScr .wfoil { font-size: max(8px, calc(var(--h) * .0108)); margin-top: calc(var(--h) * .006); }
+#pHomeScr .aic > span:last-child { color: #fff; text-shadow: 0 1px 5px #000, 0 0 2px #000; font-weight: 600; }
+
+/* Hall Rules: pictures with the important parts highlighted */
+.rfig { margin: 12px 0 18px; display: grid; grid-template-columns: minmax(0, 250px) 1fr; gap: 16px; align-items: start; }
+.rfig .rimg { position: relative; overflow: hidden; width: 100%; border: 1px solid rgba(217,172,92,.6); background: #000; box-shadow: 0 6px 18px rgba(0,0,0,.6); }
+.rfig .rimg img { position: absolute; left: 0; width: 100%; height: auto; display: block; }
+.rfig .hl { position: absolute; border: 2px solid #ffd45a; border-radius: 6px; box-shadow: 0 0 0 1px rgba(0,0,0,.75), 0 0 12px rgba(255,212,90,.85); pointer-events: none; }
+.rfig .hl b { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); width: 18px; height: 18px; border-radius: 50%; background: #ffd45a; color: #2b0407; font: 700 11px/18px 'Cinzel', Georgia, serif; text-align: center; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }
+.rfig figcaption ol { list-style: none; margin: 0; padding: 0; } .rfig figcaption li { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 9px; line-height: 1.5; } .rfig figcaption li b { flex: none; width: 20px; height: 20px; border-radius: 50%; background: #ffd45a; color: #2b0407; font: 700 11px/20px 'Cinzel', Georgia, serif; text-align: center; }
+@media (max-width: 640px) { .rfig { grid-template-columns: 1fr; } .rfig .rimg { max-width: 340px; margin: 0 auto; } }
+.rfig figcaption li::before { content: none !important; display: none; } .rfig figcaption li { padding-left: 0; }

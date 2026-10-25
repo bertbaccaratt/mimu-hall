@@ -150,7 +150,7 @@
   }
   /* ---------- the OVERVIEW page: a mind map to learn the control room, then everything about the visitors ---------- */
   var MAP = [
-    ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['flag', 'FLAGGED RUNS', 'runs held for review: approve, deny or ban'], ['cards', 'CARDS', 'the 120 cards, pictured']]],
+    ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['flag', 'FLAGGED RUNS', 'runs held for review: approve, deny or ban'], ['board', 'PLAYER BOARD', 'every player, points and deck completion'], ['cards', 'CARDS', 'the 120 cards, pictured']]],
     ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
     ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, prices and trades']]],
     ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works'], ['data', 'DATA CONTRACT', 'what the server sends'], ['road', 'CHECKLIST', 'what is done and next']]]
@@ -236,6 +236,27 @@
       '<div class="box dbox"><h4>THE GAME AT A GLANCE</h4><div class="tiles" id="admTiles"></div></div>' +
       '<div class="cols2"><div class="box"><h4>SYSTEM CHECK</h4><div class="sys one" id="admSys"></div></div><div class="box"><h4>THIS BROWSER</h4>' + thisBrowser() + '</div></div>' +
       '<div class="box"><h4>ACTIVITY</h4><div class="acts" id="admAct"></div></div></section>';
+  }
+  /* ---------- PLAYER BOARD: an admin leaderboard of every player, with regular and foil deck completion ---------- */
+  var bsort = 'points', bq = '', boardSig = '';
+  function paintBoard() {
+    var el = $('admBoardList'); if (!el) return; var all = ((feed && feed.board) || []).slice(), total = (P.cards && P.cards().length) || 120, q = bq.trim().toLowerCase(), now = Date.now();
+    var sig = JSON.stringify([bsort, q, !!feed, all.length, all.map(function (r) { return [r.points, r.owned, r.foilCards, r.foilPieces, r.runs, r.lastSeen]; })]); if (sig === boardSig) return; boardSig = sig;
+    var rows = all.filter(function (r) { return !q || String(r.name).toLowerCase().indexOf(q) >= 0; });
+    var key = { points: 'points', regular: 'owned', foil: 'foilCards', runs: 'runs', best: 'best', coins: 'coins', seen: 'lastSeen' }[bsort] || 'points';
+    rows.sort(function (a, b2) { return (b2[key] - a[key]) || (b2.points - a.points); });
+    $('admBoardH').textContent = 'PLAYER BOARD \u00b7 ' + all.length + (all.length === 1 ? ' PLAYER' : ' PLAYERS');
+    function th(k, t) { return '<button type="button" class="bsort' + (bsort === k ? ' on' : '') + '" data-bs="' + k + '">' + t + (bsort === k ? ' &#9660;' : '') + '</button>'; }
+    var h = '<div class="dtab btab"><div class="dh"><span>#</span><span>PLAYER</span>' + th('points', 'POINTS') + th('best', 'BEST RUN') + th('coins', 'COINS') + th('regular', 'REGULAR DECK') + th('foil', 'FOIL DECK') + th('runs', 'RUNS') + th('seen', 'LAST SEEN') + '</div>';
+    if (!rows.length) h += '<div class="rk none">' + (feed ? (all.length ? 'NO PLAYER MATCHES THAT SEARCH' : 'NO PLAYERS HAVE SIGNED IN YET') : 'WAITING FOR THE LIVE FEED') + '</div>';
+    rows.forEach(function (r, i) {
+      var rp = Math.round(r.owned / total * 1000) / 10, fpc = Math.round(r.foilCards / total * 1000) / 10;
+      h += '<div class="dr' + (r.banned ? ' banned' : '') + '"><span>' + (i + 1) + '</span><span>' + esc(r.name) + (r.banned ? ' <em>BANNED</em>' : '') + '</span><span>' + fmt(r.points) + '</span><span>' + fmt(r.best) + '</span><span>' + fmt(r.coins) + '</span>' +
+        '<span class="bdeck">' + r.owned + '/' + total + ' &middot; ' + rp + '%<i class="bb"><i style="width:' + Math.min(100, rp) + '%"></i></i></span>' +
+        '<span class="bdeck foil">' + r.foilCards + '/' + total + ' &middot; ' + fpc + '%<i class="bb"><i style="width:' + Math.min(100, fpc) + '%"></i></i><small>' + r.foilPieces + ' of ' + (total * 2) + ' pieces</small></span>' +
+        '<span>' + fmt(r.runs) + '</span><span>' + (r.lastSeen ? stamp(r.lastSeen) : '\u2014') + '</span></div>';
+    });
+    el.innerHTML = h + '</div>';
   }
   /* ---------- FLAGGED RUNS: runs the server held back because something did not add up ---------- */
   var FLAG_TEXT = {
@@ -361,7 +382,7 @@
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS'], ['data', 'DATA CONTRACT'], ['road', 'CHECKLIST']];
   var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
@@ -380,12 +401,13 @@
       '<main class="cr-main">' +
       ovHtml() +
       '<section data-p="live"><div class="livebox off" id="admLB2"></div></section><section data-p="flag"><div id="admFlag"></div></section>' +
+      '<section data-p="board"><div class="box dbox"><h4 id="admBoardH">PLAYER BOARD</h4><div class="hint" style="margin-bottom:10px">Every signed-in player with their points and how complete their Regular and Foil decks are. Press a column title to sort.</div><div class="bsearch"><input id="admBq" maxlength="40" placeholder="SEARCH A PLAYER" autocomplete="off"></div><div id="admBoardList"></div></div></section>' +
       '<section data-p="msg"><div class="hx"><div class="box hxl"><h4>CONVERSATIONS</h4><div class="hxnew"><input id="admHTo" list="admPl" maxlength="40" placeholder="START A NEW TEXT: PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><button type="button" class="go" id="admHNew">NEW</button></div><div class="hxlist" id="admHT"></div></div><div class="box hxr"><h4 id="admHTitle">PICK A CONVERSATION</h4><div class="hint">HYPE is the account you text players from. Players can and will text HYPE back, so their replies land here. Players can also text HYPE first.</div><div class="hxlog" id="admHLog"></div><div class="cmp"><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div></div></section>' +
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
       '<section data-p="eco"><div id="admEco"></div></section>' +
       '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="whow"><b>HOW TO LAUNCH A WANTED CARD</b><span><i>1</i>CLICK A CARD in the deck below</span><span><i>2</i>PICK HOURS in the red box at the bottom</span><span><i>3</i>PRESS LAUNCH</span></div><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Each card shows how many times it has been found.</div>' + deckGrid() + '<div id="admWanted"></div></div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
-      '<section data-p="rules"><div class="box"><h4>WHEN CARDS DROP IN ONE RUN</h4><a href="assets/game/card-timeline.png" target="_blank" rel="noopener"><img class="tlimg" src="assets/game/card-timeline.png" alt="Timeline of the first card, sightings, stagger cards, echo cards, and when Prestige and Legendary open during one run" loading="lazy"></a><div class="hint" style="margin-top:10px">Time is time alive in one run; dying starts it over. Press the picture to open it full size.</div></div><div class="box gbox"><h4>COMING: THE GRAND TOTAL TOP 10</h4><p>When the game ends and the giving is over, every player&rsquo;s <b>points</b>, <b>coins</b> and <b>card deck completion percentage</b> will be totaled up together into one grand total. The ten highest grand totals become the <b>Top 10 list</b>, and the list will be revealed in the <b>TOP 10 app</b> on the phone.</p><div class="hint">Not built yet. The TOP 10 icon on the phone is blacked out until then. We will set this up later, and this note is the announcement for the team.</div></div><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
+      '<section data-p="rules"><div class="box"><h4>WHEN CARDS DROP IN ONE RUN</h4><a href="assets/game/card-timeline.png" target="_blank" rel="noopener"><img class="tlimg" src="assets/game/card-timeline.png" alt="Timeline of the first card, sightings, stagger cards, echo cards, and when Prestige and Legendary open during one run" loading="lazy"></a><div class="hint" style="margin-top:10px">Time is time alive in one run; dying starts it over. Press the picture to open it full size.</div></div><div class="box"><h4>POWER-UPS AND THE PHONE BATTERY</h4><a href="assets/game/power-timeline.png" target="_blank" rel="noopener"><img class="tlimg" src="assets/game/power-timeline.png" alt="Timeline of the coin magnet, the coin multiplier chain, the phone battery, and how the phone power falls and recovers" loading="lazy"></a><div class="hint" style="margin-top:10px">The first 30 minutes of one run. Press the picture to open it full size.</div></div><div class="box gbox"><h4>COMING: THE GRAND TOTAL TOP 10</h4><p>When the game ends and the giving is over, every player&rsquo;s <b>points</b>, <b>coins</b> and <b>card deck completion percentage</b> will be totaled up together into one grand total. The ten highest grand totals become the <b>Top 10 list</b>, and the list will be revealed in the <b>TOP 10 app</b> on the phone.</p><div class="hint">Not built yet. The TOP 10 icon on the phone is blacked out until then. We will set this up later, and this note is the announcement for the team.</div></div><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
       '<section data-p="sys">' + (DOCS.pages.sys || '') + '</section>' +
       '<section data-p="data">' + (DOCS.pages.data || '') + '</section>' +
@@ -400,7 +422,9 @@
     }
     show(curTab);
     shade.querySelector('.adm-x').addEventListener('click', close);
+    root.addEventListener('input', function (ev) { if (ev.target && ev.target.id === 'admBq') { bq = ev.target.value; paintBoard(); } });
     root.addEventListener('click', function (ev) {
+      var bsb = ev.target.closest('[data-bs]'); if (bsb) { bsort = bsb.getAttribute('data-bs'); boardSig = ''; paintBoard(); return; }
       var ap = ev.target.closest('[data-ap]'); if (ap) { apprToggle(ap.getAttribute('data-ap')); return; }
       var tf = ev.target.closest('[data-tf2]'); if (tf) { var gr = root.querySelector('.cgrid'), v = tf.getAttribute('data-tf2'); gr.setAttribute('data-f', v); Array.prototype.forEach.call(root.querySelectorAll('[data-tf2]'), function (x) { x.classList.toggle('on', x === tf); }); return; }
       var c = ev.target.closest('.cth[data-cn]'); if (c) { wsel = +c.getAttribute('data-cn'); wMsg = ''; wSig = ''; paintWanted(); return; }
@@ -456,7 +480,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists(); paintHype();
     }
