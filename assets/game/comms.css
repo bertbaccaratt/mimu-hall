@@ -345,3 +345,13 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .bx3 span { display: block; margin-top: 8px; font: 500 10px 'Cinzel', Georgia, serif; letter-spacing: .16em; color: #fff; }
 .rfig.boxfig figcaption p { margin: 0 0 10px; }
 @media (max-width: 640px) { .rfig.boxfig { grid-template-columns: 1fr; } }
+
+/* home widgets: back to the size that fits above the dock, titles in white */
+#pHomeScr .wid { padding: calc(var(--h) * .009) calc(var(--h) * .011); }
+#pHomeScr .wid .wt, #pHomeScr .wid .wt * { color: #fff !important; text-shadow: 0 1px 3px rgba(0,0,0,.85) !important; font-size: max(9px, calc(var(--h) * .0115)); }
+#pHomeScr .wid small { font-size: max(8px, calc(var(--h) * .0102)); }
+#pHomeScr .wlb .wrk i { font-size: max(12px, calc(var(--h) * .044)); }
+#pHomeScr .wst b { font-size: max(10px, calc(var(--h) * .0165)); }
+#pHomeScr .wdk .wpc { font-size: max(9px, calc(var(--h) * .0145)); width: calc(var(--h) * .062); }
+#pHomeScr .wdk .wcn b { font-size: max(11px, calc(var(--h) * .0215)); } #pHomeScr .wdk .wcn b small { font-size: max(8px, calc(var(--h) * .0125)); }
+#pHomeScr .wfoil { font-size: max(8px, calc(var(--h) * .0108)); }
