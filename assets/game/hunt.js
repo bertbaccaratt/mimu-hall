@@ -1,0 +1,60 @@
+/* THE PHONE NUMBER EASTER EGG: 11 hidden clickable items in the hall background (3 boxes of cards and 8 candles, left and right of the phone).
+   Clicked in the secret order they reveal a phone number on the phone. The order and the number are kept on the server: this page only reports which item was
+   clicked, and is told the number only when the whole pattern is right. The positions below are fractions of the 1920 x 1080 hall picture. */
+(function () {
+  'use strict';
+  var SPOTS = [
+    { n: 'Left box of cards (front table)', t: 'box', x: 256 / 1920, y: 855 / 1080, w: 235 / 1920, h: 135 / 1080 },
+    { n: 'Left box of cards (far table)', t: 'box', x: 583 / 1920, y: 748 / 1080, w: 92 / 1920, h: 56 / 1080 },
+    { n: 'Right box of cards (front table)', t: 'box', x: 1580 / 1920, y: 810 / 1080, w: 190 / 1920, h: 120 / 1080 },
+    { n: 'Left candle (far left edge)', t: 'candle', x: 22 / 1920, y: 740 / 1080 },
+    { n: 'Left candle (middle table)', t: 'candle', x: 405 / 1920, y: 717 / 1080 },
+    { n: 'Left candle (beside the far box)', t: 'candle', x: 507 / 1920, y: 762 / 1080 },
+    { n: 'Left candle (back row)', t: 'candle', x: 226 / 1920, y: 692 / 1080 },
+    { n: 'Right candle (front, beside the box)', t: 'candle', x: 1692 / 1920, y: 836 / 1080 },
+    { n: 'Right candle (middle table)', t: 'candle', x: 1407 / 1920, y: 763 / 1080 },
+    { n: 'Right candle (back row)', t: 'candle', x: 1275 / 1920, y: 735 / 1080 },
+    { n: 'Right candle (far right edge)', t: 'candle', x: 1893 / 1920, y: 740 / 1080 }
+  ];
+  SPOTS.forEach(function (s) { if (s.t === 'candle') { s.w = 40 / 1920; s.h = 70 / 1080; } });
+  var layer = null, btns = [], busy = false, lastAt = 0;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* the notification on the phone: a red frame that says EASTER EGG */
+  function noteHtml(number) {
+    var tel = String(number).replace(/[^0-9]/g, '');
+    return '<div class="hntag">EASTER EGG</div><div class="hntxt">CALL THIS NUMBER NOW</div><a class="hnnum" href="tel:+' + esc(tel) + '">' + esc(number) + '</a>';
+  }
+  function showNote(number) {
+    var scr = $('pScreen'); if (!scr) return; var old = $('huntNote'); if (old) old.remove();
+    var n = document.createElement('div'); n.id = 'huntNote'; n.className = 'huntnote'; n.setAttribute('role', 'alertdialog'); n.setAttribute('aria-label', 'Easter egg: call this number now');
+    n.innerHTML = noteHtml(number) + '<button type="button" class="hnx" aria-label="Close">&times;</button>';
+    scr.appendChild(n); n.querySelector('.hnx').addEventListener('click', function () { n.classList.add('gone'); setTimeout(function () { n.remove(); }, 350); });
+    var ph = $('phone'); if (ph && !ph.classList.contains('open')) { var gt = document.querySelector('a[href="#games"]'); if (gt) gt.click(); }
+    try { if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card(); } catch (e) {}
+  }
+
+  /* the hidden hotspots, laid over the background picture exactly where the items are (the picture is scaled to cover the page) */
+  function place() {
+    if (!layer) return; var W = innerWidth, H = innerHeight, sc = Math.max(W / 1920, H / 1080), ox = (W - 1920 * sc) / 2, oy = (H - 1080 * sc) / 2;
+    btns.forEach(function (b, i) { var s = SPOTS[i], w = s.w * 1920 * sc * 1.15, h = s.h * 1080 * sc * 1.15; b.style.width = w + 'px'; b.style.height = h + 'px'; b.style.left = (ox + s.x * 1920 * sc - w / 2) + 'px'; b.style.top = (oy + s.y * 1080 * sc - h / 2) + 'px'; });
+  }
+  function report(k) {
+    var net = window.HallNet; if (!net || !net.api || busy) return; busy = true;
+    net.api('/egg/click', { body: { vid: net.vid ? net.vid() : 'v' + Math.random().toString(36).slice(2, 12), k: k } }).then(function (r) { busy = false; if (r && r.done && r.number) { try { localStorage.setItem('mimu-egg', JSON.stringify({ n: r.number, t: Date.now() })); } catch (e) {} showNote(r.number); } }, function () { busy = false; });
+  }
+  function build() {
+    if (layer || !document.body) return;
+    layer = document.createElement('div'); layer.className = 'huntlayer'; layer.setAttribute('aria-hidden', 'true');
+    SPOTS.forEach(function (s, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'hunthot ' + s.t; b.tabIndex = -1; b.setAttribute('data-k', i);
+      b.addEventListener('click', function () { var now = Date.now(); if (now - lastAt < 140) return; lastAt = now; b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); report(i); });
+      layer.appendChild(b); btns.push(b);
+    });
+    var veil = document.querySelector('.veil'); if (veil && veil.parentNode) veil.parentNode.insertBefore(layer, veil.nextSibling); else document.body.appendChild(layer);
+    place(); window.addEventListener('resize', place);
+  }
+  window.HallHunt = { SPOTS: SPOTS, noteHtml: noteHtml, show: showNote };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
+})();
