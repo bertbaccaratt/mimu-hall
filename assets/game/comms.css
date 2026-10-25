@@ -415,3 +415,10 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .fx3 figcaption { font-size: max(8px, calc(var(--h) * .0105)); letter-spacing: .1em; color: #ffd45a; }
 /* settings: all text in white */
 #setApp *:not(.sw2):not(.sw2 *) { color: #fff !important; }
+/* Phone (keypad numbers) and Messages: all text in white */
+#phoneApp *, #msgApp * { color: #fff !important; }
+#phoneApp .kpcall, #phoneApp .kpcall * { color: #04210f !important; } #phoneApp .kpcall.end, #phoneApp .kpcall.end * { color: #2a0402 !important; }
+#msgApp .cmbtn:not(.red), #phoneApp .cmbtn:not(.red) { color: #2b0407 !important; }
+#msgApp ::placeholder, #phoneApp ::placeholder { color: rgba(255,255,255,.6) !important; }
+/* Settings: the creator's handle stays blue */
+#setApp .srow .v.xlink, #setApp .sfoot .xlink { color: #4aa3ff !important; text-shadow: 0 0 10px rgba(74,163,255,.35); }
