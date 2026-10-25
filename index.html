@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027c"><link rel="stylesheet" href="assets/game/comms.css?v=20261027c"><link rel="stylesheet" href="assets/game/admin.css?v=20261027c">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027d"><link rel="stylesheet" href="assets/game/comms.css?v=20261027d"><link rel="stylesheet" href="assets/game/admin.css?v=20261027d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
 
   /* the looping hall */
   /* the whole hall picture is always shown, never cropped. Where the screen is a different shape, the empty bands are filled with a soft blurred copy of the same picture, so there are no black bars. */
-  video.bg { pointer-events: none; }
+  video.bg, .bganim { pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   video.bg::-webkit-media-controls, video.bg::-webkit-media-controls-enclosure, video.bg::-webkit-media-controls-panel, video.bg::-webkit-media-controls-start-playback-button, video.bg::-webkit-media-controls-overlay-play-button, video.bg::-webkit-media-controls-play-button, video.bg::-webkit-media-controls-overlay-enclosure { display: none !important; opacity: 0 !important; -webkit-appearance: none; pointer-events: none !important; }
   .bgfill { position: fixed; inset: -50px; background: #000 url("assets/poster.webp") center / cover no-repeat; filter: blur(30px) brightness(.6) saturate(1.1); }
   .bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: contain; background: url("assets/poster.webp") center / contain no-repeat; }
@@ -301,19 +301,28 @@
 </video>
 <div class="veil"></div>
 <script>
-/* the hall video must ALWAYS play on a loop, with no play button, on every phone and computer */
+/* The hall background must ALWAYS move on a loop with NO play button. Phones (and any screen that blocks autoplay, like battery saver) cannot be trusted with a <video>,
+   so they get the same hall as a looping animated picture instead, which no phone can pause or put a play button on. Computers keep the full video. */
 (function () {
-  var v = document.querySelector('video.bg'); if (!v) return;
-  v.removeAttribute('controls'); v.controls = false; v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+  var v = document.querySelector("video.bg"); if (!v) return;
+  var ua = navigator.userAgent || "", touch = (window.matchMedia && matchMedia("(pointer: coarse)").matches) || /Android|iPhone|iPad|iPod|Mobile|CriOS|FxiOS/i.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua)), swapped = false;
+  function swap() {
+    if (swapped) return; swapped = true; try { v.pause(); } catch (e) {}
+    var img = new Image(); img.className = "bg bganim"; img.alt = ""; img.setAttribute("aria-hidden", "true"); img.decoding = "async"; img.draggable = false; img.src = "assets/hall-loop.webp";
+    if (v.parentNode) { v.parentNode.insertBefore(img, v); v.parentNode.removeChild(v); }
+  }
+  if (touch) { swap(); return; }
+  v.removeAttribute("controls"); v.controls = false; v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
   function go() { try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
-  function ensure() { if (!document.hidden && v.paused) go(); }
-  ['loadedmetadata', 'loadeddata', 'canplay', 'stalled', 'suspend', 'waiting'].forEach(function (e) { v.addEventListener(e, ensure); });
-  v.addEventListener('pause', function () { setTimeout(ensure, 60); });
-  v.addEventListener('ended', function () { try { v.currentTime = 0; } catch (e) {} go(); });
-  /* if the phone blocked autoplay, the very first touch, key press or scroll starts it */
-  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'wheel', 'scroll'].forEach(function (e) { window.addEventListener(e, ensure, { passive: true, capture: true }); });
-  document.addEventListener('visibilitychange', ensure); window.addEventListener('pageshow', go); window.addEventListener('focus', ensure); window.addEventListener('resize', ensure); window.addEventListener('orientationchange', ensure);
+  function ensure() { if (!swapped && !document.hidden && v.paused) go(); }
+  ["loadedmetadata", "loadeddata", "canplay", "stalled", "suspend", "waiting"].forEach(function (e) { v.addEventListener(e, ensure); });
+  v.addEventListener("pause", function () { setTimeout(ensure, 60); });
+  v.addEventListener("ended", function () { try { v.currentTime = 0; } catch (e) {} go(); });
+  ["pointerdown", "keydown", "wheel", "click"].forEach(function (e) { window.addEventListener(e, ensure, { passive: true, capture: true }); });
+  document.addEventListener("visibilitychange", ensure); window.addEventListener("pageshow", go); window.addEventListener("focus", ensure);
+  Array.prototype.forEach.call(v.querySelectorAll("source"), function (so) { so.addEventListener("error", function () { if (v.networkState === 3) swap(); }); });
   setInterval(ensure, 1500); go();
+  setTimeout(function () { if (!swapped && (v.paused || v.readyState < 2)) swap(); }, 2500);   /* a computer that blocked autoplay or cannot play the video gets the animated picture too */
 })();
 </script>
 <div class="embers" id="embers" aria-hidden="true"></div>
@@ -515,10 +524,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027c" defer></script>
-<script src="assets/game/hall-runner.js?v=20261027c" defer></script>
-<script src="assets/game/eyes.js?v=20261027c" defer></script> <script src="assets/game/comms.js?v=20261027c" defer></script> <script src="assets/game/campaign.js?v=20261027c" defer></script> <script src="assets/game/xbonus.js?v=20261027c" defer></script> <script src="assets/game/hunt.js?v=20261027c" defer></script> <script src="assets/game/net.js?v=20261027c" defer></script> <script src="assets/game/egg.js?v=20261027c" defer></script> <script src="assets/game/badges.js?v=20261027c" defer></script> <script src="assets/game/apps.js?v=20261027c" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027c" defer></script> <script src="assets/game/admin.js?v=20261027c" defer></script>
+<script src="assets/game/profile.js?v=20261027d" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027d" defer></script>
+<script src="assets/game/eyes.js?v=20261027d" defer></script> <script src="assets/game/comms.js?v=20261027d" defer></script> <script src="assets/game/campaign.js?v=20261027d" defer></script> <script src="assets/game/xbonus.js?v=20261027d" defer></script> <script src="assets/game/hunt.js?v=20261027d" defer></script> <script src="assets/game/net.js?v=20261027d" defer></script> <script src="assets/game/egg.js?v=20261027d" defer></script> <script src="assets/game/badges.js?v=20261027d" defer></script> <script src="assets/game/apps.js?v=20261027d" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027d" defer></script> <script src="assets/game/admin.js?v=20261027d" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
