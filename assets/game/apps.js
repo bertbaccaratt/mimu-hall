@@ -118,7 +118,7 @@
     lEl.innerHTML = '<div class="pg"><div class="pgh"><img class="lbbox" src="assets/game/box.webp" alt="The black box you jump over in THE HALL" width="360" height="262" decoding="async"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTALS</div></div>' +
       '<div class="tabs3" id="lTabs"><button class="on" data-k="lifetime">LIFETIME</button><button data-k="best">BEST RUN</button><button data-k="last">LAST RUN</button></div>' +
       '<div class="sec" id="lList"></div>' +
-      '<div class="pgh dk"><h2 class="gold">TOP 10 &middot; THE FULL DECK</h2><div class="pgsub">REGULAR AND FOIL DECK COMPLETION</div></div>' +
+      '<div class="pgh dk"><h2 class="gold">TOP 5 &middot; THE FULL DECK</h2><div class="pgsub">REGULAR AND FOIL DECK COMPLETION</div></div>' +
       '<div class="sec" id="myDeck"></div><div class="sec" id="dList"></div></div>';
     $('lTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; kind = b.getAttribute('data-k'); Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); refreshLeaderboard(); });
   }
@@ -132,7 +132,7 @@
     });
     refreshDeck();
   }
-  /* top 10 by deck progress; names come from Glyph once it is connected (P.deckBoard), until then the ten places are empty */
+  /* top 5 by deck progress; names come from Glyph once it is connected (P.deckBoard), until then the five places are empty */
   function refreshDeck() {
     var total = (P.cards && P.cards().length) || 120, fs0 = foilStats(), mine = P.owned ? P.owned().size : 0;
     $('myDeck').innerHTML = '<div class="mydk"><div class="mdh"><b>YOUR DECK</b><span>' + (P.isSignedIn() ? esc(String(P.username() || '').toUpperCase()) : 'DEMO MODE') + '</span></div>' +
@@ -140,8 +140,8 @@
       '<div class="mdr foil"><span>FOIL</span><div class="dkb foil"><i style="width:' + Math.min(100, fs0.cards / total * 100) + '%"></i></div><b>' + fs0.cards + '/' + total + '</b></div>' +
       '<div class="mdn">' + fs0.pieces + ' OF ' + (total * 2) + ' FOIL PIECES COLLECTED</div></div>';
     P.deckBoard().then(function (rows) {
-      rows = (rows || []).slice(0, 10); var out = '', i, r, pct, dash = '&mdash;';
-      for (i = 0; i < 10; i++) {
+      rows = (rows || []).slice(0, 5); var out = '', i, r, pct, dash = '&mdash;';
+      for (i = 0; i < 5; i++) {
         r = rows[i];
         if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0%</span></div><div class="dkb"><i style="width:0"></i></div><div class="dkb foil"><i style="width:0"></i></div><div class="dka"><span>CARDS ' + dash + '/' + total + '</span><span>FOIL ' + dash + '/' + total + '</span><span>RAREST ' + dash + '</span><span>FAMILY ' + dash + '</span><span>RUNS ' + dash + '</span><span>BEST ' + dash + '</span></div></div>'; continue; }
         pct = Math.min(100, Math.round((r.owned || 0) / total * 1000) / 10); var fpct = Math.min(100, Math.round((r.foilCards || 0) / total * 1000) / 10);

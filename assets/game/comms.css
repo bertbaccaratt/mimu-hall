@@ -261,7 +261,7 @@ body .top { padding-top: max(16px, calc(env(safe-area-inset-top, 0px) + 10px)); 
 .phone.rgb::after { animation-name: rgbspin, rgbhueb; } @keyframes rgbhueb { from { filter: blur(calc(var(--h) * .012)) hue-rotate(0deg); } to { filter: blur(calc(var(--h) * .012)) hue-rotate(360deg); } }
 /* with the phone open the pack sits above the dimming layer, so clicking it never closes the phone; it is dimmed by hand instead */
 body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shadow(0 4px 3px rgba(0,0,0,.8)); } body.phone-open .eggpack:hover img { filter: brightness(.5) contrast(1.05) drop-shadow(0 4px 3px rgba(0,0,0,.8)); }
-/* the Top 10 icon: blacked out, not clickable */
+/* the Top 5 icon: blacked out, not clickable */
 .aic.off.blk { opacity: 1; filter: none; } .aic.off.blk .atile { color: #3a3a3a; background: #000; border-color: #1f1f1f; box-shadow: inset 0 0 0 1px #000, 0 6px 18px rgba(0,0,0,.7); } .aic.off.blk .atile svg { filter: none; } .aic.off.blk span { color: #8a8a8a; } .aic.off.blk .atile { color: #4a4a4a; }
 /* CLICK TO LOAD: a red cover that tilts to show two eyes underneath */
 #gate.enter { padding: 0; border: 0; background: none; color: #ecca82; }
@@ -368,3 +368,9 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 #pHomeScr .aic > span:last-child { text-align: center; }
 #pHomeScr[data-z="0"] .aic > span:last-child { font-size: max(6px, calc(var(--h) * .0092)); }
 #pHomeScr[data-z="2"] .aic > span:last-child { font-size: max(8px, calc(var(--h) * .0124)); letter-spacing: .01em; }
+/* Top 5 deck board: bigger text, clearer rows and bars */
+#lbApp .dkrow { padding: calc(var(--h) * .013) calc(var(--h) * .016); background: linear-gradient(90deg, rgba(96,22,32,.9), rgba(40,12,16,.85)); border: 1px solid rgba(246,220,149,.5); }
+#lbApp .dkt { font-size: max(11px, calc(var(--h) * .0175)); font-weight: 700; letter-spacing: .06em; }
+#lbApp .dkb { height: calc(var(--h) * .009); background: rgba(255,255,255,.22); margin: calc(var(--h) * .008) 0; }
+#lbApp .dka { font-size: max(9px, calc(var(--h) * .0125)); letter-spacing: .08em; font-weight: 500; }
+#lbApp .dkrow.dkx { opacity: .8; }
