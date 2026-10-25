@@ -17,12 +17,19 @@
     '<li><b>WATCH THE BARS</b> THE TOP BAR IS YOUR WHOLE DECK. THE BARS BELOW SHOW HOW CLOSE YOU ARE IN EVERY RARITY TIER AND EVERY FAMILY.</li>' +
     '<li><b>FILTER</b> USE THE BUTTONS TO SHOW ONE TIER, ONE FAMILY, ONLY CARDS YOU HAVE COLLECTED, OR ONLY THE ONES YOU ARE MISSING.</li>' +
     '<li><b>GET CARDS</b> JUMP THE FLOATING CARD IN THE HALL. OR BUY A FACE UP DUPLICATE FROM ANOTHER PLAYER IN THE MARKETPLACE, FOR POINTS.</li>' +
-    '<li><b>DUPLICATES</b> A GOLD ×2, ×3 SHOWS WHEN YOU HAVE EXTRA COPIES. TAP SELL 1 TWICE TO SELL ONE COPY TO THE HALL FOR POINTS.</li>' +
+    '<li><b>DUPLICATES</b> A GOLD ×2, ×3 SHOWS WHEN YOU HAVE EXTRA COPIES. EXTRA COPIES CAN BE SOLD TO OTHER PLAYERS IN THE MARKETPLACE, FOR POINTS.</li>' +
     '<li>UNTIL SIGN-IN OPENS THE HALL RUNS AS A DEMO, SO NOTHING IS SAVED HERE YET.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>';
   var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set(), cMode = 'reg', ff = { view: 'all' };
   function tierDot(t) { return t.grad ? '<i class="dm" style="background:' + t.grad + '"></i>' : '<i class="dm" style="background:' + t.color + '"></i>'; }
   /* ---------- the foil page: 120 cards, each in two glowing halves ---------- */
   var HOWTO_FOIL = '<div class="howto foilhow"><div class="hth"><b>HOW FOIL WORKS</b></div><div class="hsub">EVERY CARD CAN BE RIPPED DOWN THE MIDDLE INTO TWO GLOWING FOIL HALVES: 240 PIECES IN ALL. COLLECT BOTH HALVES OF A CARD TO MAKE ITS FOIL CARD.</div>' +
+    '<div class="hex fx3">' +
+    '<figure><div class="fc fxs some hl"><div class="fcf"><div class="fcb"><img src="assets/game/card-back.webp" alt=""></div><div class="fh fl"><img src="assets/game/cards/ex/049.webp" alt="The left half of a foil card, glowing gold"></div><i class="fshine"></i></div></div><figcaption>ONE HALF<br>HALF A CARD</figcaption></figure>' +
+    '<span class="har">&rsaquo;</span>' +
+    '<figure><div class="fxp"><div class="fxh l"><img src="assets/game/cards/ex/049.webp" alt="The left half of a card"><i class="fshine"></i></div><div class="fxh r"><img src="assets/game/cards/ex/049.webp" alt="The right half of the same card"><i class="fshine"></i></div></div><figcaption>TWO HALVES<br>OF ONE CARD</figcaption></figure>' +
+    '<span class="har">&rsaquo;</span>' +
+    '<figure><div class="fc fxs full"><div class="fcf"><div class="fcb"><img src="assets/game/card-back.webp" alt=""></div><div class="fh fl"><img src="assets/game/cards/ex/049.webp" alt=""></div><div class="fh fr"><img src="assets/game/cards/ex/049.webp" alt="A whole foil card, glowing gold"></div><i class="fshine"></i></div></div><figcaption>BOTH HALVES<br>A FOIL CARD</figcaption></figure></div>' +
+
     '<ol class="hsteps"><li><b>FIND THEM IN A RUN</b> THE FIRST FOIL HALF FLOATS IN AFTER 1 MINUTE OF TOTAL PLAY, THEN ONE MORE FOR EVERY 30 MINUTES YOU PLAY. THE PIECES COME IN A MIX: ANY CARD, EITHER HALF, AND SOMETIMES BOTH HALVES OF ONE CARD.</li>' +
     '<li><b>RARE CARDS COME LESS OFTEN</b> A LEGENDARY HALF IS MUCH HARDER TO FIND THAN A COMMON ONE.</li>' +
     '<li><b>YOUR HALVES ARE SAVED</b> A HALF YOU FIND STAYS ON ITS CARD UNTIL YOU FIND THE OTHER ONE. HERE A HALF SHOWS AS HALF A CARD.</li>' +
@@ -84,7 +91,7 @@
   var sellVals = {}, sellFetched = false, sellArm = null;
   function refreshCollected(animate) {
     if (!cBuilt) return;
-    var own = P.owned(), counts = P.counts ? P.counts() : {}, mk = P.market ? P.market() : null, canSell = !!(P.isSignedIn() && mk && mk.sell), cards = P.cards(), total = 0, byT = {}, byF = {};
+    var own = P.owned(), counts = P.counts ? P.counts() : {}, mk = P.market ? P.market() : null, canSell = false && !!(P.isSignedIn() && mk && mk.sell), cards = P.cards(), total = 0, byT = {}, byF = {};
     cards.forEach(function (c) { if (own.has(c.n)) { total++; byT[c.tier] = (byT[c.tier] || 0) + 1; byF[c.family] = (byF[c.family] || 0) + 1; } });
     if (cMode === 'reg') $('cSub').textContent = total + ' / ' + cards.length; $('cTotalCt').textContent = total + '/' + cards.length; $('cTotalBar').style.width = (total / cards.length * 100) + '%';
     P.tiers.forEach(function (t) { var row = cEl.querySelector('.pb[data-t="' + t.n + '"]'); var n = byT[t.n] || 0; row.querySelector('i').style.width = (n / t.count * 100) + '%'; row.querySelector('.ct').textContent = n + '/' + t.count; });

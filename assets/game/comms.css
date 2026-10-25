@@ -401,3 +401,17 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 #alarmApp *, #giveApp *, #top5App * { color: #fff !important; }
 .mkstats.one { grid-template-columns: 1fr !important; text-align: center; }
 .hcard.pts { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: linear-gradient(160deg, #35171b, #170a0c); } .hcard.pts b { font-size: max(12px, calc(var(--h) * .02)); } .hcard.pts small { font-size: max(7px, calc(var(--h) * .0092)); letter-spacing: .14em; }
+/* Collected, Foil deck tab: how foil looks (a half, two halves, a whole card) */
+.fx3 { align-items: flex-end; gap: calc(var(--h) * .012); } .fx3 figure { flex: none; }
+.fx3 .fxs { width: calc(var(--h) * .088); margin: 0 auto; } .fx3 .fxs.full .fcf { box-shadow: 0 0 0 1px #ffd45a, 0 0 18px rgba(255,205,90,.9); } .fx3 .fxs.some .fcf { box-shadow: 0 0 0 1px rgba(255,210,100,.85), 0 0 14px rgba(255,200,70,.6); }
+.fx3 .fxs .fh { opacity: 1; } .fx3 .fxs .fcb img { opacity: .55; } .fx3 .fxs.full .fcb img { opacity: 0; }
+.fx3 .fxp { position: relative; display: flex; align-items: center; justify-content: center; gap: calc(var(--h) * .012); height: calc(var(--h) * .088 * 355 / 256); }
+.fx3 .fxh { position: relative; width: calc(var(--h) * .044); height: 100%; overflow: hidden; background: #050203; filter: drop-shadow(0 0 7px rgba(255,205,90,.8)); }
+.fx3 .fxh img { position: absolute; top: 0; width: 200%; height: 100%; max-width: none; object-fit: cover; display: block; }
+.fx3 .fxh.l img { left: 0; } .fx3 .fxh.r img { left: -100%; }
+.fx3 .fxh.l { clip-path: polygon(0 0, 100% 0, 92% 14%, 100% 30%, 90% 46%, 100% 62%, 92% 78%, 100% 100%, 0 100%); transform: rotate(-4deg) translateX(-2px); }
+.fx3 .fxh.r { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 78%, 0 62%, 10% 46%, 0 30%, 8% 14%); transform: rotate(4deg) translateX(2px); }
+.fx3 .fxh .fshine { opacity: .4; }
+.fx3 figcaption { font-size: max(8px, calc(var(--h) * .0105)); letter-spacing: .1em; color: #ffd45a; }
+/* settings: all text in white */
+#setApp *:not(.sw2):not(.sw2 *) { color: #fff !important; }
