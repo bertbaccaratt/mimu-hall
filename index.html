@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027b"><link rel="stylesheet" href="assets/game/comms.css?v=20261027b"><link rel="stylesheet" href="assets/game/admin.css?v=20261027b">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027c"><link rel="stylesheet" href="assets/game/comms.css?v=20261027c"><link rel="stylesheet" href="assets/game/admin.css?v=20261027c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -30,6 +30,8 @@
 
   /* the looping hall */
   /* the whole hall picture is always shown, never cropped. Where the screen is a different shape, the empty bands are filled with a soft blurred copy of the same picture, so there are no black bars. */
+  video.bg { pointer-events: none; }
+  video.bg::-webkit-media-controls, video.bg::-webkit-media-controls-enclosure, video.bg::-webkit-media-controls-panel, video.bg::-webkit-media-controls-start-playback-button, video.bg::-webkit-media-controls-overlay-play-button, video.bg::-webkit-media-controls-play-button, video.bg::-webkit-media-controls-overlay-enclosure { display: none !important; opacity: 0 !important; -webkit-appearance: none; pointer-events: none !important; }
   .bgfill { position: fixed; inset: -50px; background: #000 url("assets/poster.webp") center / cover no-repeat; filter: blur(30px) brightness(.6) saturate(1.1); }
   .bg { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: contain; background: url("assets/poster.webp") center / contain no-repeat; }
   @media (max-aspect-ratio: 16/9) and (min-aspect-ratio: 1/1) { .bg { --bar: max(0px, calc((100vh - 56.25vw) / 2)); -webkit-mask-image: linear-gradient(to bottom, transparent var(--bar), #000 calc(var(--bar) + 7vh), #000 calc(100% - var(--bar) - 7vh), transparent calc(100% - var(--bar))); mask-image: linear-gradient(to bottom, transparent var(--bar), #000 calc(var(--bar) + 7vh), #000 calc(100% - var(--bar) - 7vh), transparent calc(100% - var(--bar))); } }
@@ -293,11 +295,27 @@
 </head>
 <body>
 <div class="bgfill" aria-hidden="true"></div>
-<video class="bg" autoplay muted loop playsinline preload="auto" poster="assets/poster.webp" aria-hidden="true" disablepictureinpicture>
+<video class="bg" autoplay muted loop playsinline webkit-playsinline x-webkit-airplay="deny" disableremoteplayback preload="auto" poster="assets/poster.webp" aria-hidden="true" tabindex="-1" disablepictureinpicture>
   <source src="assets/hall.mp4" type="video/mp4">
   <source src="assets/hall.webm" type="video/webm">
 </video>
 <div class="veil"></div>
+<script>
+/* the hall video must ALWAYS play on a loop, with no play button, on every phone and computer */
+(function () {
+  var v = document.querySelector('video.bg'); if (!v) return;
+  v.removeAttribute('controls'); v.controls = false; v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+  function go() { try { var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+  function ensure() { if (!document.hidden && v.paused) go(); }
+  ['loadedmetadata', 'loadeddata', 'canplay', 'stalled', 'suspend', 'waiting'].forEach(function (e) { v.addEventListener(e, ensure); });
+  v.addEventListener('pause', function () { setTimeout(ensure, 60); });
+  v.addEventListener('ended', function () { try { v.currentTime = 0; } catch (e) {} go(); });
+  /* if the phone blocked autoplay, the very first touch, key press or scroll starts it */
+  ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'wheel', 'scroll'].forEach(function (e) { window.addEventListener(e, ensure, { passive: true, capture: true }); });
+  document.addEventListener('visibilitychange', ensure); window.addEventListener('pageshow', go); window.addEventListener('focus', ensure); window.addEventListener('resize', ensure); window.addEventListener('orientationchange', ensure);
+  setInterval(ensure, 1500); go();
+})();
+</script>
 <div class="embers" id="embers" aria-hidden="true"></div>
 
 <noscript><div style="position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:#000;color:#f6dc95;font:600 16px Georgia,serif;line-height:1.6">THE HALL needs JavaScript. Please turn it on in your browser and reload mimu.games.</div></noscript>
@@ -497,10 +515,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027b" defer></script>
-<script src="assets/game/hall-runner.js?v=20261027b" defer></script>
-<script src="assets/game/eyes.js?v=20261027b" defer></script> <script src="assets/game/comms.js?v=20261027b" defer></script> <script src="assets/game/campaign.js?v=20261027b" defer></script> <script src="assets/game/xbonus.js?v=20261027b" defer></script> <script src="assets/game/hunt.js?v=20261027b" defer></script> <script src="assets/game/net.js?v=20261027b" defer></script> <script src="assets/game/egg.js?v=20261027b" defer></script> <script src="assets/game/badges.js?v=20261027b" defer></script> <script src="assets/game/apps.js?v=20261027b" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027b" defer></script> <script src="assets/game/admin.js?v=20261027b" defer></script>
+<script src="assets/game/profile.js?v=20261027c" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027c" defer></script>
+<script src="assets/game/eyes.js?v=20261027c" defer></script> <script src="assets/game/comms.js?v=20261027c" defer></script> <script src="assets/game/campaign.js?v=20261027c" defer></script> <script src="assets/game/xbonus.js?v=20261027c" defer></script> <script src="assets/game/hunt.js?v=20261027c" defer></script> <script src="assets/game/net.js?v=20261027c" defer></script> <script src="assets/game/egg.js?v=20261027c" defer></script> <script src="assets/game/badges.js?v=20261027c" defer></script> <script src="assets/game/apps.js?v=20261027c" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027c" defer></script> <script src="assets/game/admin.js?v=20261027c" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
