@@ -43,7 +43,7 @@
     var steps = [
       ['THE HALL RUN', '14 DAYS &middot; ' + when(C.start) + ' TO ' + when(C.runEnd), 'Play THE HALL and collect points, coins and cards. When the 14 days end, the Hall closes. Its app goes gray and cannot be opened.', 1],
       ['THE GIVING', '48 HOURS &middot; UNTIL ' + when(C.giveEnd), 'A green app opens. Anyone who is not in the top 5 can give their coins to other players. After 48 hours it goes gray and closes.', 2],
-      ['THE TOP 5', 'OPENS ' + when(C.giveEnd), 'The Top 5 app opens in glowing gold and shows the top 5 players of all time: points, coins, Regular deck % and Foil deck %, all totaled. This is the end of the game.', 3]
+      ['THE TOP 5', 'OPENS ' + when(C.giveEnd), 'The Top 5 app opens in glowing gold and shows the top 5 lifetime totals of all time: distance and coin points, coins, Regular deck %, Foil deck % and X bonus, all added together. This is the end of the game.', 3]
     ];
     var keep = el.querySelector('.pg'), top = keep ? keep.scrollTop : 0;
     el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">ALARM</h2><div class="pgsub">THE CAMPAIGN CLOCK</div></div>' +
@@ -115,12 +115,13 @@
       body = '<div class="gvbox"><b>LOADING&hellip;</b></div>';
       api('/final').then(function (r) { tp.rows = r.locked ? [] : r.top; tp.err = false; paintTop(); }).catch(function () { tp.err = true; paintTop(); });
     } else {
-      body = '<div class="t5note">TOTAL = POINTS (WHICH INCLUDE YOUR X BONUS POINTS) + COINS + ' + C.deckPct.toLocaleString('en-US') + ' FOR EVERY 1% OF EACH DECK.</div>' + (tp.rows.length ? tp.rows.map(function (r, i) {
+      body = '<div class="t5note">LIFETIME TOTAL = DISTANCE POINTS + COIN POINTS (25 EACH) + YOUR COINS + ' + C.deckPct.toLocaleString('en-US') + ' PER 1% OF THE REGULAR DECK + ' + C.deckPct.toLocaleString('en-US') + ' PER 1% OF THE FOIL DECK + X BONUS POINTS</div>' + (tp.rows.length ? tp.rows.map(function (r, i) {
+        var runPts = Math.max(0, (r.points || 0) - (r.xPoints || 0));
         return '<div class="t5row r' + (i + 1) + '"><div class="t5h"><span class="t5rk">' + (i + 1) + '</span><span class="t5nm">' + esc(r.name) + '</span><span class="t5tt">' + fmt(r.total) + '</span></div>' +
-          '<div class="t5g"><div><small>POINTS</small><b>' + fmt(r.points) + '</b></div><div><small>COINS</small><b>' + fmt(r.coins) + '</b></div><div><small>X BONUS (IN POINTS)</small><b>' + fmt(r.xPoints || 0) + '</b></div><div><small>REGULAR DECK</small><b>' + r.regPct + '%</b></div><div><small>FOIL DECK</small><b>' + r.foilPct + '%</b></div></div></div>';
+          '<div class="t5g"><div><small>DISTANCE + COIN POINTS</small><b>' + fmt(runPts) + '</b></div><div><small>COINS</small><b>' + fmt(r.coins) + '</b></div><div><small>X BONUS</small><b>' + fmt(r.xPoints || 0) + '</b></div><div><small>REGULAR DECK ' + r.regPct + '%</small><b>+' + fmt(Math.round(r.regPct * C.deckPct)) + '</b></div><div><small>FOIL DECK ' + r.foilPct + '%</small><b>+' + fmt(Math.round(r.foilPct * C.deckPct)) + '</b></div></div></div>';
       }).join('') : '<div class="gvbox"><b>NO PLAYERS YET</b></div>');
     }
-    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">TOP 5 &middot; ALL TIME</h2><div class="pgsub">THE FINAL RESULTS</div></div>' + body + '</div>';
+    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">TOP 5 &middot; LIFETIME TOTAL</h2><div class="pgsub">THE FINAL RESULTS &middot; ALL TIME</div></div>' + body + '</div>';
   }
 
   function current() { var s = $('pScreen'); return s && s.classList.contains('inapp') ? s.dataset.app : ''; }

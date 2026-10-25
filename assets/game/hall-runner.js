@@ -241,7 +241,7 @@
   function fmtN(n) { return Math.floor(n || 0).toLocaleString('en-US'); }
   function showOffer() {
     S.offer = true;
-    var signed = HallProfile.isSignedIn(), pts = Math.floor((HallProfile.totals().lifetime) || 0), cost = HallProfile.lifeCost();
+    var signed = HallProfile.isSignedIn(), pts = Math.floor((HallProfile.totals().points != null ? HallProfile.totals().points : HallProfile.totals().lifetime) || 0), cost = HallProfile.lifeCost();
     S.lifeCost = cost; ovLife.querySelector('.lc').textContent = signed ? fmtN(cost) + ' PTS' : 'FREE (DEMO)';
     ovLife.querySelector('.lp').textContent = signed ? fmtN(pts) : '—';
     var buy = ovLife.querySelector('.hbuy'), msg = ovLife.querySelector('.hmsg'); buy.disabled = signed && pts < cost; msg.textContent = signed ? (pts < cost ? 'NOT ENOUGH POINTS FOR A LIFE' : '') : 'DEMO RUN · NOTHING IS SPENT OR SAVED';

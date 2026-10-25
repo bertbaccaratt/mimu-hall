@@ -154,7 +154,7 @@
       '<li><b>SELL.</b> OPEN THE SELL TAB, TYPE YOUR PRICE UNDER A DUPLICATE AND PRESS LIST. IT SHOWS FACE UP TO EVERY SIGNED-IN PLAYER. CANCEL IT ANY TIME FROM MY LISTINGS.</li>' +
       '<li><b>BUY.</b> OPEN THE BUY TAB AND PRESS THE PRICE ON ANY CARD. PRESS TEXT TO MESSAGE THE SELLER FIRST AND ASK FOR A BETTER PRICE.</li>' +
       '<li><b>SALES ARE FINAL.</b> ONLY POINTS CHANGE HANDS, NEVER MONEY. YOU MUST BE SIGNED IN TO BUY OR SELL.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>' +
-      '<div class="mkstats one"><div><small>YOUR POINTS</small><b>' + fmt(t.lifetime) + '</b></div></div>' +
+      '<div class="mkstats one"><div><small>YOUR POINTS TO SPEND</small><b>' + fmt(t.points != null ? t.points : t.lifetime) + '</b></div></div>' +
       '<div class="tabs3 t3" id="mkTabs">' + tabs.map(function (x) { return '<button' + (mk.tab === x[0] ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>' +
       '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE MARKETPLACE OPENS WITH SIGN-IN<br><span style="opacity:.7">' + lockSub + '</span></div>') + '</div></div>';
     $('mkTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; mk.tab = b.getAttribute('data-k'); mk.msg = ''; drawMarket(); });

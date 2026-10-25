@@ -50,7 +50,7 @@
     txt(c, nm, cx + cw / 2, cy + ch - 34, ns, { a: 'center', c: '#fff', ls: 3 }); frameLine(c, cx, cy, cw, ch, 22, 6);
     c.save(); c.beginPath(); c.arc(cx + 62, cy + 62, 42, 0, 7); c.fillStyle = '#2b0407'; c.fill(); c.lineWidth = 4; c.strokeStyle = GOLD; c.stroke(); c.restore(); txt(c, D.rank ? '#' + D.rank : '#-', cx + 62, cy + 77, D.rank > 99 ? 30 : 38, { a: 'center', c: GOLD });
     sparkle(c, cx + cw - 40, cy + 60, 26, .95); sparkle(c, cx + cw - 90, cy + 110, 14, .8); sparkle(c, cx + 60, cy + 400, 16, .7);
-    var rx = 620, words = fmt(D.points).split(' '); txt(c, 'TOTAL POINTS', rx, 260, 24, { c: '#e9c982', ls: 8, w: 500 });
+    var rx = 620, words = fmt(D.points).split(' '); txt(c, 'LIFETIME TOTAL', rx, 260, 24, { c: '#e9c982', ls: 8, w: 500 });
     var bs = words[0].length > 7 ? 70 : 100; txt(c, words[0], rx, 350, bs, { c: GOLD, glow: 'rgba(255,190,80,.55)', w: 900 }); if (words[1]) txt(c, words[1], rx + 4, 400, 44, { c: GOLD, ls: 8 });
     c.fillStyle = GOLD2; c.fillRect(rx + 4, 436, 360, 2);
     stat(c, 'COINS', fmt(D.coins), rx + 4, 500); stat(c, 'REGULAR DECK', D.reg + '%', rx + 4, 620); stat(c, 'FOIL DECK', D.foil + '%', rx + 4, 740);

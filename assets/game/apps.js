@@ -122,16 +122,16 @@
   var TROPHY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 5H5a2 2 0 0 0 0 4h3M16 5h3a2 2 0 0 1 0 4h-3"/><path d="M12 13v4M8.5 20h7M10 17h4"/></svg>';
   function buildLeaderboard() {
     lEl = $('lbApp'); if (!lEl || lBuilt) return; lBuilt = true; lEl.classList.add('page');
-    lEl.innerHTML = '<div class="pg"><div class="pgh"><img class="lbbox" src="assets/game/box.webp" alt="The black box you jump over in THE HALL" width="360" height="262" decoding="async"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTALS &middot; INCLUDES X BONUS POINTS</div></div>' +
+    lEl.innerHTML = '<div class="pg"><div class="pgh"><img class="lbbox" src="assets/game/box.webp" alt="The black box you jump over in THE HALL" width="360" height="262" decoding="async"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTAL &middot; DISTANCE, COINS, DECKS AND X BONUS</div></div>' +
       '<div class="tabs3" id="lTabs"><button class="on" data-k="lifetime">LIFETIME</button><button data-k="best">BEST RUN</button><button data-k="last">LAST RUN</button></div>' +
       '<div class="sec" id="lList"></div>' +
-      '<div class="pgh dk"><h2 class="gold">TOP 5 &middot; THE FULL DECK</h2><div class="pgsub">REGULAR AND FOIL DECK COMPLETION &middot; X BONUS POINTS SHOWN</div></div>' +
+      '<div class="pgh dk"><h2 class="gold">TOP 5 &middot; LIFETIME TOTAL</h2><div class="pgsub">THE FIVE HIGHEST TOTALS &middot; EVERY PART SHOWN</div></div>' +
       '<div class="sec" id="myDeck"></div><div class="sec" id="dList"></div></div>';
     $('lTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; kind = b.getAttribute('data-k'); Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); refreshLeaderboard(); });
   }
   function refreshLeaderboard() {
     if (!lBuilt) return;
-    $('lSub').textContent = { lifetime: 'LIFETIME TOTALS 00b7 INCLUDES X BONUS POINTS', best: 'BEST SINGLE RUN', last: 'MOST RECENT RUN' }[kind];
+    $('lSub').textContent = { lifetime: 'LIFETIME TOTAL \u00b7 DISTANCE, COINS, DECKS AND X BONUS', best: 'BEST SINGLE RUN', last: 'MOST RECENT RUN' }[kind];
     P.leaderboard(kind).then(function (rows) {
       var box = $('lList');
       if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + TROPHY + '<br>NO RANKED RUNS YET<br><span style="opacity:.7">DEMO RUNS ARE NOT RANKED</span></div>'; return; }
@@ -145,14 +145,14 @@
     $('myDeck').innerHTML = '<div class="mydk"><div class="mdh"><b>YOUR DECK</b><span>' + (P.isSignedIn() ? esc(String(P.username() || '').toUpperCase()) : 'DEMO MODE') + '</span></div>' +
       '<div class="mdr"><span>REGULAR</span><div class="dkb"><i style="width:' + Math.min(100, mine / total * 100) + '%"></i></div><b>' + mine + '/' + total + '</b></div>' +
       '<div class="mdr foil"><span>FOIL</span><div class="dkb foil"><i style="width:' + Math.min(100, fs0.cards / total * 100) + '%"></i></div><b>' + fs0.cards + '/' + total + '</b></div>' +
-      '<div class="mdn">' + fs0.pieces + ' OF ' + (total * 2) + ' FOIL PIECES COLLECTED</div>' + '<div class="mdn">X POINTS EARNED &middot; ' + fmt((P.stats && P.stats().xPoints) || 0) + '</div></div>';
+      '<div class="mdn">' + fs0.pieces + ' OF ' + (total * 2) + ' FOIL PIECES COLLECTED</div>' + '<div class="mdn">X BONUS POINTS EARNED &middot; ' + fmt((P.stats && P.stats().xPoints) || 0) + '</div><div class="mdn">YOUR DECKS ADD ' + fmt(Math.round((mine / total * 100 + fs0.cards / total * 100) * 1000)) + ' POINTS TO YOUR LIFETIME TOTAL</div></div>';
     P.deckBoard().then(function (rows) {
       rows = (rows || []).slice(0, 5); var out = '', i, r, pct, dash = '&mdash;';
       for (i = 0; i < 5; i++) {
         r = rows[i];
-        if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0%</span></div><div class="dkb"><i style="width:0"></i></div><div class="dkb foil"><i style="width:0"></i></div><div class="dka"><span>CARDS ' + dash + '/' + total + '</span><span>FOIL ' + dash + '/' + total + '</span><span>RAREST ' + dash + '</span><span>FAMILY ' + dash + '</span><span>RUNS ' + dash + '</span><span>BEST ' + dash + '</span></div></div>'; continue; }
-        pct = Math.min(100, Math.round((r.owned || 0) / total * 1000) / 10); var fpct = Math.min(100, Math.round((r.foilCards || 0) / total * 1000) / 10);
-        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + pct + '%</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>CARDS ' + fmt(r.owned || 0) + '/' + total + '</span><span>FOIL ' + fmt(r.foilCards || 0) + '/' + total + '</span><span>RAREST ' + esc((r.rarest || dash).toString().toUpperCase()) + '</span><span>FAMILY ' + esc((r.family || dash).toString().toUpperCase()) + '</span><span>X POINTS ' + fmt(r.xPoints || 0) + '</span><span>RUNS ' + (r.runs == null ? dash : fmt(r.runs)) + '</span><span>BEST ' + (r.best == null ? dash : fmt(r.best)) + '</span></div></div>';
+        if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0</span></div><div class="dkb"><i style="width:0"></i></div><div class="dkb foil"><i style="width:0"></i></div><div class="dka"><span>POINTS ' + dash + '</span><span>COINS ' + dash + '</span><span>X BONUS ' + dash + '</span><span>REGULAR ' + dash + '</span><span>FOIL ' + dash + '</span></div></div>'; continue; }
+        pct = Math.min(100, r.regPct != null ? r.regPct : Math.round((r.owned || 0) / total * 1000) / 10); var fpct = Math.min(100, r.foilPct != null ? r.foilPct : Math.round((r.foilCards || 0) / total * 1000) / 10), xp = r.xPoints || 0, runPts = Math.max(0, (r.points || 0) - xp);
+        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + fmt(r.total != null ? r.total : r.points || 0) + '</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>DISTANCE + COIN POINTS ' + fmt(runPts) + '</span><span>COINS ' + fmt(r.coins || 0) + '</span><span>REGULAR ' + pct + '% (+' + fmt(Math.round(pct * 1000)) + ')</span><span>FOIL ' + fpct + '% (+' + fmt(Math.round(fpct * 1000)) + ')</span><span>X BONUS ' + fmt(xp) + '</span></div></div>';
       }
       $('dList').innerHTML = out + (rows.length ? '' : '<div class="dknote">USERNAMES APPEAR HERE ONCE GLYPH IS CONNECTED</div>');
     });
