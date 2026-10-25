@@ -13,7 +13,7 @@
       locksSec: [0, 1800, 3600, 7200, 10800],                            // Common, Uncommon, Rare, Prestige, Legendary open after this long alive in the run
       odds: [60, 21, 7, 6.5, 3.3],                                       // chance weights among the tiers that are open
       unlockShare: 0.6,                                                  // a tier opens once you own 60% of the tier below it
-      dupChance: 0.2,                                                    // one sighting in five may be a card you already own
+      dupChance: 0,                                                      // every sighting is a card you do not have yet (duplicates come from stagger and echo cards)
       lucky: { afterSec: 3600, prestige: 0.005, legendary: 0.001 }       // a tiny chance of a top card in shorter runs
     },
     pack: { firstSec: 3600, everySec: 3600, slowPct: 20, slowSec: 60 },  // the black pack: at 1 hour, then every hour alive; slows you 20% for 60 s

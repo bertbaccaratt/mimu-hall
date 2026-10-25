@@ -71,7 +71,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netEchoAt: 900, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netEchoAt: 600, netStaggerAt: 300, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -170,7 +170,7 @@
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
     var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
     if (window.HallNet && HallNet.ev) HallNet.ev('played');
-    if (nr) nr.start().then(function (info) { if (S === cur) S.net = info; }, function () { if (S === cur) S.net = null; });
+    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 300; S.netEchoAt = info.echoFirst || 600; } }, function () { if (S === cur) S.net = null; });
   }
   /* ---------- cards the server puts in a run: the new-player card, echoes and the wanted card ---------- */
   var elHint = el('div', 'hhint', ''); root.appendChild(elHint);
@@ -179,7 +179,7 @@
     if (!r || !r.dropId || S.dropSeen[r.dropId]) return; S.dropSeen[r.dropId] = 1;
     var c = HallProfile.card(r.card); if (!c) return; cardImg(c.n);
     var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, drop: { id: r.dropId, kind: kind } });
-    hint(kind === 'wanted' ? 'THE WANTED CARD! JUMP IT!' : kind === 'echo' ? 'AN ECHO OF YOUR DECK! JUMP IT!' : 'YOUR FIRST CARD! JUMP TO COLLECT IT!', 5);
+    hint(kind === 'wanted' ? 'THE WANTED CARD! JUMP IT!' : kind === 'echo' ? 'AN ECHO OF YOUR DECK! JUMP IT!' : kind === 'stagger' ? 'A STAGGER CARD: A DUPLICATE! JUMP IT!' : 'YOUR FIRST CARD! JUMP TO COLLECT IT!', 5);
     if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
   }
   function netTick() {
@@ -189,6 +189,7 @@
       nr.beat({ score: Math.floor(S.score), alive: Math.floor(S.alive), coins: S.coins, hp: S.hp, cards: S.cards.length + S.dropGot, speed: Math.round(S.v * MPH * 10) }).then(function (r) { if (S === cur && r && r.wanted) spawnDrop('wanted', r.wanted); }, function () {});
     }
     if (S.net.offerFirst) for (var i = 0; i < 2; i++) if (!S.firstReq[i] && S.alive >= S.net.firstOffers[i]) { S.firstReq[i] = true; nr.drop('first').then(function (r) { if (S === cur && r && r.dropId) spawnDrop('first', r); }, function () {}); }
+    if (S.alive >= S.netStaggerAt) { S.netStaggerAt = S.alive + 60; nr.drop('stagger').then(function (r) { if (S === cur && r && r.dropId) { S.netStaggerAt = S.alive + (S.net.staggerEvery || 900); spawnDrop('stagger', r); } }, function () {}); }
     if (S.alive >= S.netEchoAt) { S.netEchoAt = S.alive + 60; nr.drop('echo').then(function (r) { if (S === cur && r && r.dropId) { S.netEchoAt = S.alive + (S.net.echoEvery || 900); spawnDrop('echo', r); } }, function () {}); }
   }
   function die(silent) {
@@ -444,14 +445,14 @@
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1) * (dk === 'echo' ? 0.62 : 1);
     shadow(x, y, cw * 0.5);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; if (dk === 'wanted') pulse = 0.9 + 0.3 * Math.sin(S.t * 7);
-    var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'echo' ? [['170,240,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
+    var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'echo' ? [['170,240,255', 0]] : dk === 'stagger' ? [['190,140,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
     cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
     ctx.restore();
     ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5);
     if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-    ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'echo' ? 'rgba(190,245,255,0.9)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
-    if (dk === 'wanted' || dk === 'first') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' ? '#ffd45a' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
+    ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'echo' ? 'rgba(190,245,255,0.9)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
+    if (dk === 'wanted' || dk === 'first' || dk === 'stagger') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
   /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */
