@@ -470,3 +470,8 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 #alarmApp .pg { padding-bottom: calc(var(--h) * .075); }
 #alarmApp .alstep p { font-size: max(12px, calc(var(--h) * .0158)); }
 #xApp .xstep span b { display: inline; font-size: inherit; letter-spacing: inherit; } #xApp .xstats b { font-size: max(10px, calc(var(--h) * .0135)); }
+/* the X icon on the home screen: green = claimed, red and wiggling = a new bonus is ready */
+@keyframes xicwig { 0%, 45%, 100% { transform: rotate(0) scale(1); } 6% { transform: rotate(-9deg) scale(1.06); } 12% { transform: rotate(9deg) scale(1.06); } 18% { transform: rotate(-7deg); } 24% { transform: rotate(7deg); } 30% { transform: rotate(-3deg); } 36% { transform: rotate(3deg); } }
+.aic.ic-x.xgreen .atile { color: #fff; background: linear-gradient(160deg, #3ddc84 0%, #1fa25a 55%, #0b6a38 100%); border-color: rgba(190,255,215,.7); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 18px rgba(60,230,130,.55); }
+.aic.ic-x.xred .atile { color: #fff; background: linear-gradient(160deg, #ff5a52 0%, #d3222b 55%, #8e0f16 100%); border-color: rgba(255,170,160,.8); box-shadow: 0 6px 18px rgba(0,0,0,.7), 0 0 22px rgba(255,70,60,.75); animation: xicwig 1.4s ease-in-out infinite; transform-origin: 50% 60%; }
+.aic.ic-x.xred > span:last-child { color: #ff8d80 !important; }

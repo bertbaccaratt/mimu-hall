@@ -706,6 +706,22 @@
     else if (k === 'ArrowDown' || k === 's' || k === 'S') { slide(); e.preventDefault(); }
   });
 
+  /* ---------- game controllers: stick or d-pad to change lane, up / A / X to jump, down / B to slide, Start or A to run ---------- */
+  var padPrev = {};
+  function padTick() {
+    if (!active || !navigator.getGamepads) return; var pads = navigator.getGamepads(), i, g, cur, ax, go;
+    for (i = 0; i < pads.length; i++) {
+      g = pads[i]; if (!g || !g.connected) continue; ax = g.axes || [];
+      cur = { l: !!(g.buttons[14] && g.buttons[14].pressed) || ax[0] < -0.55, r: !!(g.buttons[15] && g.buttons[15].pressed) || ax[0] > 0.55, u: !!(g.buttons[12] && g.buttons[12].pressed) || ax[1] < -0.6 || !!(g.buttons[0] && g.buttons[0].pressed) || !!(g.buttons[2] && g.buttons[2].pressed), d: !!(g.buttons[13] && g.buttons[13].pressed) || ax[1] > 0.6 || !!(g.buttons[1] && g.buttons[1].pressed), s: !!(g.buttons[9] && g.buttons[9].pressed) };
+      go = padPrev[i] || {};
+      if (cur.l && !go.l) lane(-1); if (cur.r && !go.r) lane(1);
+      if ((cur.u && !go.u) || (cur.s && !go.s)) { if (S.mode === 'idle' || (S.mode === 'dead' && !S.offer)) start(); else if (cur.u && !go.u) jump(); }
+      if (cur.d && !go.d) slide();
+      padPrev[i] = cur;
+    }
+  }
+  setInterval(padTick, 33);
+
   /* ---------- the phone calls these ---------- */
   document.addEventListener('visibilitychange', function () { if (document.hidden) leave(); });
   window.addEventListener('pagehide', leave);

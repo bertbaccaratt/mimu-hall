@@ -170,6 +170,7 @@
       approve: function (key, on) { return call('/admin/approve', { body: { key: key, on: !!on }, admin: tk() }).then(adminFeed, fail); },
       wantedLaunch: function (card, hours) { return call('/admin/wanted/launch', { body: { card: card, hours: hours }, admin: tk() }).then(adminFeed, fail); },
       wantedEnd: function () { return call('/admin/wanted/end', { body: {}, admin: tk() }).then(adminFeed, fail); },
+      xrecheck: function (id) { return call('/admin/x/recheck', { body: { id: id }, admin: tk() }).then(function (r) { return adminFeed().then(function () { return r; }); }, fail); },
       flag: function (runId, action) { return call('/admin/flag', { body: { runId: runId, action: action }, admin: tk() }).then(adminFeed, fail); }
     });
     adminFeed().catch(fail); clearInterval(adm.timer); adm.timer = setInterval(function () { adminFeed().catch(function (e) { if (e && e.status === 401) adminLogout(); }); }, 4000);

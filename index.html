@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261026p"><link rel="stylesheet" href="assets/game/comms.css?v=20261026p"><link rel="stylesheet" href="assets/game/admin.css?v=20261026p">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261026q"><link rel="stylesheet" href="assets/game/comms.css?v=20261026q"><link rel="stylesheet" href="assets/game/admin.css?v=20261026q">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -483,10 +483,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261026p" defer></script>
-<script src="assets/game/hall-runner.js?v=20261026p" defer></script>
-<script src="assets/game/eyes.js?v=20261026p" defer></script> <script src="assets/game/comms.js?v=20261026p" defer></script> <script src="assets/game/campaign.js?v=20261026p" defer></script> <script src="assets/game/xbonus.js?v=20261026p" defer></script> <script src="assets/game/net.js?v=20261026p" defer></script> <script src="assets/game/egg.js?v=20261026p" defer></script> <script src="assets/game/badges.js?v=20261026p" defer></script> <script src="assets/game/apps.js?v=20261026p" defer></script>
-<script src="assets/game/admin-docs.js?v=20261026p" defer></script> <script src="assets/game/admin.js?v=20261026p" defer></script>
+<script src="assets/game/profile.js?v=20261026q" defer></script>
+<script src="assets/game/hall-runner.js?v=20261026q" defer></script>
+<script src="assets/game/eyes.js?v=20261026q" defer></script> <script src="assets/game/comms.js?v=20261026q" defer></script> <script src="assets/game/campaign.js?v=20261026q" defer></script> <script src="assets/game/xbonus.js?v=20261026q" defer></script> <script src="assets/game/net.js?v=20261026q" defer></script> <script src="assets/game/egg.js?v=20261026q" defer></script> <script src="assets/game/badges.js?v=20261026q" defer></script> <script src="assets/game/apps.js?v=20261026q" defer></script>
+<script src="assets/game/admin-docs.js?v=20261026q" defer></script> <script src="assets/game/admin.js?v=20261026q" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -600,7 +600,7 @@ window.MIMUAudio = (function () {
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), v: v })); } catch (e) {} }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function num(n) {
-    if (n == null || isNaN(n)) return 'â€”';
+    if (n == null || isNaN(n)) return '—';
     var a = Math.abs(n);
     if (a >= 1e9) return (n / 1e9).toFixed(2) + 'B';
     if (a >= 1e6) return (n / 1e6).toFixed(2) + 'M';
@@ -619,10 +619,10 @@ window.MIMUAudio = (function () {
       '<span class="who">' + img + '<span class="nm">' + esc(c.name) + '</span>' + (c.verified ? CHECK : '') + '</span>' +
       '<span class="st fl"><b>' + num(s.floorPrice) + '</b><i>APE</i></span>' +
       '<span class="st v24"><b>' + num(v['7d']) + '</b><i>APE</i></span>' +
-      '<span class="st vt" data-tot><b>' + (tot != null ? num(tot) : '<em class="dots">Â·Â·Â·</em>') + '</b><i>APE</i></span></a>';
+      '<span class="st vt" data-tot><b>' + (tot != null ? num(tot) : '<em class="dots">···</em>') + '</b><i>APE</i></span></a>';
   }
   function fillTotal(slug, val) {
-    var el = apeList.querySelector('.arow[data-slug="' + slug + '"] [data-tot] b'); if (el) el.textContent = val == null ? 'â€”' : num(val);
+    var el = apeList.querySelector('.arow[data-slug="' + slug + '"] [data-tot] b'); if (el) el.textContent = val == null ? '—' : num(val);
   }
   function loadTotals(items) {
     var cache = lsGet('mimu-ape-totals', 6 * 3600 * 1000) || {}, queue = [];
@@ -645,7 +645,7 @@ window.MIMUAudio = (function () {
   }
   function showList(items, when) {
     apeList.innerHTML = items.map(rowHtml).join('');
-    apeUpdated.textContent = 'LIVE FROM OSWIKI Â· UPDATED ' + new Date(when).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    apeUpdated.textContent = 'LIVE FROM OSWIKI · UPDATED ' + new Date(when).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     ape.loaded = true; loadTotals(items);
   }
   function loadApe(force) {
@@ -684,6 +684,7 @@ window.MIMUAudio = (function () {
     '<div class="rk">Change lane</div><div>Swipe left or right</div><div>&larr; &rarr; or A D</div>',
     '<div class="rk">Jump</div><div>Swipe up</div><div>&uarr;, W or Space</div>',
     '<div class="rk">Slide</div><div>Swipe down</div><div>&darr; or S</div></div>',
+    '<p>You can also play with a <strong>game controller</strong>: the stick or d-pad changes lane (left and right), up or the A / X button jumps, down or the B button slides, and Start or A begins a run. A mouse works like a finger: drag to swipe.</p>',
     '</div></details>',
     '<details class="rs" id="r-tips"><summary>How to win: what to do for the best score</summary><div class="rsb">',
     '<p>Your final standing is the <strong>total</strong> of your <strong>points</strong>, your <strong>coins</strong>, your <strong>Regular deck %</strong> and your <strong>Foil deck %</strong> (each 1% of a deck counts as 1,000 points). X bonus points and the points from distance are already inside your points. Here is how to grow every part of it.</p>',

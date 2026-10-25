@@ -17,8 +17,10 @@
   function cur() { var s = $('pScreen'); return s && s.classList.contains('inapp') ? s.dataset.app : ''; }
   function load() {
     var a = A(); if (!a) { ST = null; return Promise.resolve(); }
-    return a.status().then(function (s) { ST = s; off = s.now - Date.now(); if (cur() === 'x') paintPage(); }, function () {});
+    return a.status().then(function (s) { ST = s; off = s.now - Date.now(); icon(); if (cur() === 'x') paintPage(); }, function () {});
   }
+  /* the X icon on the home screen: green when the bonus is claimed, red and wiggling when a new one is ready */
+  function icon() { var b = $('xIcon'); if (!b) return; var st = state(); b.classList.toggle('xred', st === 'ready'); b.classList.toggle('xgreen', st === 'wait'); b.setAttribute('aria-label', st === 'ready' ? 'X: your bonus is ready, post to earn points' : st === 'wait' ? 'X: bonus claimed' : 'X'); }
 
   /* ---------- the picture: one real run frame, the player's numbers drawn over it ---------- */
   var GOLD = '#f6dc95', GOLD2 = '#d9ac5c';
@@ -104,6 +106,9 @@
     if (!ST || cur() !== 'x') return; var a = document.querySelectorAll('#xApp .xbt'); Array.prototype.forEach.call(a, function (e) { e.textContent = left(ST.nextAt - now()); });
     if (ST.nextAt && now() >= ST.nextAt && !ST.canClaim) { ST.canClaim = true; paintPage(); }
   }, 1000);
+  setInterval(function () { if (ST && ST.nextAt && now() >= ST.nextAt && !ST.canClaim) { ST.canClaim = true; } icon(); }, 1000);
+  setInterval(function () { if (P.isSignedIn()) load(); }, 5 * 60000);
   window.HallXBonus = { open: function (name) { if (name !== 'x') return; msg = ''; paintPage(); load(); } };
-  P.onChange(function (what) { if (what === 'connect' || what === 'scores') { ST = null; if (cur() === 'x') { paintPage(); load(); } } });
+  P.onChange(function (what) { if (what === 'connect') ST = null; if (what === 'connect' || what === 'scores') { icon(); load(); if (cur() === 'x') paintPage(); } });
+  if (P.isSignedIn()) load();
 })();

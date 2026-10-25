@@ -155,3 +155,11 @@
 .adm-shade .cr-nav button.on, .adm-shade .cr-nav button.on i, .adm-shade .ctier .cct, .adm-shade .mmh, .adm-shade .hxnew .go, .adm-shade .hxt .tm i, .adm-shade .fga button.ok, .adm-shade .adm .api.on i, .adm-shade .cfilt button.on, .adm-shade .whow i, .adm-shade .cmp .go, .adm-shade .mtabs button.on, .adm-shade .adm-login .go, .adm-shade .amh { color: #1a0306 !important; }
 .adm-shade input::placeholder, .adm-shade textarea::placeholder { color: rgba(255,255,255,.55) !important; }
 .adm-shade svg text { fill: #fff !important; }
+
+/* X BONUS page */
+.xrt { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; } .xrt span { font-size: 11px; letter-spacing: .08em; line-height: 1.4; flex: 1; min-width: 200px; }
+.xrb { font: 700 11px 'Cinzel', Georgia, serif; letter-spacing: .16em; padding: 9px 14px; color: #1a0306; background: linear-gradient(180deg, #f6dc95, #c8963f); border: 0; cursor: pointer; } .xrb.sm { padding: 5px 9px; font-size: 9px; }
+.xpl { margin-bottom: 12px; padding: 12px 14px; border: 1px solid rgba(246,220,149,.3); background: rgba(40,10,16,.5); } .xph { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; } .xph b { font-size: 15px; letter-spacing: .1em; } .xph a { font-size: 12px; letter-spacing: .1em; text-decoration: underline; } .xph span { margin-left: auto; font-size: 12px; letter-spacing: .1em; }
+.xpc { margin-top: 8px; display: grid; gap: 6px; } .xpr { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 8px; border-left: 3px solid #3ddc84; background: rgba(0,0,0,.25); } .xpr.bad { border-left-color: #ff5a52; }
+.xpr .xck { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; background: #3ddc84; } .xpr.bad .xck { background: #ff5a52; } .xpr a { font-size: 12px; letter-spacing: .08em; text-decoration: underline; word-break: break-all; } .xpr em { font-style: normal; font-size: 10px; letter-spacing: .1em; flex: 1; min-width: 120px; }
+.adm-shade .xpr .xck, .adm-shade .xrb { color: #1a0306 !important; }

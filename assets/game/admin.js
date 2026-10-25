@@ -154,7 +154,7 @@
   var MAP = [
     ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['flag', 'FLAGGED RUNS', 'runs held for review: approve, deny or ban'], ['board', 'PLAYER BOARD', 'every player, points and deck completion'], ['cards', 'CARDS', 'the 120 cards, pictured'], ['wanted', 'LAUNCH A WANTED CARD', 'pick a card, set the hours and launch it']]],
     ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
-    ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, the Marketplace, the Giving and the X bonus']]],
+    ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, the Marketplace and the Giving'], ['xbonus', 'X BONUS', 'who posted on X, every post link and its check']]],
     ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works']]]
   ];
   function mindMap() {
@@ -365,6 +365,22 @@
     h += '<div class="box dbox"><h4>THE RULES OF THE ECONOMY</h4>' + '<ul class="dl"><li><b>Coins</b> come only from runs: each coin collected is also worth ' + c.coinPoints + ' points to that run. Coins are only given between players in The Giving.</li><li><b>Points</b> are the leaderboard score. Duplicate cards listed by players cost points, and the points go from the buyer to the seller. Only duplicates can be sold.</li><li><b>Extra life:</b> after a crash a player may buy one extra life per run for ' + Math.round(c.life.share * 100) + '% of their points. It cannot be bought twice in a run.</li><li><b>X bonus:</b> a verified post on X earns 50,000 points every 12 hours. They are added to the player&rsquo;s points.</li><li><b>Never money:</b> only coins and points change hands. Sales are final. The cards are in-game pictures, not real-world assets.</li><li><b>Where the numbers live:</b> the Hall run, Giving and Top 5 times, the X bonus amount and the Marketplace limits all live in the server, so they can change without touching the site.</li></ul></div>';
     return h;
   }
+  /* ---------- the X BONUS page: who posted, with every post link and whether it checks out ---------- */
+  var xSig = '', xMsg = '';
+  function paintX() {
+    var el = $('admX'); if (!el) return; var f = feed || {}, e = f.economy || {}, x = f.xbonus || { players: [] }, none = feed ? '' : 'WAITING FOR LIVE FEED';
+    var all = (x.players || []).reduce(function (a, p) { return a.concat(p.claims || []); }, []), okN = all.filter(function (c) { return c.verified; }).length;
+    var sig = JSON.stringify([x, e.xPosts, e.xPoints, e.xLinked, xMsg, !!feed]); if (sig === xSig) return; xSig = sig;
+    var tl = [['POSTS CLAIMED', fmt(e.xPosts), 'all players'], ['BONUS POINTS PAID', fmt(e.xPoints), '50,000 a post'], ['X ACCOUNTS LINKED', fmt(e.xLinked), 'one per player'], ['POSTS VERIFIED', all.length ? okN + ' OF ' + all.length : '—', 'still public with the tag and picture']];
+    var h = '<div class="tiles eco2">' + tl.map(function (t) { return '<div class="tile"><small>' + t[0] + '</small><b>' + t[1] + '</b><em>' + esc(t[2]) + '</em></div>'; }).join('') + '</div>';
+    h += '<div class="box dbox"><h4>PLAYERS WHO POSTED ON X</h4><div class="xrt"><button type="button" class="xrb" data-xr="all">RECHECK ALL POSTS</button><span>' + (xMsg || 'A check confirms the post is still public, from the linked account, with @mimuonape and a picture. New claims start verified.') + '</span></div>';
+    if (!(x.players || []).length) h += '<div class="rk none">' + (feed ? 'NOBODY HAS CLAIMED THE X BONUS YET' : none) + '</div>';
+    else h += (x.players || []).map(function (p) {
+      return '<div class="xpl"><div class="xph"><b>' + esc(String(p.name).toUpperCase()) + '</b><a href="https://x.com/' + esc(p.handle) + '" target="_blank" rel="noopener noreferrer">@' + esc(String(p.handle).toUpperCase()) + '</a><span>' + fmt(p.points) + ' PTS &middot; ' + p.posts + ' POST' + (p.posts === 1 ? '' : 'S') + '</span></div>' +
+        '<div class="xpc">' + (p.claims || []).map(function (c, i) { return '<div class="xpr ' + (c.verified ? 'ok' : 'bad') + '"><span class="xck" title="' + (c.verified ? 'Verified' : 'Unverified') + '">' + (c.verified ? '&#10003;' : '&#10007;') + '</span><a href="' + esc(c.url) + '" target="_blank" rel="noopener noreferrer">POST ' + (p.claims.length - i) + ' &middot; ' + stamp(c.ts) + '</a><em>' + (c.verified ? 'VERIFIED' : 'UNVERIFIED') + (c.checkedAt ? ' &middot; CHECKED ' + stamp(c.checkedAt) : '') + '</em><button type="button" class="xrb sm" data-xr="' + c.id + '">RECHECK</button></div>'; }).join('') + '</div></div>';
+    }).join('');
+    el.innerHTML = h + '</div>';
+  }
   function sysRows() {
     var A = window.MIMUAudio, f = feed || {}, ok = function (b) { return b ? 'ok' : 'off'; }, cards = (P.cards && P.cards().length) || 0, vw = window.innerWidth + ' x ' + window.innerHeight;
     var rows = [
@@ -385,7 +401,7 @@
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['cards', 'CARDS'], ['wanted', 'LAUNCH A WANTED CARD'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['xbonus', 'X BONUS'], ['cards', 'CARDS'], ['wanted', 'LAUNCH A WANTED CARD'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS']];
   var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
@@ -409,6 +425,7 @@
       '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
       '<section data-p="eco"><div id="admEco"></div></section>' +
+      '<section data-p="xbonus"><div id="admX"></div></section>' +
       '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="whow"><b>HOW TO LAUNCH A WANTED CARD</b><span><i>1</i>CLICK A CARD in the deck below</span><span><i>2</i>PICK HOURS in the red box at the bottom</span><span><i>3</i>PRESS LAUNCH</span></div><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Each card shows how many times it has been found.</div>' + deckGrid() + '<div id="admWanted"></div></div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>WHEN CARDS DROP IN ONE RUN</h4><a href="assets/game/card-timeline.png" target="_blank" rel="noopener"><img class="tlimg" src="assets/game/card-timeline.png" alt="Timeline of the first card, sightings, stagger cards, foil pieces, and when Prestige and Legendary open during one run" loading="lazy"></a><div class="hint" style="margin-top:10px">Time is time alive in one run; dying starts it over. Press the picture to open it full size.</div></div><div class="box"><h4>POWER-UPS AND THE PHONE BATTERY</h4><a href="assets/game/power-timeline.png" target="_blank" rel="noopener"><img class="tlimg" src="assets/game/power-timeline.png" alt="Timeline of the coin magnet, the coin multiplier chain, the phone battery, and how the phone power falls and recovers" loading="lazy"></a><div class="hint" style="margin-top:10px">The first 30 minutes of one run. Press the picture to open it full size.</div></div><div class="box gbox"><h4>THE CAMPAIGN: HALL RUN, THE GIVING, THE TOP 5</h4><p><b>Monday, Oct 26, 12:00 AM Pacific:</b> the Hall run starts and lasts <b>14 days</b>. <b>Monday, Nov 9:</b> the Hall closes (its app goes gray and new runs are refused). The <b>Giving</b> opens in green for <b>48 hours</b>: players outside the top 5 can give their coins to other players. <b>Wednesday, Nov 11:</b> the Giving closes and the <b>Top 5</b> opens in gold with the final results: points, coins, Regular deck % and Foil deck %, totaled (each 1% of a deck counts as 1,000 points). The Alarm app counts it all down.</p><div class="hint">The times live on the server (CAMPAIGN in the Worker) and the page reads them from there.</div></div><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
@@ -427,6 +444,7 @@
     root.addEventListener('input', function (ev) { if (ev.target && ev.target.id === 'admBq') { bq = ev.target.value; paintBoard(); } });
     root.addEventListener('click', function (ev) {
       var bsb = ev.target.closest('[data-bs]'); if (bsb) { bsort = bsb.getAttribute('data-bs'); boardSig = ''; paintBoard(); return; }
+      var xr = ev.target.closest('[data-xr]'); if (xr) { if (!handlers.xrecheck) { xMsg = 'NOT CONNECTED YET'; paintX(); return; } var xid = xr.getAttribute('data-xr'); xMsg = 'CHECKING THE POSTS ON X…'; xSig = ''; paintX(); handlers.xrecheck(xid === 'all' ? 0 : Number(xid)).then(function (r) { xMsg = r && r.checked != null ? 'CHECKED ' + r.checked + ': ' + r.verified + ' VERIFIED, ' + r.unverified + ' UNVERIFIED' + (r.unknown ? ', ' + r.unknown + ' COULD NOT BE REACHED' : '') : 'DONE'; xSig = ''; paintX(); }, function (e) { xMsg = String((e && e.message) || 'COULD NOT CHECK').toUpperCase(); xSig = ''; paintX(); }); return; }
       var ap = ev.target.closest('[data-ap]'); if (ap) { apprToggle(ap.getAttribute('data-ap')); return; }
       var tf = ev.target.closest('[data-tf2]'); if (tf) { var gr = root.querySelector('.cgrid'), v = tf.getAttribute('data-tf2'); gr.setAttribute('data-f', v); Array.prototype.forEach.call(root.querySelectorAll('[data-tf2]'), function (x) { x.classList.toggle('on', x === tf); }); return; }
       var c = ev.target.closest('.cth[data-cn]'); if (c) { wsel = +c.getAttribute('data-cn'); wMsg = ''; wSig = ''; paintWanted(); return; }
@@ -482,7 +500,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintX(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists(); paintHype();
     }
