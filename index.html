@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027e"><link rel="stylesheet" href="assets/game/comms.css?v=20261027e"><link rel="stylesheet" href="assets/game/admin.css?v=20261027e">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027f"><link rel="stylesheet" href="assets/game/comms.css?v=20261027f"><link rel="stylesheet" href="assets/game/admin.css?v=20261027f">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -30,6 +30,8 @@
 
   /* the looping hall */
   /* the whole hall picture is always shown, never cropped. Where the screen is a different shape, the empty bands are filled with a soft blurred copy of the same picture, so there are no black bars. */
+  /* on a phone the phone fills the whole screen, so the moving hall behind it cannot be seen: it is switched off while the phone is open, which frees the phone for the game */
+  @media (max-width: 700px) { body.phone-open .bg, body.phone-open .bganim, body.phone-open .bgfill, body.phone-open .veil, body.phone-open .embers { display: none !important; } }
   video.bg, .bganim { pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   video.bg::-webkit-media-controls, video.bg::-webkit-media-controls-enclosure, video.bg::-webkit-media-controls-panel, video.bg::-webkit-media-controls-start-playback-button, video.bg::-webkit-media-controls-overlay-play-button, video.bg::-webkit-media-controls-play-button, video.bg::-webkit-media-controls-overlay-enclosure { display: none !important; opacity: 0 !important; -webkit-appearance: none; pointer-events: none !important; }
   .bgfill { position: fixed; inset: -50px; background: #000 url("assets/poster.webp") center / cover no-repeat; filter: blur(30px) brightness(.6) saturate(1.1); }
@@ -524,10 +526,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027e" defer></script>
-<script src="assets/game/hall-runner.js?v=20261027e" defer></script>
-<script src="assets/game/eyes.js?v=20261027e" defer></script> <script src="assets/game/comms.js?v=20261027e" defer></script> <script src="assets/game/campaign.js?v=20261027e" defer></script> <script src="assets/game/xbonus.js?v=20261027e" defer></script> <script src="assets/game/hunt.js?v=20261027e" defer></script> <script src="assets/game/net.js?v=20261027e" defer></script> <script src="assets/game/egg.js?v=20261027e" defer></script> <script src="assets/game/badges.js?v=20261027e" defer></script> <script src="assets/game/apps.js?v=20261027e" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027e" defer></script> <script src="assets/game/admin.js?v=20261027e" defer></script>
+<script src="assets/game/profile.js?v=20261027f" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027f" defer></script>
+<script src="assets/game/eyes.js?v=20261027f" defer></script> <script src="assets/game/comms.js?v=20261027f" defer></script> <script src="assets/game/campaign.js?v=20261027f" defer></script> <script src="assets/game/xbonus.js?v=20261027f" defer></script> <script src="assets/game/hunt.js?v=20261027f" defer></script> <script src="assets/game/net.js?v=20261027f" defer></script> <script src="assets/game/egg.js?v=20261027f" defer></script> <script src="assets/game/badges.js?v=20261027f" defer></script> <script src="assets/game/apps.js?v=20261027f" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027f" defer></script> <script src="assets/game/admin.js?v=20261027f" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;

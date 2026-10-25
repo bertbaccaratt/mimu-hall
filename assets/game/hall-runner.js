@@ -77,6 +77,8 @@
   })();
 
   /* ---------- state ---------- */
+  /* PHONES ONLY: the picture is drawn a little less sharp when the phone cannot keep up, and the game clock always follows real time (computers are untouched) */
+  var TOUCH = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches), qLevel = 0, qEma = 0.0167, qN = 0, QS = [1, 0.82, 0.68, 0.55], FSTEP = [2, 2, 3, 4];
   var W = 0, H = 0, y0 = 0, dpr = 1, active = false, raf = 0, last = 0, S, embers = [], bestScore = 0, cardImgs = {};
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
@@ -89,7 +91,7 @@
 
   function resize() {
     var w = root.clientWidth, h = root.clientHeight; if (!w || !h) return;
-    dpr = Math.min(2, window.devicePixelRatio || 1);
+    dpr = Math.min(2, window.devicePixelRatio || 1) * (TOUCH ? QS[qLevel] : 1);
     W = w; H = h; y0 = Math.round(H * HORIZON);
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -364,11 +366,12 @@
 
   function drawFloor() {
     var hh = H - y0, y, s, d, v, x0, wd, fsrc = imgs.floor.naturalWidth ? imgs.floor : tex, fw = imgs.floor.naturalWidth ? imgs.floor.naturalWidth : TEX_W, fh = imgs.floor.naturalWidth ? imgs.floor.naturalHeight : TEX_H;
-    for (y = y0 + 2; y < H; y += 2) {
+    var fstep = TOUCH ? FSTEP[qLevel] : 2;
+    for (y = y0 + 2; y < H; y += fstep) {
       s = (y - y0) / hh; if (s < 0.03) continue;
       d = 1 / s; v = ((((d + S.scrollZ) * 0.30) % 1) + 1) % 1 * (fh - 2);
       x0 = cxAt(s) - W * XW * s; wd = W * XW * 2 * s;
-      ctx.drawImage(fsrc, 0, v | 0, fw, 2, x0, y, wd, 2.6);
+      ctx.drawImage(fsrc, 0, v | 0, fw, 2, x0, y, wd, fstep + 0.6);
     }
     // haze where the floor runs into the far end of the hall, and a soft dark at the bottom
     var g = ctx.createLinearGradient(0, y0 - 2, 0, y0 + hh * 0.28);
@@ -672,10 +675,14 @@
     if (!active) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
     var raw = (now - last) / 1000 || 0.016, dt = Math.min(0.05, raw); last = now;
+    if (TOUCH && raw < 0.5) { qEma += (raw - qEma) * 0.08; if (++qN > 12 && qEma > 0.0245 && qLevel < QS.length - 1 && S.mode !== 'dead') { qLevel = Math.min(QS.length - 1, qLevel + (qEma > 0.05 ? 2 : 1)); qN = 0; qEma = 0.0167; resize(); } }
     if (raw > 0.5 && S.mode === 'run') leave();   // the page stalled or was frozen: no pausing by freezing it
     if (!W) { resize(); if (!W) return; }
     if (pending > 0) return;
-    update(dt); render();
+    /* a slow frame no longer slows the game: the missing time is played out in small steps, so the road, jumps and boxes move at the same real speed as on a computer */
+    var left = Math.min(raw, 0.25), steps = left > 0.05 ? Math.ceil(left / 0.033) : 1, i2;
+    if (steps === 1) update(dt); else for (i2 = 0; i2 < steps; i2++) update(left / steps);
+    render();
   }
 
   /* ---------- controls ---------- */
