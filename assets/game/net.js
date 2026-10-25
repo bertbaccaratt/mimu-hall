@@ -77,11 +77,11 @@
       send: function (to, amount) { return call('/give', { body: { to: to, amount: amount } }).then(function (r) { return refreshMe().then(function () { return r; }); }); }
     },
     market: {
-      shelf: function () { return call('/market/shelf'); },
       listings: function () { return call('/market/listings'); },
       sellable: function () { return call('/market/sellable'); },
-      buy: function (n) { return call('/market/buy', { body: { n: n } }).then(function (r) { return refreshMe().then(function () { return r; }); }); },
-      sell: function (n) { return call('/market/sell', { body: { n: n } }).then(function (r) { return refreshMe().then(function () { return r; }); }); }
+      list: function (n, price) { return call('/market/list', { body: { n: n, price: price } }); },
+      cancel: function (id) { return call('/market/cancel', { body: { id: id } }); },
+      buy: function (id) { return call('/market/buy', { body: { id: Number(id) } }).then(function (r) { return refreshMe().then(function () { return r; }); }); }
     }
   };
   function finishRun(r) {

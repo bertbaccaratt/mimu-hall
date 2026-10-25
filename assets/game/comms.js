@@ -1,4 +1,4 @@
-/* The phone's talking and trading apps: PHONE (keypad), MESSAGES (texts between players, plus MIMU and HYPE), MAIL (emails from MIMU) and MARKETPLACE (buy and sell cards).
+/* The phone's talking and trading apps: PHONE (keypad), MESSAGES (texts between players, plus MIMU and HYPE), MAIL (emails from MIMU) and MARKETPLACE (players sell duplicate cards for points).
    Everything arrives through HallProfile once somebody is signed in (the Cloudflare adapter supplies messages, mail and market); until then each app shows an empty, honest state. */
 (function () {
   'use strict';
@@ -139,50 +139,53 @@
   }
 
   /* ---------- MARKETPLACE ---------- */
-  /* three shelves: FACE DOWN cards come from the Hall and cost coins (deliberately dear); FACE UP cards come from other players and cost points (far dearer); SELL puts your own cards up */
-  var mk = { tab: 'down', msg: '' };
+  /* players sell their DUPLICATE cards, face up, to other signed-in players, for points (never coins) at a price the seller sets */
+  var mk = { tab: 'buy', msg: '' };
   function drawMarket() {
     var el = $('mktApp'); if (!el) return; el.classList.add('page');
     var A = P.market ? P.market() : null, t = P.totals ? P.totals() : {}, on = P.isSignedIn() && A;
-    var tabs = [['down', 'FACE DOWN &middot; COINS'], ['up', 'FACE UP &middot; POINTS'], ['sell', 'SELL']];
-    var lockSub = { down: 'FACE DOWN CARDS FROM THE HALL, FOR COINS', up: 'FACE UP CARDS FROM PLAYERS, FOR POINTS', sell: 'SELL ANY CARD YOU HAVE COLLECTED' }[mk.tab];
-    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">MARKETPLACE</h2><div class="pgsub">FACE DOWN FOR COINS &middot; FACE UP FOR POINTS</div></div>' +
+    var tabs = [['buy', 'BUY &middot; FACE UP'], ['sell', 'SELL &middot; DUPLICATES'], ['mine', 'MY LISTINGS']];
+    var lockSub = { buy: 'FACE UP CARDS FROM PLAYERS, FOR POINTS', sell: 'SELL YOUR DUPLICATE CARDS FOR POINTS', mine: 'THE CARDS YOU HAVE LISTED' }[mk.tab];
+    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">MARKETPLACE</h2><div class="pgsub">DUPLICATE CARDS &middot; FACE UP &middot; FOR POINTS</div></div>' +
       '<div class="howto"><div class="hth"><b>HOW TO USE THE MARKETPLACE</b></div>' +
-      '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card you do not have yet, face down"></div><figcaption>FACE DOWN<br>FROM THE HALL<br>COSTS COINS</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a collected card, face up"></div><figcaption>FACE UP &middot; #049<br>FROM A PLAYER<br>COSTS POINTS</figcaption></figure></div>' +
-      '<div class="hsub">THIS IS HOW EVERY CARD LOOKS IN <b>COLLECTED</b>: FACE DOWN UNTIL YOU HAVE IT, THEN IT FLIPS OVER. THE DIAMONDS SHOW HOW RARE IT IS AND THE NUMBER IS ITS PLACE FROM 1 TO 120.</div>' +
-      '<ol class="hsteps"><li><b>FACE DOWN CARDS COME FROM THE HALL.</b> THEY ARE CARDS YOU DO NOT HAVE YET, AND THEY COST <b>COINS</b>. THE HALL ONLY SELLS COMMON, UNCOMMON AND RARE CARDS FACE DOWN. THEY ARE PRICED HIGH ON PURPOSE, SO RUNNING STAYS THE BEST WAY TO BUILD A DECK.</li>' +
-      '<li><b>FACE UP CARDS COME FROM PLAYERS.</b> THESE ARE CARDS OTHER PLAYERS HAVE ALREADY COLLECTED, AND THEY COST <b>POINTS</b>, DRAMATICALLY MORE THAN A FACE DOWN CARD. THE SELLER SETS THE PRICE. POINTS YOU SPEND COME OFF YOUR LEADERBOARD SCORE AND GO TO THE SELLER.</li>' +
-      '<li><b>NEGOTIATE.</b> PRESS TEXT ON A FACE UP LISTING TO MESSAGE THE SELLER. ASK THEM TO LOWER THE PRICE OR MAKE AN OFFER. IF THEY AGREE, THEY CHANGE THE PRICE AND YOU BUY IT.</li>' +
-      '<li><b>SELL.</b> ANY CARD YOU HAVE COLLECTED, EARNED OR BOUGHT, CAN GO TO THE HALL FOR A SET NUMBER OF POINTS, OR BE LISTED FACE UP FOR YOUR OWN PRICE IN POINTS WHILE BUYERS TEXT YOU.</li>' +
-      '<li><b>CHECK</b> YOUR DECK IN COLLECTED ANY TIME. ONLY COINS AND POINTS CHANGE HANDS, NEVER MONEY. SALES ARE FINAL.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>' +
-      '<div class="mkstats"><div><small>COIN BALANCE</small><b>' + fmt(t.balance) + '</b></div><div><small>COINS EARNED</small><b>' + fmt(t.coins) + '</b></div><div><small>YOUR POINTS</small><b>' + fmt(t.lifetime) + '</b></div></div>' +
+      '<div class="hex"><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a duplicate card listed face up"></div><figcaption>A DUPLICATE<br>LISTED FACE UP<br>#049</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own pts"><b>5,000</b><small>POINTS</small></div><figcaption>THE PRICE THE<br>SELLER SETS<br>IN POINTS</figcaption></figure></div>' +
+      '<ol class="hsteps"><li><b>ONLY DUPLICATES CAN BE SOLD.</b> YOU ALWAYS KEEP ONE COPY OF EVERY CARD. ONLY THE EXTRA COPIES CAN GO ON SALE, SO NOBODY EVER SELLS A CARD OUT OF THEIR DECK.</li>' +
+      '<li><b>POINTS ONLY, NEVER COINS.</b> THE SELLER CHOOSES THE PRICE IN POINTS. THE BUYER&rsquo;S POINTS COME OFF THEIR LEADERBOARD SCORE AND GO TO THE SELLER.</li>' +
+      '<li><b>SELL.</b> OPEN THE SELL TAB, TYPE YOUR PRICE UNDER A DUPLICATE AND PRESS LIST. IT SHOWS FACE UP TO EVERY SIGNED-IN PLAYER. CANCEL IT ANY TIME FROM MY LISTINGS.</li>' +
+      '<li><b>BUY.</b> OPEN THE BUY TAB AND PRESS THE PRICE ON ANY CARD. PRESS TEXT TO MESSAGE THE SELLER FIRST AND ASK FOR A BETTER PRICE.</li>' +
+      '<li><b>SALES ARE FINAL.</b> ONLY POINTS CHANGE HANDS, NEVER MONEY. YOU MUST BE SIGNED IN TO BUY OR SELL.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>' +
+      '<div class="mkstats one"><div><small>YOUR POINTS</small><b>' + fmt(t.lifetime) + '</b></div></div>' +
       '<div class="tabs3 t3" id="mkTabs">' + tabs.map(function (x) { return '<button' + (mk.tab === x[0] ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>' +
-      '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE SHELVES OPEN WITH SIGN-IN<br><span style="opacity:.7">' + lockSub + '</span></div>') + '</div></div>';
+      '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE MARKETPLACE OPENS WITH SIGN-IN<br><span style="opacity:.7">' + lockSub + '</span></div>') + '</div></div>';
     $('mkTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; mk.tab = b.getAttribute('data-k'); mk.msg = ''; drawMarket(); });
     if (!on) return;
-    var tab = mk.tab, src = tab === 'down' ? (A.shelf || A.listings) : tab === 'up' ? A.listings : A.sellable;
-    function thumb(r, c) { var back = tab === 'down'; return '<span class="mkn"><img class="mkt" alt="" loading="lazy" src="' + (back || !c ? 'assets/game/card-back.webp' : esc(c.file)) + '"><b>' + pad3(r.n) + '</b></span>'; }
+    var tab = mk.tab;
+    function thumb(r) { var c = P.card ? P.card(r.n) : null; return '<span class="mkn"><img class="mkt" alt="" loading="lazy" src="' + (c ? esc(c.file) : 'assets/game/card-back.webp') + '"><b>' + pad3(r.n) + '</b></span>'; }
     function row(r) {
-      var c = P.card ? P.card(r.n) : null, name = tab === 'down' ? 'FACE DOWN CARD' : esc(c ? c.name : 'CARD'), sub = esc(r.tier || '') + (tab === 'down' ? ' &middot; FROM THE HALL' : '') + (r.count > 1 ? ' &middot; ' + r.count + ' COPIES' : '');
-      var seller = tab === 'up' && r.seller ? '<em class="sl">SOLD BY ' + esc(String(r.seller).toUpperCase()) + ' <button type="button" class="mkmsg" data-id="' + esc(r.sellerId || '') + '" data-name="' + esc(r.seller) + '">TEXT</button></em>' : '';
-      var list = tab === 'sell' && A.list ? '<span class="mkl"><input class="mkp" type="number" min="1" inputmode="numeric" placeholder="YOUR PRICE IN POINTS" aria-label="Your price in points"><button type="button" class="mklist" data-n="' + r.n + '">LIST</button></span>' : '';
-      var label = tab === 'down' ? fmt(r.price) + ' COINS' : tab === 'up' ? fmt(r.price) + ' PTS' : 'SELL +' + fmt(r.value) + ' PTS';
-      return '<div class="mkrow">' + thumb(r, c) + '<span class="cmmid"><b>' + name + '</b><em>' + sub + '</em>' + seller + list + '</span><button type="button" class="cmbtn" data-n="' + r.n + '"' + (r.id != null ? ' data-id="' + esc(r.id) + '"' : '') + '>' + label + '</button></div>';
+      var c = P.card ? P.card(r.n) : null, name = esc(c ? c.name : 'CARD'), sub = esc(r.tier || ''), mid, btn;
+      if (tab === 'sell') {
+        sub += ' &middot; ' + r.count + ' COPIES &middot; ' + r.spare + ' TO SELL';
+        mid = '<span class="mkl"><input class="mkp" type="number" min="1" inputmode="numeric" placeholder="YOUR PRICE IN POINTS" aria-label="Your price in points"></span>'; btn = '<button type="button" class="cmbtn mklist" data-n="' + r.n + '">LIST</button>';
+      } else if (tab === 'mine') { mid = ''; sub += ' &middot; ' + fmt(r.price) + ' PTS'; btn = '<button type="button" class="cmbtn" data-cancel="' + esc(r.id) + '">CANCEL</button>'; }
+      else {
+        mid = '<em class="sl">SOLD BY ' + esc(String(r.seller || '').toUpperCase()) + (r.mine ? '' : ' <button type="button" class="mkmsg" data-id="' + esc(r.sellerId || '') + '" data-name="' + esc(r.seller) + '">TEXT</button>') + '</em>';
+        btn = r.mine ? '<button type="button" class="cmbtn" data-cancel="' + esc(r.id) + '">CANCEL</button>' : '<button type="button" class="cmbtn" data-buy="' + esc(r.id) + '" data-n="' + r.n + '">' + fmt(r.price) + ' PTS</button>';
+      }
+      return '<div class="mkrow">' + thumb(r) + '<span class="cmmid"><b>' + name + '</b><em>' + sub + '</em>' + mid + '</span>' + btn + '</div>';
     }
-    src.call(A).then(function (rows) {
+    var src = tab === 'sell' ? A.sellable() : A.listings().then(function (rows) { return tab === 'mine' ? (rows || []).filter(function (r) { return r.mine; }) : rows; });
+    src.then(function (rows) {
       var box = $('mkList'); if (!box) return;
-      if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + (tab === 'sell' ? 'YOU HAVE NO CARDS TO SELL YET' : tab === 'up' ? 'NO PLAYER HAS A CARD FOR SALE RIGHT NOW' : 'THE HALL HAS NOTHING FACE DOWN FOR SALE') + '</div>'; return; }
+      if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + (tab === 'sell' ? 'YOU HAVE NO DUPLICATE CARDS TO SELL YET<br><span style="opacity:.7">ONLY EXTRA COPIES CAN BE SOLD</span>' : tab === 'mine' ? 'YOU HAVE NO CARDS LISTED' : 'NO PLAYER HAS A CARD FOR SALE RIGHT NOW') + '</div>'; return; }
       box.innerHTML = rows.map(row).join('');
-      box.addEventListener('click', function (ev) {
+      box.onclick = function (ev) {
         var tx = ev.target.closest('.mkmsg'); if (tx) { ms.pending = { id: tx.getAttribute('data-id'), name: tx.getAttribute('data-name') }; var mi = $('msgIcon'); if (mi) mi.click(); return; }
         function fail(e) { mk.msg = String((e && e.message) || 'NOT AVAILABLE').toUpperCase(); drawMarket(); }
         var li = ev.target.closest('.mklist'); if (li) { var inp = li.parentNode.querySelector('.mkp'), pr = parseInt(inp.value, 10), n2 = parseInt(li.getAttribute('data-n'), 10); if (!(pr > 0)) { mk.msg = 'TYPE A PRICE IN POINTS FIRST'; $('mkMsg').textContent = mk.msg; return; } li.disabled = true; A.list(n2, pr).then(function () { mk.msg = 'LISTED CARD ' + pad3(n2) + ' FACE UP FOR ' + fmt(pr) + ' POINTS'; drawMarket(); }, fail); return; }
-        var b = ev.target.closest('.cmbtn'); if (!b) return; b.disabled = true;
-        var n = parseInt(b.getAttribute('data-n'), 10), id = b.getAttribute('data-id'), p;
-        if (tab === 'down') p = A.buy(n); else if (tab === 'up') p = (A.buyListing || A.buy)(id != null ? id : n); else p = A.sell(n);
-        p.then(function () { mk.msg = tab === 'sell' ? 'SOLD CARD ' + pad3(n) + ' TO THE HALL' : 'BOUGHT CARD ' + pad3(n); drawMarket(); }, fail);
-      });
-    }, function () { var box = $('mkList'); if (box) box.innerHTML = '<div class="empty">COULD NOT LOAD THE SHELVES</div>'; });
+        var cn = ev.target.closest('[data-cancel]'); if (cn) { cn.disabled = true; A.cancel(cn.getAttribute('data-cancel')).then(function () { mk.msg = 'LISTING CANCELLED'; drawMarket(); }, fail); return; }
+        var by = ev.target.closest('[data-buy]'); if (by) { by.disabled = true; var bn = parseInt(by.getAttribute('data-n'), 10); A.buy(by.getAttribute('data-buy')).then(function () { mk.msg = 'BOUGHT CARD ' + pad3(bn); drawMarket(); }, fail); }
+      };
+    }, function () { var box = $('mkList'); if (box) box.innerHTML = '<div class="empty">COULD NOT LOAD THE MARKETPLACE</div>'; });
   }
 
   /* ---------- X and OPENSEA: phone-view pictures of the Mimu On Ape pages, each with a button that opens the real page ---------- */

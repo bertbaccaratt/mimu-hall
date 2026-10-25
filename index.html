@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261026c"><link rel="stylesheet" href="assets/game/comms.css?v=20261026c"><link rel="stylesheet" href="assets/game/admin.css?v=20261026c">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261026d"><link rel="stylesheet" href="assets/game/comms.css?v=20261026d"><link rel="stylesheet" href="assets/game/admin.css?v=20261026d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -483,10 +483,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261026c" defer></script>
-<script src="assets/game/hall-runner.js?v=20261026c" defer></script>
-<script src="assets/game/eyes.js?v=20261026c" defer></script> <script src="assets/game/comms.js?v=20261026c" defer></script> <script src="assets/game/campaign.js?v=20261026c" defer></script> <script src="assets/game/net.js?v=20261026c" defer></script> <script src="assets/game/egg.js?v=20261026c" defer></script> <script src="assets/game/badges.js?v=20261026c" defer></script> <script src="assets/game/apps.js?v=20261026c" defer></script>
-<script src="assets/game/admin-docs.js?v=20261026c" defer></script> <script src="assets/game/admin.js?v=20261026c" defer></script>
+<script src="assets/game/profile.js?v=20261026d" defer></script>
+<script src="assets/game/hall-runner.js?v=20261026d" defer></script>
+<script src="assets/game/eyes.js?v=20261026d" defer></script> <script src="assets/game/comms.js?v=20261026d" defer></script> <script src="assets/game/campaign.js?v=20261026d" defer></script> <script src="assets/game/net.js?v=20261026d" defer></script> <script src="assets/game/egg.js?v=20261026d" defer></script> <script src="assets/game/badges.js?v=20261026d" defer></script> <script src="assets/game/apps.js?v=20261026d" defer></script>
+<script src="assets/game/admin-docs.js?v=20261026d" defer></script> <script src="assets/game/admin.js?v=20261026d" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -705,10 +705,10 @@ window.MIMUAudio = (function () {
     '<details class="rs" id="r-coins"><summary>Coins, scores and the leaderboard</summary><div class="rsb">',
     '<figure class="rfig"><div class="rimg" style="aspect-ratio:375/312"><img src="assets/rules/leaderboard.jpg" alt="The leaderboard showing Regular and Foil deck completion" loading="lazy" style="top:-34.62%"><i class="hl" style="left:14.93%;top:3.21%;width:70.40%;height:24.36%"><b>1</b></i><i class="hl" style="left:14.93%;top:31.41%;width:70.40%;height:21.15%"><b>2</b></i></div><figcaption><ol><li><b>1</b><span><strong>Your deck</strong>: Regular and Foil completion.</span></li><li><b>2</b><span>Each leader shows two bars: <strong>Regular</strong> (red) and <strong>Foil</strong> (gold).</span></li></ol></figcaption></figure>',
     '<ul><li>Run through a rotating <strong>gold coin</strong> to pick it up. Each one adds to your coin count and is worth <strong>25 points</strong>.</li>',
-    '<li>Your profile keeps two coin numbers: <strong>coins earned</strong>, which only goes up, and your <strong>coin balance</strong>, which is what you have not spent yet. Coins are spent in the Marketplace.</li>',
+    '<li>Your profile keeps two coin numbers: <strong>coins earned</strong>, which only goes up, and your <strong>coin balance</strong>, which is what you have not spent yet. Coins can be given to other players in The Giving at the end of the campaign.</li>',
     '<li>Every run gets a <strong>score</strong>: points for distance, plus 25 for each coin. Each score is added to the last one to build your <strong>lifetime total</strong>. The game also notes your <strong>best run</strong> and your <strong>last run</strong>.</li>',
     '<li>The <strong>Leaderboard</strong> ranks everyone by lifetime total (with filters for best and last run). Under it is <strong>Your deck</strong> and the <strong>Top 5 &middot; The Full Deck</strong> board, which shows each leading collector&rsquo;s <strong>Regular deck</strong> and <strong>Foil deck</strong> completion side by side.</li>',
-    '<li>Points from selling cards in the Marketplace count on the leaderboard too.</li></ul>',
+    '<li>Points from selling duplicate cards in the Marketplace count on the leaderboard too, and points spent buying cards come off it.</li></ul>',
     '</div></details>',
     '<details class="rs" id="r-cards"><summary>How cards drop in a run</summary><div class="rsb">',
     '<figure class="rfig"><div class="rimg" style="aspect-ratio:375/150"><img src="assets/rules/cards.jpg" alt="Three kinds of cards floating down the road: a sighting, a stagger card and a foil half" loading="lazy" style="top:-290.67%"><i class="hl" style="left:9.07%;top:17.33%;width:19.20%;height:66.67%"><b>1</b></i><i class="hl" style="left:38.93%;top:6.67%;width:18.67%;height:76.00%"><b>2</b></i><i class="hl" style="left:72.00%;top:6.67%;width:11.20%;height:76.00%"><b>3</b></i></div><figcaption><ol><li><b>1</b><span><strong>Sighting</strong>: a normal card. Always one you do not have yet.</span></li><li><b>2</b><span><strong>Stagger</strong>: a duplicate of a card you own, with a purple glow.</span></li><li><b>3</b><span><strong>Foil</strong>: half a card, glowing gold. Jump to collect any of them.</span></li></ol></figcaption></figure>',
@@ -780,11 +780,13 @@ window.MIMUAudio = (function () {
     '<li><strong>Foil deck:</strong> the same 120 cards. A card where you hold one half shows that half in glowing foil. A card with both halves is a full foil card. Filters show all, foil cards, halves only, or missing.</li></ul>',
     '</div></details>',
     '<details class="rs" id="r-market"><summary>The Marketplace</summary><div class="rsb">',
-    '<p>The Marketplace trades in-game cards only, using in-game coins and points. Cards are pictures that stand for real cards and are not real-world assets.</p>',
-    '<ul><li>Open <strong>MARKETPLACE</strong>. It has two tabs: <strong>BUY</strong> and <strong>SELL</strong>. The top shows your coin balance and coins earned.</li>',
-    '<li><strong>Face down cards come from the Hall.</strong> They are cards you do not have yet and they cost <strong>coins</strong>. The Hall only sells <strong>Common, Uncommon and Rare</strong> cards face down. The price is high on purpose, so running stays the best way to build a deck.</li>',
-    '<li><strong>Face up cards come from players</strong> (player listings open later). They cost <strong>points</strong>, set by the seller. You can press <strong>TEXT</strong> on a listing to ask for a better price.</li>',
-    '<li><strong>Selling:</strong> sell any card you have collected to the Hall for a set number of <strong>points</strong>, or list it face up at your own price. Purchases and sales are final. Prices can change, and the Marketplace only works for signed-in players.</li></ul>',
+    '<p>The Marketplace is where players sell their <strong>duplicate cards</strong> to each other, <strong>face up</strong>, for <strong>points</strong>. It trades in-game cards only. Cards are pictures that stand for real cards and are not real-world assets.</p>',
+    '<ul><li>Open <strong>MARKETPLACE</strong>. It has three tabs: <strong>BUY</strong>, <strong>SELL</strong> and <strong>MY LISTINGS</strong>. You must be signed in.</li>',
+    '<li><strong>Only duplicates can be sold.</strong> You always keep one copy of every card. Only the extra copies (the gold &times;2, &times;3 in Collected) can go on sale.</li>',
+    '<li><strong>Points only, never coins.</strong> The seller sets the price in points. When someone buys, the points come off the buyer&rsquo;s leaderboard score and go to the seller, and the card moves to the buyer.</li>',
+    '<li><strong>To sell:</strong> open SELL, type your price under a duplicate and press LIST. It then shows face up to every signed-in player. You can have up to 50 listings and can cancel any of them from MY LISTINGS.</li>',
+    '<li><strong>To buy:</strong> open BUY and press the price on a card. Press <strong>TEXT</strong> to message the seller first and ask for a better price. If you agree, the seller can cancel and list it again at the new price.</li>',
+    '<li><strong>Sales are final.</strong> The Hall no longer sells or buys cards: the Marketplace is players only.</li></ul>',
     '</div></details>',
     '<details class="rs" id="r-badges"><summary>Badges</summary><div class="rsb">',
     '<ul><li>Open <strong>BADGES</strong> (the purple icon). It lists <strong>more than 170 milestones</strong> you earn by doing things in the Hall: finishing runs, distance, time alive, coins, collecting cards, jumping boxes and packs, trading, texting and coming back day after day.</li>',
@@ -806,7 +808,7 @@ window.MIMUAudio = (function () {
     '<div class="rtab"><div class="rh">ICON</div><div class="rh">WHAT IT DOES</div><div class="rh">STATUS</div>',
     '<div class="rk">THE HALL</div><div>The runner game</div><div>open</div>',
     '<div class="rk">COLLECTED</div><div>Your Regular and Foil decks</div><div>open</div>',
-    '<div class="rk">MARKETPLACE</div><div>Buy cards with coins, sell cards for points</div><div>needs sign-in</div>',
+    '<div class="rk">MARKETPLACE</div><div>Players sell duplicate cards face up for points</div><div>needs sign-in</div>',
     '<div class="rk">OPENSEA, X, MUDWATER</div><div>Links to the Mimu On Ape collection, the X profile and the Mudwater site</div><div>open</div>',
     '<div class="rk">CAMERA, SETTINGS</div><div>A camera with a shutter and flash, and sound, volume, clock, About and How to play</div><div>open</div>',
     '<div class="rk">LEADERBOARD</div><div>Lifetime, best run, last run, your decks, and the Top 5 deck board</div><div>open</div>',
