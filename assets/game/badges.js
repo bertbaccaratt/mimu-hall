@@ -44,7 +44,8 @@
     { g: 'soc', k: 'mailRead', n: 'MAIL READ', t: [1, 5, 10, 25], names: ['First Letter', 'Mail Reader', 'Loyal Subscriber', 'Archivist'], d: function (n) { return 'Read ' + n + ' emails from MIMU'; } },
     { g: 'loy', k: 'daysPlayed', n: 'DAYS PLAYED', t: [1, 3, 7, 14, 30, 60, 100], names: ['Day One', 'Three Days', 'A Full Week', 'Two Weeks', 'A Month', 'Sixty Days', 'Hundred Days'], d: function (n) { return 'Play on ' + n + (n === 1 ? ' day' : ' different days'); } },
     { g: 'loy', k: 'bestStreak', n: 'DAY STREAK', t: [2, 3, 7, 14, 30, 60], names: ['Two in a Row', 'Three-Day Run', 'Weekly Habit', 'Fortnight Flame', 'Monthly Flame', 'Sixty Straight'], d: function (n) { return 'Play ' + n + ' days in a row'; } },
-    { g: 'loy', k: 'signedIn', n: 'WELCOME', t: [1], names: ['Welcome to the Hall'], d: function () { return 'Sign in with Glyph'; } }
+    { g: 'loy', k: 'signedIn', n: 'WELCOME', t: [1], names: ['Welcome to the Hall'], d: function () { return 'Sign in with Glyph'; } },
+    { g: 'loy', k: 'eggFound', n: 'EASTER EGG', t: [1], names: ['Egg Hunter'], d: function () { return 'Be the one player who finds the hidden Easter egg'; } }
   ];
   var METAL = ['bronze', 'silver', 'gold', 'ruby', 'diamond'], METAL_NAME = { bronze: 'BRONZE', silver: 'SILVER', gold: 'GOLD', ruby: 'RUBY', diamond: 'DIAMOND' };
   var ALL = [];
@@ -160,13 +161,13 @@
       }
       body += '</div></div>';
     });
-    el.innerHTML = '<div class="pg bd"><div class="pgh"><h2 class="gold">BADGES</h2><div class="pgsub">MILESTONES &middot; NOT RANKED &middot; NO VALUE</div></div>' +
+    el.innerHTML = '<div class="pg bd"><div class="pgh"><h2 class="gold">BADGES</h2><div class="pgsub">MILESTONES &middot; NOT RANKED &middot; NO VALUE</div></div><div id="huntBadge" class="huntbadge lost"></div>' +
       '<div class="bdsum"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>' + gauge(got.length / ALL.length, 10, null, true) + '<div class="bdbig"><b>' + got.length + '</b><span>OF ' + ALL.length + ' EARNED &middot; ' + pct + '%</span></div><div class="bdm">' + METAL.map(function (m) { return '<span class="' + m + '"><i></i>' + metals[m] + '<small>' + METAL_NAME[m] + '</small></span>'; }).join('') + '</div></div>' +
       '<div class="bdnote">' + (signed ? 'Badges are only milestones to keep track of what you have done in the Hall. They do not change the leaderboard and they are worth nothing.' : 'THE GAME IS A DEMO FOR NOW, SO EVERY BADGE STAYS LOCKED UNTIL GLYPH SIGN-IN OPENS. BADGES ARE ONLY MILESTONES: THEY NEVER CHANGE THE LEADERBOARD AND ARE WORTH NOTHING.') + '</div>' +
       (upnext.length ? '<div class="sec"><div class="sech">UP NEXT</div>' + upnext.map(function (b) { return row(b, v); }).join('') + '</div>' : '') +
       '<div class="sec"><div class="chips" id="bdG">' + groups + '</div><div class="chips" id="bdS" style="margin-top:6px">' + shows + '</div></div>' +
       '<div class="sec" id="bdL">' + (body || '<div class="empty">NOTHING TO SHOW HERE YET</div>') + '</div></div>';
-    var pg = el.querySelector('.pg'); pg.scrollTop = keep;
+    var pg = el.querySelector('.pg'); pg.scrollTop = keep; if (window.HallHunt) HallHunt.banner();
     $('bdG').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.group = b.getAttribute('data-g'); st.open = null; draw(); });
     $('bdS').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.show = b.getAttribute('data-s'); draw(); });
     $('bdL').addEventListener('click', function (e) { var b = e.target.closest('.bdg'); if (!b) return; var k = b.getAttribute('data-c'); st.open = st.open === k ? null : k; draw(); });

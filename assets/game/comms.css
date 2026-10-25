@@ -501,3 +501,13 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .hnx { position: absolute; right: calc(var(--h) * .008); top: calc(var(--h) * .004); width: calc(var(--h) * .03); height: calc(var(--h) * .03); padding: 0; border: 0; background: none; font-size: max(16px, calc(var(--h) * .03)); line-height: 1; cursor: pointer; }
 .huntnote, .huntnote * { color: #fff !important; } .huntnote .hntag { color: #fff !important; }
 @media (prefers-reduced-motion: reduce) { .huntnote { animation: none; } }
+
+/* the Easter egg: congratulations line, the banner at the top of Badges, and the hotspots going quiet once it is won */
+.huntlayer.over .hunthot { pointer-events: none; cursor: default; }
+.hncong { margin-top: calc(var(--h) * .012); font-weight: 900; font-size: max(11px, calc(var(--h) * .0175)); letter-spacing: .1em; color: #ffe08a !important; text-shadow: 0 0 10px rgba(255,200,70,.8); line-height: 1.3; }
+.huntbadge { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--h) * .008) calc(var(--h) * .014); margin: calc(var(--h) * .014) 4% 0; padding: calc(var(--h) * .016) calc(var(--h) * .018); border-radius: 6px; font-family: 'Cinzel', Georgia, serif; border: 1px solid; }
+.huntbadge b { font-size: max(13px, calc(var(--h) * .0205)); letter-spacing: .14em; } .huntbadge .hbico { font-size: max(20px, calc(var(--h) * .034)); line-height: 1; } .huntbadge em { flex: 1 1 100%; font-style: normal; font-size: max(10px, calc(var(--h) * .0135)); letter-spacing: .08em; line-height: 1.45; } .huntbadge em a { text-decoration: underline; font-weight: 700; }
+.huntbadge.lost { background: linear-gradient(135deg, #8e0f16, #3a0508); border-color: #ff5a52; box-shadow: 0 0 18px rgba(255,70,60,.4); }
+.huntbadge.found { background: linear-gradient(135deg, #0c7a42, #053a20); border-color: #3ddc84; box-shadow: 0 0 18px rgba(60,230,130,.4); }
+.huntbadge.mine { background: linear-gradient(135deg, #b9801f, #5a3a08); border-color: #ffe08a; box-shadow: 0 0 26px rgba(255,205,90,.8); animation: t5glow 2.2s ease-in-out infinite; }
+#badgeApp .huntbadge, #badgeApp .huntbadge * { color: #fff !important; }
