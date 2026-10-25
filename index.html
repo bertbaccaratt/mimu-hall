@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261025u"><link rel="stylesheet" href="assets/game/comms.css?v=20261025u"><link rel="stylesheet" href="assets/game/admin.css?v=20261025u">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261025x"><link rel="stylesheet" href="assets/game/comms.css?v=20261025x"><link rel="stylesheet" href="assets/game/admin.css?v=20261025x">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -364,7 +364,7 @@
     <div class="app" id="osApp"></div>
     <div class="app" id="camApp"></div>
     <div class="app" id="badgeApp"></div>
-    <div class="phome" id="pHome" role="button" aria-label="Home"></div>
+    <div class="phome" id="pHome" role="button" aria-label="Home"></div><button type="button" class="zbtn zp" id="zPlus" aria-label="Bigger text">+</button><button type="button" class="zbtn zm" id="zMinus" aria-label="Smaller text">&minus;</button>
     <div class="osd" id="osd" aria-hidden="true"><span id="osdTxt">VOLUME</span><div class="osdbar"><i id="osdFill"></i></div></div>
     <div class="psleep" id="pSleep"></div>
   </div>
@@ -480,10 +480,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261025u" defer></script>
-<script src="assets/game/hall-runner.js?v=20261025u" defer></script>
-<script src="assets/game/eyes.js?v=20261025u" defer></script> <script src="assets/game/comms.js?v=20261025u" defer></script> <script src="assets/game/net.js?v=20261025u" defer></script> <script src="assets/game/egg.js?v=20261025u" defer></script> <script src="assets/game/badges.js?v=20261025u" defer></script> <script src="assets/game/apps.js?v=20261025u" defer></script>
-<script src="assets/game/admin-docs.js?v=20261025u" defer></script> <script src="assets/game/admin.js?v=20261025u" defer></script>
+<script src="assets/game/profile.js?v=20261025x" defer></script>
+<script src="assets/game/hall-runner.js?v=20261025x" defer></script>
+<script src="assets/game/eyes.js?v=20261025x" defer></script> <script src="assets/game/comms.js?v=20261025x" defer></script> <script src="assets/game/net.js?v=20261025x" defer></script> <script src="assets/game/egg.js?v=20261025x" defer></script> <script src="assets/game/badges.js?v=20261025x" defer></script> <script src="assets/game/apps.js?v=20261025x" defer></script>
+<script src="assets/game/admin-docs.js?v=20261025x" defer></script> <script src="assets/game/admin.js?v=20261025x" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -909,6 +909,11 @@ window.MIMUAudio = (function () {
     if (s.y - ev.clientY > 36) unlockPhone(); else nudge();
   });
   pscreen.addEventListener('pointercancel', function () { swipeStart = null; });
+  var zLv = 1; try { zLv = Math.max(0, Math.min(3, +localStorage.getItem('mimu-z'))); if (isNaN(zLv)) zLv = 1; } catch (e) {}
+  function zSet(n) { zLv = Math.max(0, Math.min(3, n)); $('pHomeScr').setAttribute('data-z', zLv); try { localStorage.setItem('mimu-z', zLv); } catch (e) {} }
+  zSet(zLv);
+  $('zPlus').addEventListener('click', function () { zSet(zLv + 1); });
+  $('zMinus').addEventListener('click', function () { zSet(zLv - 1); });
   $('pHome').addEventListener('click', function () { if (isLocked()) unlockPhone(); else if (pscreen.classList.contains('inapp')) leaveHall(); });
   $('hallIcon').addEventListener('click', openHall);
   $('collIcon').addEventListener('click', function () { openApp('collected'); });

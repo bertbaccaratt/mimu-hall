@@ -355,3 +355,17 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 #pHomeScr .wdk .wpc { font-size: max(9px, calc(var(--h) * .0145)); width: calc(var(--h) * .062); }
 #pHomeScr .wdk .wcn b { font-size: max(11px, calc(var(--h) * .0215)); } #pHomeScr .wdk .wcn b small { font-size: max(8px, calc(var(--h) * .0125)); }
 #pHomeScr .wfoil { font-size: max(8px, calc(var(--h) * .0108)); }
+/* app text in white: collected, leaderboard, badges, marketplace, mail */
+#collApp *, #lbApp *, #badgeApp *, #mktApp *, #mailApp * { color: #fff !important; }
+:is(#collApp, #lbApp, #badgeApp, #mktApp, #mailApp) :is(.chip.on, .tabs3 button.on, .cmbtn, .mklist, .cc .cx, .cc .csell.arm, .bdi b, .lki) { color: #2b0407 !important; }
+:is(#mktApp, #mailApp) :is(.mkmsg, .lki) { color: #04210f !important; }
+/* home screen: top clock, date, MIMU and battery percentage in white */
+#pHomeScr .hclock, #pHomeScr .hdate, #pHomeScr .hclock *, .pscreen > .pstatus > span:first-child, .pstatus .bpct:not(.low):not(.hot) { color: #fff !important; }
+/* home screen text zoom: + and - beside the HOME bar */
+.zbtn { display: none; position: absolute; z-index: 7; bottom: calc(2.3% - var(--h) * .0069); width: calc(var(--h) * .026); height: calc(var(--h) * .026); padding: 0; border: 0; border-radius: 50%; background: #fff; color: #000; font: 900 calc(var(--h) * .02)/1 'Cinzel', Georgia, serif; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 0 6px rgba(255,255,255,.45); }
+.zm { left: calc(33% - var(--h) * .034); } .zp { right: calc(33% - var(--h) * .034); }
+.pscreen.unlocked:not(.inapp) .zbtn { display: flex; }
+#pHomeScr .aic > span:last-child { text-align: center; }
+#pHomeScr[data-z="0"] .aic > span:last-child { font-size: max(6px, calc(var(--h) * .0092)); }
+#pHomeScr[data-z="2"] .aic > span:last-child { font-size: max(8px, calc(var(--h) * .0124)); letter-spacing: .01em; }
+#pHomeScr[data-z="3"] .aic > span:last-child { font-size: max(9px, calc(var(--h) * .0138)); letter-spacing: -.01em; }
