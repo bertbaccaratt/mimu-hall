@@ -13,7 +13,6 @@
       locksSec: [0, 1800, 3600, 7200, 10800],                            // Common, Uncommon, Rare, Prestige, Legendary open after this long alive in the run
       odds: [60, 21, 7, 6.5, 3.3],                                       // chance weights among the tiers that are open
       unlockShare: 0.6,                                                  // a tier opens once you own 60% of the tier below it
-      demoAny: true, demoEverySec: 60,                                  // TEMPORARY (demo only, revert later): in the demo a random card from the whole deck drops every 60 seconds
       dupChance: 0.2,                                                    // one sighting in five may be a card you already own
       lucky: { afterSec: 3600, prestige: 0.005, legendary: 0.001 }       // a tiny chance of a top card in shorter runs
     },
