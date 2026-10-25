@@ -368,4 +368,3 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 #pHomeScr .aic > span:last-child { text-align: center; }
 #pHomeScr[data-z="0"] .aic > span:last-child { font-size: max(6px, calc(var(--h) * .0092)); }
 #pHomeScr[data-z="2"] .aic > span:last-child { font-size: max(8px, calc(var(--h) * .0124)); letter-spacing: .01em; }
-#pHomeScr[data-z="3"] .aic > span:last-child { font-size: max(9px, calc(var(--h) * .0138)); letter-spacing: -.01em; }
