@@ -230,13 +230,13 @@
 
   /* ---------- CAMERA: a viewfinder, a shutter that flashes and clicks, and a photo gallery with a full-screen viewer ---------- */
   var cam = { n: 0, built: false };
-  var PICS = [10, 1, 2, 3, 4, 5, 6].map(function (i) { return 'assets/game/photos/p' + i + '.webp'; });
+  var PICS = [];   // the gallery is empty: no photos are stored in the camera
   function camToast(txt) { var t = $('camToast'); if (!t) return; t.innerHTML = txt; t.classList.remove('on'); void t.offsetWidth; t.classList.add('on'); }
   function buildCamera() {
     var el = $('camApp'); if (!el || cam.built) { if (el) closeGallery(); return; } cam.built = true; el.classList.add('page');
     el.innerHTML = '<div class="cam"><div class="camvf"><img src="assets/game/camera-photo.webp" alt="The camera view: Mimu, ready for a photo"><div class="camgrid"></div></div>' +
       '<div class="camct"><span>&#9889;&#xFE0E; AUTO</span><span>HDR</span></div><div class="cammd">PHOTO</div>' +
-      '<button type="button" class="camth" id="camGal" aria-label="Open photos"><img src="' + PICS[PICS.length - 1] + '" alt=""><b id="camN"></b></button>' +
+      '<button type="button" class="camth" id="camGal" aria-label="Open photos"><b id="camN"></b></button>' +
       '<div class="camcb"><button type="button" class="camshut" id="camSh" aria-label="Take a photo"><i></i></button></div><div class="camflash" id="camFl"></div><div class="camtoast" id="camToast"></div></div>';
     $('camSh').addEventListener('click', function () {
       var f = $('camFl'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
@@ -250,7 +250,7 @@
     var cv = document.querySelector('#camApp .cam'); if (!cv) return; closeGallery();
     var g = document.createElement('div'); g.className = 'camgal';
     function grid() {
-      g.innerHTML = '<div class="cgh"><button type="button" class="cgx" id="galX">&lsaquo; CAMERA</button><b>PHOTOS</b><span>' + PICS.length + '</span></div><div class="cgg">' + PICS.map(function (s, i) { return '<button type="button" data-i="' + i + '"><img src="' + s + '" alt="Photo ' + (i + 1) + '" loading="lazy"></button>'; }).join('') + '</div>';
+      g.innerHTML = '<div class="cgh"><button type="button" class="cgx" id="galX">&lsaquo; CAMERA</button><b>PHOTOS</b><span>' + PICS.length + '</span></div>' + (PICS.length ? '' : '<div class="cgempty">NO PHOTOS</div>') + '<div class="cgg">' + PICS.map(function (s, i) { return '<button type="button" data-i="' + i + '"><img src="' + s + '" alt="Photo ' + (i + 1) + '" loading="lazy"></button>'; }).join('') + '</div>';
       g.querySelector('#galX').addEventListener('click', function () { g.remove(); tones([[0, 0.03, [500]]]); });
       Array.prototype.forEach.call(g.querySelectorAll('.cgg button'), function (b) { b.addEventListener('click', function () { view(+b.getAttribute('data-i')); }); });
     }
