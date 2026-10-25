@@ -10,12 +10,11 @@
     climb: { pct: 3, everySec: 1800 },                                   // the run gets 3% faster every 30 minutes alive, compounding, no cap
     sight: {
       everySec: 900,                                                     // a card sighting every 15 minutes alive (the first at 15 minutes)
-      locksSec: [0, 1800, 3600, 7200, 10800],                            // Common, Uncommon, Rare, Prestige, Legendary open after this long alive in the run
-      odds: [60, 21, 7, 6.5, 3.3],                                       // chance weights among the tiers that are open
-      unlockShare: 0.6,                                                  // a tier opens once you own 60% of the tier below it
-      dupChance: 0,                                                      // every sighting is a card you do not have yet (duplicates come from stagger and echo cards)
-      lucky: { afterSec: 3600, prestige: 0.005, legendary: 0.001 }       // a tiny chance of a top card in shorter runs
+      locksSec: [0, 0, 0, 7200, 10800],                                  // only Prestige (2:00) and Legendary (3:00) wait for time alive in the run; Common, Uncommon and Rare are open from the first sighting
+      odds: [62, 24, 10, 3, 1]                                           // the rarity lottery: Common, Uncommon, Rare, Prestige, Legendary (Common to Rare are always new cards, Prestige and Legendary can repeat)
     },
+    stagger: { firstSec: 3900, everySec: 900 },                          // a duplicate of a card you own: at 1:05 alive, then every 15 minutes (same lottery, only rarities you own)
+    foil: { firstSec: 60, everySec: 1800, bothChance: 1 / 7 },           // a glowing foil half: after 1 minute of TOTAL play, then every 30 minutes of total play; rare cards come less often
     pack: { firstSec: 3600, everySec: 3600, slowPct: 20, slowSec: 60 },  // the black pack: at 1 hour, then every hour alive; slows you 20% for 60 s
     hp: { segments: 6, dmg: { plain: 2, red: 6, blue: 3 } },             // plain box 3 hits, blue 2, red 1
     coinPoints: 25,
@@ -69,6 +68,7 @@
     track: function (metric, n) { if (adapter && adapter.track) adapter.track(metric, n || 1); },   // small actions the page reports (photos, calls)
     deckBoard: function () { return adapter && adapter.deckBoard ? adapter.deckBoard() : Promise.resolve([]); },   // top 10 by deck progress: [{ username, owned, rarest, family, runs, best }]
     leaderboard: function (kind) { return adapter && adapter.leaderboard ? adapter.leaderboard(kind) : Promise.resolve([]); },   // kind: 'lifetime' | 'best' | 'last'
+    foil: function () { return adapter && adapter.foil ? adapter.foil() : {}; },   // { cardNumber: 'L' | 'R' | 'LR' }: the foil halves the signed-in player holds
     counts: function () { return adapter && adapter.counts ? adapter.counts() : {}; },   // { cardNumber: copies } for the signed-in player
     netRun: function () { return adapter && adapter.run ? adapter.run : null; },        // the server side of a run: start, beat, drop, collect
     notify: function (what) { emit(what); },

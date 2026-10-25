@@ -204,7 +204,7 @@
     var g = document.querySelector('.agrid'); if (!g || $('wLb')) return;
     g.insertAdjacentHTML('beforeend',
       '<button type="button" class="wid wlb" id="wLb" aria-label="My ranking"><span class="wt">MY RANKING</span><span class="wrk"><i id="wRk">&mdash;</i><small id="wRkOf">SIGN IN TO RANK</small></span><span class="wst"><span><small>TOTAL</small><b id="wTot">0</b></span><span><small>BEST</small><b id="wBest">0</b></span><span><small>LAST</small><b id="wLast">0</b></span></span></button>' +
-      '<button type="button" class="wid wdk" id="wDk" aria-label="My deck"><span class="wt">THE FULL DECK</span><span class="wmid"><svg viewBox="0 0 44 44" class="wring"><circle cx="22" cy="22" r="18" class="rb"/><circle cx="22" cy="22" r="18" class="rf" id="wRf" stroke-dasharray="' + CIRC.toFixed(2) + '" stroke-dashoffset="' + CIRC.toFixed(2) + '"/></svg><span class="wpc" id="wPc">0%</span><span class="wcn"><b id="wCn">0<small>/120</small></b><small id="wLeft">120 TO GO</small></span></span><span class="wtb" id="wTb"></span></button>');
+      '<button type="button" class="wid wdk" id="wDk" aria-label="My deck"><span class="wt">THE FULL DECK</span><span class="wmid"><svg viewBox="0 0 44 44" class="wring"><circle cx="22" cy="22" r="18" class="rb"/><circle cx="22" cy="22" r="18" class="rf" id="wRf" stroke-dasharray="' + CIRC.toFixed(2) + '" stroke-dashoffset="' + CIRC.toFixed(2) + '"/></svg><span class="wpc" id="wPc">0%</span><span class="wcn"><b id="wCn">0<small>/120</small></b><small id="wLeft">120 TO GO</small></span></span><span class="wtb" id="wTb"></span><span class="wfoil" id="wFoil">FOIL 0/120</span></button>');
     $('wLb').addEventListener('click', function () { var b = $('lbIcon'); if (b) b.click(); });
     $('wDk').addEventListener('click', function () { var b = $('collIcon'); if (b) b.click(); });
     /* 3D tilt: the widget leans toward the pointer, and springs back when it leaves */
@@ -222,10 +222,11 @@
     $('wRk').innerHTML = signed && t.rank ? '#' + fmt(t.rank) : '&mdash;'; $('wRkOf').textContent = !signed ? 'SIGN IN TO RANK' : t.rank ? 'OF ' + fmt(t.players || t.rank) + ' PLAYERS' : 'NO RANKED RUN YET';
     $('wTot').textContent = short(t.lifetime); $('wBest').textContent = short(t.best); $('wLast').textContent = short(t.last);
     $('wRf').setAttribute('stroke-dashoffset', (CIRC * (1 - pct)).toFixed(2)); $('wPc').textContent = Math.round(pct * 100) + '%';
+    var fm = P.foil ? P.foil() : {}, fc = 0, fp = 0; Object.keys(fm).forEach(function (k) { var h = String(fm[k] || ''); fp += h.length; if (h.length >= 2) fc++; }); $('wFoil').textContent = 'FOIL ' + fc + '/' + total + ' \u00b7 ' + fp + ' PIECES';
     $('wCn').innerHTML = n + '<small>/' + total + '</small>'; $('wLeft').textContent = (total - n) + ' TO GO';
     $('wTb').innerHTML = (P.tiers || []).map(function (tr) { var c = byT[tr.n] || 0, w = tr.count ? Math.round(c / tr.count * 100) : 0; return '<span title="' + esc(tr.name) + ' ' + c + '/' + tr.count + '"><i style="width:' + w + '%;background:' + (tr.grad || tr.color) + '"></i></span>'; }).join('');
   }
-  P.whenReady(function () { buildWidgets(); paintWidgets(); });
+  P.whenReady(function () { buildWidgets(); paintWidgets(); }); P.onChange(function (w) { if (w === 'foil') paintWidgets(); });
   buildWidgets();
 
   /* ---------- CAMERA: a viewfinder, a shutter that flashes and clicks, and a photo gallery with a full-screen viewer ---------- */

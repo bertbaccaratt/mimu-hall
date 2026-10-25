@@ -71,7 +71,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netEchoAt: 600, netStaggerAt: 300, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netFoilAt: 60, netStaggerAt: 3900, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -104,35 +104,28 @@
 
   /* ---------- card sightings and the pack ---------- */
   function cardImg(n) { var im = cardImgs[n]; if (!im) { im = new Image(); im.src = HallProfile.card(n).file; cardImgs[n] = im; } return im; }
-  // which card appears: the tiers that are open (time alive in this run, and owning enough of the tier below), weighted odds, a tiny lucky chance, mostly cards you do not own yet
+  // which card a sighting is: a lottery with no time limit for Common, Uncommon and Rare (always a card you do not have yet); Prestige joins at 2:00 alive and Legendary at 3:00, at their small odds, and those two can repeat
   function pickCard() {
     var P = HallProfile, cfg = P.config.sight, list = P.cards(); if (!list.length) return null;
     var test = S.rc.test, own = P.owned(), byTier = [[], [], [], [], [], []], i, t;
     function have(c) { return own.has(c.n) || S.runOwned.has(c.n); }
     list.forEach(function (c) { byTier[c.tier].push(c); });
-    function owns(tr) { var n = 0; byTier[tr].forEach(function (c) { if (have(c)) n++; }); return n; }
-    function complete(tr) { return owns(tr) >= byTier[tr].length; }
+    function complete(tr) { return byTier[tr].every(have); }
     var tier = 0, open = [], w = [], total = 0, r;
-    if (!test && S.alive >= cfg.lucky.afterSec) {
-      r = Math.random();
-      if (r < cfg.lucky.legendary && !complete(5)) tier = 5; else if (r < cfg.lucky.legendary + cfg.lucky.prestige && !complete(4)) tier = 4;
+    for (t = 1; t <= 5; t++) {
+      if (!(test || S.alive >= cfg.locksSec[t - 1])) continue;
+      if (t <= 3 && complete(t)) continue;
+      open.push(t); w.push(cfg.odds[t - 1]);
     }
-    if (!tier) {
-      for (t = 1; t <= 5; t++) {
-        var lockOk = test || S.alive >= cfg.locksSec[t - 1];
-        var gateOk = test || t === 1 || owns(t - 1) >= Math.ceil(cfg.unlockShare * byTier[t - 1].length);
-        if (lockOk && gateOk && !complete(t)) { open.push(t); w.push(cfg.odds[t - 1]); }
-      }
-      if (!open.length) { open = [1, 2, 3, 4, 5]; w = cfg.odds.slice(); }
-      w.forEach(function (x) { total += x; }); r = Math.random() * total;
-      for (i = 0; i < open.length; i++) { r -= w[i]; if (r <= 0) { tier = open[i]; break; } }
-      if (!tier) tier = open[open.length - 1];
-    }
-    var cand = byTier[tier].filter(function (c) { return !have(c); });
-    if (!cand.length || Math.random() < cfg.dupChance) cand = byTier[tier];
+    if (!open.length) { open = [4, 5]; w = [cfg.odds[3], cfg.odds[4]]; }
+    w.forEach(function (x) { total += x; }); r = Math.random() * total;
+    for (i = 0; i < open.length; i++) { r -= w[i]; if (r <= 0) { tier = open[i]; break; } }
+    if (!tier) tier = open[open.length - 1];
+    var cand = tier <= 3 ? byTier[tier].filter(function (c) { return !have(c); }) : byTier[tier];
+    if (!cand.length) cand = byTier[tier];
     return cand[(Math.random() * cand.length) | 0];
   }
-  // a lane for something floating ahead: never on top of a box, and (for the pack) never the lane the last pack used
+    // a lane for something floating ahead: never on top of a box, and (for the pack) never the lane the last pack used
   function freeLane(z, avoid) {
     var lanes = [-1, 0, 1].filter(function (l) { return l !== avoid; }).sort(function () { return Math.random() - 0.5; }), i, j, bad;
     for (var dz = 0; dz < 12; dz += 1.4) for (i = 0; i < lanes.length; i++) { bad = false; for (j = 0; j < S.ents.length; j++) { var e = S.ents[j]; if (e.lane === lanes[i] && Math.abs(e.z - (z + dz)) < 1.8) bad = true; } if (!bad) return { lane: lanes[i], z: z + dz }; }
@@ -148,7 +141,7 @@
   function collectCard(e) {
     if (e.drop) {   // a card the server dropped: the server decides, we just show it
       var nr = HallProfile.netRun && HallProfile.netRun(), cur = S; S.dropGot++; S.cardPulse = 1; if (window.MIMUAudio && MIMUAudio.card) MIMUAudio.card();
-      if (nr) nr.collect(e.drop.id).then(function (r) { if (S === cur || true) hint(r.already ? '' : (r.wasNew ? 'NEW CARD ADDED TO YOUR DECK!' : 'DUPLICATE ADDED: YOU NOW HAVE ' + r.count), 4); }, function (er) { hint(String((er && er.message) || 'THAT CARD FLOATED AWAY').toUpperCase(), 3); });
+      if (nr) nr.collect(e.drop.id).then(function (r) { if (S === cur || true) hint(r.already ? '' : r.foil ? (r.complete ? 'FOIL CARD COMPLETE!' : r.wasNew ? 'FOIL HALF COLLECTED' : 'YOU ALREADY HAD THAT HALF') : (r.wasNew ? 'NEW CARD ADDED TO YOUR DECK!' : 'DUPLICATE ADDED: YOU NOW HAVE ' + r.count), 4); }, function (er) { hint(String((er && er.message) || 'THAT CARD FLOATED AWAY').toUpperCase(), 3); });
       return;
     }
     S.cards.push(e.n); S.runOwned.add(e.n); S.cardPulse = 1;
@@ -170,7 +163,7 @@
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
     var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
     if (window.HallNet && HallNet.ev) HallNet.ev('played');
-    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 300; S.netEchoAt = info.echoFirst || 600; } }, function () { if (S === cur) S.net = null; });
+    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 3900; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function () { if (S === cur) S.net = null; });
   }
   /* ---------- cards the server puts in a run: the new-player card, echoes and the wanted card ---------- */
   var elHint = el('div', 'hhint', ''); root.appendChild(elHint);
@@ -178,8 +171,8 @@
   function spawnDrop(kind, r) {
     if (!r || !r.dropId || S.dropSeen[r.dropId]) return; S.dropSeen[r.dropId] = 1;
     var c = HallProfile.card(r.card); if (!c) return; cardImg(c.n);
-    var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, drop: { id: r.dropId, kind: kind } });
-    hint(kind === 'wanted' ? 'THE WANTED CARD! JUMP IT!' : kind === 'echo' ? 'AN ECHO OF YOUR DECK! JUMP IT!' : kind === 'stagger' ? 'A STAGGER CARD: A DUPLICATE! JUMP IT!' : 'YOUR FIRST CARD! JUMP TO COLLECT IT!', 5);
+    var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, drop: { id: r.dropId, kind: kind, half: r.half || '' } });
+    hint(kind === 'wanted' ? 'THE WANTED CARD! JUMP IT!' : kind === 'foil' ? (r.half === 'B' ? 'BOTH HALVES OF A FOIL CARD! JUMP IT!' : 'A GLOWING FOIL HALF! JUMP IT!') : kind === 'stagger' ? 'A STAGGER CARD: A DUPLICATE! JUMP IT!' : 'YOUR FIRST CARD! JUMP TO COLLECT IT!', 5);
     if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
   }
   function netTick() {
@@ -190,7 +183,7 @@
     }
     if (S.net.offerFirst) for (var i = 0; i < 2; i++) if (!S.firstReq[i] && S.alive >= S.net.firstOffers[i]) { S.firstReq[i] = true; nr.drop('first').then(function (r) { if (S === cur && r && r.dropId) spawnDrop('first', r); }, function () {}); }
     if (S.alive >= S.netStaggerAt) { S.netStaggerAt = S.alive + 60; nr.drop('stagger').then(function (r) { if (S === cur && r && r.dropId) { S.netStaggerAt = S.alive + (S.net.staggerEvery || 900); spawnDrop('stagger', r); } }, function () {}); }
-    if (S.alive >= S.netEchoAt) { S.netEchoAt = S.alive + 60; nr.drop('echo').then(function (r) { if (S === cur && r && r.dropId) { S.netEchoAt = S.alive + (S.net.echoEvery || 900); spawnDrop('echo', r); } }, function () {}); }
+    if (S.alive >= S.netFoilAt) { S.netFoilAt = S.alive + 60; nr.drop('foil').then(function (r) { if (S === cur && r && r.dropId) { S.netFoilAt = S.alive + (S.net.foilEvery || 1800); spawnDrop('foil', r); } }, function () {}); }
   }
   function die(silent) {
     S.mode = 'dead'; S.flash = 1; S.shake = 1; if (!silent && window.MIMUAudio && MIMUAudio.hit) MIMUAudio.hit();
@@ -436,23 +429,44 @@
   }
 
   /* a card sighting: the front of the card floating above the boxes, in an aura the colour of its rarity (half strength) */
+  /* a foil piece: the same card art, ripped down the middle along a jagged tear, with a gold glow on the tear and a slow rainbow shimmer over the picture (the design is untouched, only the material changes) */
+  function drawFoil(im, e, x, cy, cw, ch) {
+    var half = e.drop.half || 'L', both = half === 'B', l = x - cw / 2, r = x + cw / 2, t = cy - ch / 2, b = cy + ch / 2, n = 9, gap = both ? cw * 0.05 : 0, sides = both ? ['L', 'R'] : [half], si, k, tear = [];
+    for (k = 0; k <= n; k++) tear.push(x + (((k * 37 + e.n * 11) % 7) - 3) * cw * 0.011);
+    sides.forEach(function (side) {
+      var dx = both ? (side === 'L' ? -gap : gap) : (side === 'L' ? cw * 0.25 : -cw * 0.25);
+      ctx.save(); ctx.translate(dx, 0); ctx.beginPath();
+      if (side === 'L') { ctx.moveTo(l, t); for (k = 0; k <= n; k++) ctx.lineTo(tear[k], t + ch * k / n); ctx.lineTo(l, b); }
+      else { ctx.moveTo(r, t); for (k = 0; k <= n; k++) ctx.lineTo(tear[k], t + ch * k / n); ctx.lineTo(r, b); }
+      ctx.closePath(); ctx.save(); ctx.clip();
+      if (im.naturalWidth) ctx.drawImage(im, l, t, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(l, t, cw, ch); }
+      var sh = (S.t * 0.45 + e.ph) % 1, g = ctx.createLinearGradient(l - cw * 0.5 + sh * cw * 2, t, l + sh * cw * 2, b);
+      g.addColorStop(0, 'rgba(255,90,160,0)'); g.addColorStop(0.2, 'rgba(255,200,80,0.42)'); g.addColorStop(0.4, 'rgba(120,255,200,0.34)'); g.addColorStop(0.6, 'rgba(110,170,255,0.38)'); g.addColorStop(0.8, 'rgba(230,120,255,0.34)'); g.addColorStop(1, 'rgba(255,90,160,0)');
+      ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(l, t, cw, ch);
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(255,215,120,0.12)'; ctx.fillRect(l, t, cw, ch);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(255,215,100,0.95)'; ctx.shadowColor = 'rgba(255,200,70,0.95)'; ctx.shadowBlur = Math.max(5, cw * 0.18); ctx.lineWidth = Math.max(1, cw * 0.03); ctx.stroke();
+      ctx.restore();
+    });
+  }
   function drawCard(e) {
     if (e.got) return;
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh; if (e.z < 0.62 || y > H + 120) return;
     var tr = HallProfile.tiers[e.tier - 1], im = cardImg(e.n), x = cxAt(s) + e.lane * LANE * W * s, cw = 0.24 * W * s, ch = cw * 1.386;
     var cy = y - 0.70 * W * s + Math.sin(S.t * 2.6 + e.ph) * 0.02 * W * s, pulse = 0.8 + 0.2 * Math.sin(S.t * 4 + e.ph), g, gr = ch * 0.95;
     var dk = e.drop ? e.drop.kind : '';
-    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1) * (dk === 'echo' ? 0.62 : 1);
+    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, cw * 0.5);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; if (dk === 'wanted') pulse = 0.9 + 0.3 * Math.sin(S.t * 7);
-    var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'echo' ? [['170,240,255', 0]] : dk === 'stagger' ? [['190,140,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
+    var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'foil' ? [['255,205,90', 0]] : dk === 'stagger' ? [['190,140,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
     cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
     ctx.restore();
     ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5);
-    if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
+    if (dk === 'foil') drawFoil(im, e, x, cy, cw, ch);
+    else if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-    ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'echo' ? 'rgba(190,245,255,0.9)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
-    if (dk === 'wanted' || dk === 'first' || dk === 'stagger') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
+    ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); if (dk !== 'foil') ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
+    if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
   /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */

@@ -19,8 +19,37 @@
     '<li><b>GET CARDS</b> JUMP THE FLOATING CARD IN THE HALL. OR USE THE MARKETPLACE: FACE DOWN CARDS FROM THE HALL COST COINS, AND FACE UP CARDS FROM OTHER PLAYERS COST POINTS.</li>' +
     '<li><b>DUPLICATES</b> A GOLD ×2, ×3 SHOWS WHEN YOU HAVE EXTRA COPIES. TAP SELL 1 TWICE TO SELL ONE COPY TO THE HALL FOR POINTS.</li>' +
     '<li>UNTIL SIGN-IN OPENS THE HALL RUNS AS A DEMO, SO NOTHING IS SAVED HERE YET.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>';
-  var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set();
+  var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set(), cMode = 'reg', ff = { view: 'all' };
   function tierDot(t) { return t.grad ? '<i class="dm" style="background:' + t.grad + '"></i>' : '<i class="dm" style="background:' + t.color + '"></i>'; }
+  /* ---------- the foil page: 120 cards, each in two glowing halves ---------- */
+  var HOWTO_FOIL = '<div class="howto foilhow"><div class="hth"><b>HOW FOIL WORKS</b></div><div class="hsub">EVERY CARD CAN BE RIPPED DOWN THE MIDDLE INTO TWO GLOWING FOIL HALVES: 240 PIECES IN ALL. COLLECT BOTH HALVES OF A CARD TO MAKE ITS FOIL CARD.</div>' +
+    '<ol class="hsteps"><li><b>FIND THEM IN A RUN</b> THE FIRST FOIL HALF FLOATS IN AFTER 1 MINUTE OF TOTAL PLAY, THEN ONE MORE FOR EVERY 30 MINUTES YOU PLAY. THE PIECES COME IN A MIX: ANY CARD, EITHER HALF, AND SOMETIMES BOTH HALVES OF ONE CARD.</li>' +
+    '<li><b>RARE CARDS COME LESS OFTEN</b> A LEGENDARY HALF IS MUCH HARDER TO FIND THAN A COMMON ONE.</li>' +
+    '<li><b>YOUR HALVES ARE SAVED</b> A HALF YOU FIND STAYS ON ITS CARD UNTIL YOU FIND THE OTHER ONE. HERE A HALF SHOWS AS HALF A CARD.</li>' +
+    '<li>FOIL IS THE ONLY WAY TO GET FOIL CARDS. THEY STAND FOR REAL CARDS AND ARE NOT REAL-WORLD ASSETS.</li></ol></div>';
+  function foilPage() {
+    var cs = P.cards().map(function (c) { return '<div class="fc" data-n="' + c.n + '" data-t="' + c.tier + '"><div class="fcf"><div class="fcb"><img src="assets/game/card-back.webp" alt="" loading="lazy" decoding="async"></div><div class="fh fl"><img data-src="' + c.file + '" alt="" decoding="async"></div><div class="fh fr"><img data-src="' + c.file + '" alt="" decoding="async"></div><i class="fshine"></i></div><span class="cn">' + pad3(c.n) + '</span></div>'; }).join('');
+    var chips = ['all', 'full', 'half', 'missing'].map(function (v, i) { return '<button class="chip' + (i ? '' : ' on') + '" data-fv="' + v + '">' + ({ all: 'ALL', full: 'FOIL CARDS', half: 'HALVES ONLY', missing: 'MISSING' })[v] + '</button>'; }).join('');
+    return HOWTO_FOIL + '<div class="sec"><div class="pb total foil"><span>FOIL CARDS</span><div class="tr"><i id="fCardBar"></i></div><span class="ct" id="fCardCt">0/120</span></div><div class="pb total foil"><span>PIECES</span><div class="tr"><i id="fPieceBar"></i></div><span class="ct" id="fPieceCt">0/240</span></div></div>' +
+      '<div class="sec"><div class="sech">FILTER</div><div class="fl"><div class="chips" id="fChips">' + chips + '</div></div></div><div class="sec"><div class="sech"><span id="fShow">SHOWING 120</span></div></div><div class="cgrid foilgrid" id="fGrid">' + cs + '</div>';
+  }
+  function foilStats() { var fm = P.foil ? P.foil() : {}, cards = 0, pieces = 0; Object.keys(fm).forEach(function (k) { var h = String(fm[k] || ''); pieces += h.length; if (h.length >= 2) cards++; }); return { map: fm, cards: cards, pieces: pieces }; }
+  function refreshFoil() {
+    if (!cBuilt) return; var st = foilStats(), total = (P.cards().length || 120), els = cEl.querySelectorAll('.fc');
+    $('fCardCt').textContent = st.cards + '/' + total; $('fCardBar').style.width = (st.cards / total * 100) + '%'; $('fPieceCt').textContent = st.pieces + '/' + (total * 2); $('fPieceBar').style.width = (st.pieces / (total * 2) * 100) + '%';
+    Array.prototype.forEach.call(els, function (el) {
+      var n = el.getAttribute('data-n'), h = String(st.map[n] || ''), l = h.indexOf('L') >= 0, r = h.indexOf('R') >= 0;
+      el.classList.toggle('hl', l); el.classList.toggle('hr', r); el.classList.toggle('full', l && r); el.classList.toggle('some', l || r);
+      if (l || r) Array.prototype.forEach.call(el.querySelectorAll('.fh img'), function (im) { if (!im.getAttribute('src')) im.setAttribute('src', im.getAttribute('data-src')); });
+    });
+    applyFoilFilters(); if (cMode === 'foil') $('cSub').textContent = 'FOIL ' + st.cards + ' / ' + total + ' \u00b7 ' + st.pieces + ' PIECES';
+  }
+  function applyFoilFilters() {
+    var shown = 0; Array.prototype.forEach.call(cEl.querySelectorAll('.fc'), function (el) {
+      var full = el.classList.contains('full'), some = el.classList.contains('some'), ok = ff.view === 'all' || (ff.view === 'full' && full) || (ff.view === 'half' && some && !full) || (ff.view === 'missing' && !some);
+      el.hidden = !ok; if (ok) shown++;
+    }); $('fShow').textContent = 'SHOWING ' + shown;
+  }
   function buildCollected() {
     cEl = $('collApp'); if (!cEl || cBuilt || !P.cards().length) return; cBuilt = true;
     var tierBars = P.tiers.map(function (t) { return '<div class="pb" data-t="' + t.n + '"><span>' + t.name.toUpperCase() + '</span><div class="tr"><i></i></div><span class="ct">0/' + t.count + '</span></div>'; }).join('');
@@ -31,13 +60,15 @@
     var cards = P.cards().map(function (c) { return '<div class="cc" data-n="' + c.n + '" data-t="' + c.tier + '" data-f="' + c.family + '"><div class="cf"><div class="cb"><img src="assets/game/card-back.webp" alt="" loading="lazy" decoding="async"></div><div class="cfr"><img data-src="' + c.file + '" alt="' + esc(c.name) + '" decoding="async"></div></div><span class="cn">' + pad3(c.n) + '</span></div>'; }).join('');
     cEl.classList.add('page');
     cEl.innerHTML = '<div class="pg" id="cScroll"><div class="pgh"><h2 class="gold">COLLECTED</h2><div class="pgsub" id="cSub">0 / 120</div></div>' +
-      HOWTO_COLLECTED + '<div class="pgnote" id="cNote"></div>' +
+      '<div class="tabs3 cmode" id="cTabs"><button class="on" data-m="reg">REGULAR DECK</button><button data-m="foil">FOIL DECK</button></div><div class="pgnote" id="cNote"></div><div id="cReg">' +
+      HOWTO_COLLECTED +
       '<div class="sec"><div class="pb total"><span>ALL</span><div class="tr"><i id="cTotalBar"></i></div><span class="ct" id="cTotalCt">0/120</span></div></div>' +
       '<div class="sec"><div class="sech">BY TIER</div><div class="bars2" id="cTiers">' + tierBars + '</div></div>' +
       '<div class="sec"><div class="sech">BY FAMILY</div><div class="bars2" id="cFams">' + famBars + '</div></div>' +
       '<div class="sec"><div class="sech">FILTERS</div><div class="fl"><div class="chips">' + tierChips + '</div><div class="chips">' + famChips + '</div><div class="chips">' + viewChips + '</div></div></div>' +
       '<div class="sec"><div class="sech"><span id="cShow">SHOWING 120</span></div></div>' +
-      '<div class="cgrid" id="cGrid">' + cards + '</div></div>';
+      '<div class="cgrid" id="cGrid">' + cards + '</div></div>' +
+      '<div id="cFoil" hidden>' + foilPage() + '</div></div>';
     cEl.addEventListener('click', function (ev) {
       var sb = ev.target.closest('.csell');
       if (sb) {   // selling an extra copy to the Hall: two taps, so it is never an accident
@@ -46,14 +77,16 @@
         sellArm = null; sb.disabled = true; P.market().sell(n).then(function (r) { note.textContent = 'SOLD ONE COPY OF CARD ' + pad3(n) + ' TO THE HALL'; sellFetched = false; refreshCollected(false); }, function (e) { sb.disabled = false; note.textContent = String((e && e.message) || 'COULD NOT SELL').toUpperCase(); });
         return;
       }
-      var b = ev.target.closest('.chip'); if (!b) return; var k = b.getAttribute('data-k'), v = b.getAttribute('data-v'); f[k] = k === 'tier' ? parseInt(v, 10) : v; Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); applyFilters(); });
+      var tb = ev.target.closest('#cTabs button'); if (tb) { cMode = tb.getAttribute('data-m'); Array.prototype.forEach.call(tb.parentNode.children, function (x) { x.classList.toggle('on', x === tb); }); $('cReg').hidden = cMode !== 'reg'; $('cFoil').hidden = cMode !== 'foil'; if (cMode === 'foil') refreshFoil(); else refreshCollected(false); var sc = $('cScroll'); if (sc) sc.scrollTop = 0; return; }
+      var fb = ev.target.closest('#fChips .chip'); if (fb) { ff.view = fb.getAttribute('data-fv'); Array.prototype.forEach.call(fb.parentNode.children, function (x) { x.classList.toggle('on', x === fb); }); applyFoilFilters(); return; }
+      var b = ev.target.closest('.chip'); if (!b || !b.getAttribute('data-k')) return; var k = b.getAttribute('data-k'), v = b.getAttribute('data-v'); f[k] = k === 'tier' ? parseInt(v, 10) : v; Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); applyFilters(); });
   }
   var sellVals = {}, sellFetched = false, sellArm = null;
   function refreshCollected(animate) {
     if (!cBuilt) return;
     var own = P.owned(), counts = P.counts ? P.counts() : {}, mk = P.market ? P.market() : null, canSell = !!(P.isSignedIn() && mk && mk.sell), cards = P.cards(), total = 0, byT = {}, byF = {};
     cards.forEach(function (c) { if (own.has(c.n)) { total++; byT[c.tier] = (byT[c.tier] || 0) + 1; byF[c.family] = (byF[c.family] || 0) + 1; } });
-    $('cSub').textContent = total + ' / ' + cards.length; $('cTotalCt').textContent = total + '/' + cards.length; $('cTotalBar').style.width = (total / cards.length * 100) + '%';
+    if (cMode === 'reg') $('cSub').textContent = total + ' / ' + cards.length; $('cTotalCt').textContent = total + '/' + cards.length; $('cTotalBar').style.width = (total / cards.length * 100) + '%';
     P.tiers.forEach(function (t) { var row = cEl.querySelector('.pb[data-t="' + t.n + '"]'); var n = byT[t.n] || 0; row.querySelector('i').style.width = (n / t.count * 100) + '%'; row.querySelector('.ct').textContent = n + '/' + t.count; });
     P.families.forEach(function (fa) { var row = cEl.querySelector('.pb[data-f="' + fa.key + '"]'); var n = byF[fa.key] || 0; row.querySelector('i').style.width = (n / fa.count * 100) + '%'; row.querySelector('.ct').textContent = n + '/' + fa.count; });
     $('cNote').textContent = P.isSignedIn() ? 'SIGNED IN AS ' + String(P.username() || '').toUpperCase() : 'DEMO MODE · SIGN IN TO KEEP YOUR CARDS';
@@ -66,7 +99,7 @@
       if (cnt > 1 && canSell) { if (!cs) { cs = document.createElement('button'); cs.type = 'button'; cs.className = 'csell'; cs.textContent = 'SELL 1'; el.appendChild(cs); } } else if (cs) cs.remove();
     });
     if (canSell && !sellFetched) { sellFetched = true; mk.sellable().then(function (rows) { rows.forEach(function (r) { sellVals[r.n] = r.value; }); }, function () {}); setTimeout(function () { sellFetched = false; }, 30000); }
-    applyFilters();
+    applyFilters(); refreshFoil();
   }
   function applyFilters() {
     var shown = 0;
@@ -85,8 +118,8 @@
     lEl.innerHTML = '<div class="pg"><div class="pgh"><img class="lbbox" src="assets/game/box.webp" alt="The black box you jump over in THE HALL" width="360" height="262" decoding="async"><h2 class="gold">LEADERBOARD</h2><div class="pgsub" id="lSub">LIFETIME TOTALS</div></div>' +
       '<div class="tabs3" id="lTabs"><button class="on" data-k="lifetime">LIFETIME</button><button data-k="best">BEST RUN</button><button data-k="last">LAST RUN</button></div>' +
       '<div class="sec" id="lList"></div>' +
-      '<div class="pgh dk"><h2 class="gold">TOP 10 &middot; THE FULL DECK</h2><div class="pgsub">HOW CLOSE EACH RUNNER IS TO ALL 120 CARDS</div></div>' +
-      '<div class="sec" id="dList"></div></div>';
+      '<div class="pgh dk"><h2 class="gold">TOP 10 &middot; THE FULL DECK</h2><div class="pgsub">REGULAR AND FOIL DECK COMPLETION</div></div>' +
+      '<div class="sec" id="myDeck"></div><div class="sec" id="dList"></div></div>';
     $('lTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; kind = b.getAttribute('data-k'); Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); }); refreshLeaderboard(); });
   }
   function refreshLeaderboard() {
@@ -101,14 +134,18 @@
   }
   /* top 10 by deck progress; names come from Glyph once it is connected (P.deckBoard), until then the ten places are empty */
   function refreshDeck() {
-    var total = (P.cards && P.cards().length) || 120;
+    var total = (P.cards && P.cards().length) || 120, fs0 = foilStats(), mine = P.owned ? P.owned().size : 0;
+    $('myDeck').innerHTML = '<div class="mydk"><div class="mdh"><b>YOUR DECK</b><span>' + (P.isSignedIn() ? esc(String(P.username() || '').toUpperCase()) : 'DEMO MODE') + '</span></div>' +
+      '<div class="mdr"><span>REGULAR</span><div class="dkb"><i style="width:' + Math.min(100, mine / total * 100) + '%"></i></div><b>' + mine + '/' + total + '</b></div>' +
+      '<div class="mdr foil"><span>FOIL</span><div class="dkb foil"><i style="width:' + Math.min(100, fs0.cards / total * 100) + '%"></i></div><b>' + fs0.cards + '/' + total + '</b></div>' +
+      '<div class="mdn">' + fs0.pieces + ' OF ' + (total * 2) + ' FOIL PIECES COLLECTED</div></div>';
     P.deckBoard().then(function (rows) {
       rows = (rows || []).slice(0, 10); var out = '', i, r, pct, dash = '&mdash;';
       for (i = 0; i < 10; i++) {
         r = rows[i];
-        if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0%</span></div><div class="dkb"><i style="width:0"></i></div><div class="dka"><span>CARDS ' + dash + '/' + total + '</span><span>RAREST ' + dash + '</span><span>FAMILY ' + dash + '</span><span>RUNS ' + dash + '</span><span>BEST ' + dash + '</span></div></div>'; continue; }
-        pct = Math.min(100, Math.round((r.owned || 0) / total * 1000) / 10);
-        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + pct + '%</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dka"><span>CARDS ' + fmt(r.owned || 0) + '/' + total + '</span><span>RAREST ' + esc((r.rarest || dash).toString().toUpperCase()) + '</span><span>FAMILY ' + esc((r.family || dash).toString().toUpperCase()) + '</span><span>RUNS ' + (r.runs == null ? dash : fmt(r.runs)) + '</span><span>BEST ' + (r.best == null ? dash : fmt(r.best)) + '</span></div></div>';
+        if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0%</span></div><div class="dkb"><i style="width:0"></i></div><div class="dkb foil"><i style="width:0"></i></div><div class="dka"><span>CARDS ' + dash + '/' + total + '</span><span>FOIL ' + dash + '/' + total + '</span><span>RAREST ' + dash + '</span><span>FAMILY ' + dash + '</span><span>RUNS ' + dash + '</span><span>BEST ' + dash + '</span></div></div>'; continue; }
+        pct = Math.min(100, Math.round((r.owned || 0) / total * 1000) / 10); var fpct = Math.min(100, Math.round((r.foilCards || 0) / total * 1000) / 10);
+        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + pct + '%</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>CARDS ' + fmt(r.owned || 0) + '/' + total + '</span><span>FOIL ' + fmt(r.foilCards || 0) + '/' + total + '</span><span>RAREST ' + esc((r.rarest || dash).toString().toUpperCase()) + '</span><span>FAMILY ' + esc((r.family || dash).toString().toUpperCase()) + '</span><span>RUNS ' + (r.runs == null ? dash : fmt(r.runs)) + '</span><span>BEST ' + (r.best == null ? dash : fmt(r.best)) + '</span></div></div>';
       }
       $('dList').innerHTML = out + (rows.length ? '' : '<div class="dknote">USERNAMES APPEAR HERE ONCE GLYPH IS CONNECTED</div>');
     });
@@ -164,8 +201,8 @@
     }
   };
   P.onChange(function (what) {
-    if (cBuilt && (what === 'cards' || what === 'connect')) refreshCollected(what === 'cards');
-    if (lBuilt && (what === 'scores' || what === 'connect')) refreshLeaderboard();
+    if (cBuilt && (what === 'cards' || what === 'connect' || what === 'foil')) refreshCollected(what === 'cards');
+    if (lBuilt && (what === 'scores' || what === 'connect' || what === 'foil' || what === 'cards')) refreshLeaderboard();
     if (sBuilt && what === 'connect') drawSettings();
   });
   P.whenReady(function () { /* the card list is here: the Collected grid is built the first time the app opens */ });

@@ -44,6 +44,7 @@
     username: function () { return S.me ? S.me.name : ''; },
     owned: function () { return new Set(Object.keys(S.me ? S.me.cards : {}).map(Number)); },
     counts: function () { return S.me ? S.me.cards : {}; },
+    foil: function () { return S.me ? S.me.foil || {} : {}; },
     totals: function () { return S.me ? S.me.totals : { lifetime: 0, best: 0, last: 0, coins: 0, balance: 0 }; },
     stats: function () { return S.me ? S.me.stats : {}; },
     addCard: function (n) { if (S.me) { S.me.cards[n] = (S.me.cards[n] || 0) + 1; } return true; },   // shown at once; the server adds the card for real when the run is verified
@@ -57,7 +58,7 @@
       start: function () { return call('/run/start', { method: 'POST', body: {} }).then(function (r) { S.run = r; return r; }); },
       beat: function (d) { if (!S.run) return Promise.resolve({}); d.runId = S.run.runId; return call('/run/beat', { body: d }); },
       drop: function (kind) { if (!S.run) return Promise.resolve({ none: true }); return call('/run/drop', { body: { runId: S.run.runId, kind: kind } }); },
-      collect: function (dropId) { if (!S.run) return Promise.reject(new Error('NO RUN')); return call('/run/collect', { body: { runId: S.run.runId, dropId: dropId } }).then(function (r) { if (S.me && r.card && !r.already) { S.me.cards[r.card] = r.count; saveSession(); P.notify('cards'); } return r; }); }
+      collect: function (dropId) { if (!S.run) return Promise.reject(new Error('NO RUN')); return call('/run/collect', { body: { runId: S.run.runId, dropId: dropId } }).then(function (r) { if (S.me && r.card && !r.already) { if (r.foil) { S.me.foil = S.me.foil || {}; S.me.foil[r.card] = r.halves; saveSession(); P.notify('foil'); } else { S.me.cards[r.card] = r.count; saveSession(); P.notify('cards'); } } return r; }); }
     },
     messages: {
       threads: function () { return call('/msg/threads'); },
