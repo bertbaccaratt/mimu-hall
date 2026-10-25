@@ -318,3 +318,23 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 .rfig figcaption ol { list-style: none; margin: 0; padding: 0; } .rfig figcaption li { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 9px; line-height: 1.5; } .rfig figcaption li b { flex: none; width: 20px; height: 20px; border-radius: 50%; background: #ffd45a; color: #2b0407; font: 700 11px/20px 'Cinzel', Georgia, serif; text-align: center; }
 @media (max-width: 640px) { .rfig { grid-template-columns: 1fr; } .rfig .rimg { max-width: 340px; margin: 0 auto; } }
 .rfig figcaption li::before { content: none !important; display: none; } .rfig figcaption li { padding-left: 0; }
+
+/* Hall Rules, About and Apechain: white text so everything is easy to read */
+.ipanel .ibody, .ipanel .ibody * { color: #fff !important; }
+.ipanel .ibody .rfig .hl b, .ipanel .ibody .rfig figcaption li b { color: #2b0407 !important; }
+.ipanel .ibody a.xl { text-decoration: underline; }
+#infoTitle, #infoLine { background: none !important; color: #fff !important; -webkit-text-fill-color: #fff; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+.apanel .arow, .apanel .arow .nm, .apanel .arow .rk, .apanel .arow .st, .apanel .arow .st b, .apanel .arow .st i, .apanel .arow .fl, .apanel .acols, .apanel .asub, .apanel .asub .arank, .apanel .arow .dots { color: #fff !important; }
+.apanel .arow .st::before { color: #fff !important; }
+
+/* home widgets: larger again (the whole widget and the text) */
+#pHomeScr .wid { padding: calc(var(--h) * .012) calc(var(--h) * .014); }
+#pHomeScr .wid .wt { font-size: max(11px, calc(var(--h) * .0135)); }
+#pHomeScr .wid small { font-size: max(10px, calc(var(--h) * .0122)); }
+#pHomeScr .wlb .wrk i { font-size: max(16px, calc(var(--h) * .052)); }
+#pHomeScr .wst b { font-size: max(12px, calc(var(--h) * .02)); }
+#pHomeScr .wdk .wpc { font-size: max(11px, calc(var(--h) * .0175)); width: calc(var(--h) * .07); }
+#pHomeScr .wdk .wcn b { font-size: max(14px, calc(var(--h) * .026)); } #pHomeScr .wdk .wcn b small { font-size: max(10px, calc(var(--h) * .0145)); }
+#pHomeScr .wfoil { font-size: max(10px, calc(var(--h) * .0128)); }
+
+#pHomeScr .wid .wt { letter-spacing: .12em; white-space: nowrap; } #pHomeScr .wid small { letter-spacing: .06em; } #pHomeScr .wfoil { letter-spacing: .03em; white-space: nowrap; }
