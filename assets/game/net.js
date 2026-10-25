@@ -76,6 +76,10 @@
       players: function () { return call('/msg/players'); },
       send: function (to, amount) { return call('/give', { body: { to: to, amount: amount } }).then(function (r) { return refreshMe().then(function () { return r; }); }); }
     },
+    xbonus: {
+      status: function () { return call('/x/status'); },
+      claim: function (url) { return call('/x/claim', { body: { url: url } }).then(function (r) { return refreshMe().then(function () { return r; }); }); }
+    },
     market: {
       listings: function () { return call('/market/listings'); },
       sellable: function () { return call('/market/sellable'); },

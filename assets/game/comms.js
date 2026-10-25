@@ -5,7 +5,7 @@
   var P = window.HallProfile; if (!P) return;
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function fmt(n) { return Math.floor(n || 0).toLocaleString('en-US'); }
+  function fmt(n) { return P.big ? P.big(n) : Math.floor(n || 0).toLocaleString('en-US'); }
   function pad3(n) { n = String(n); while (n.length < 3) n = '0' + n; return n; }
   function when(ts) { try { return new Date(ts).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase(); } catch (e) { return ''; } }
   function current() { var s = $('pScreen'); return s && s.classList.contains('inapp') ? s.dataset.app : ''; }
@@ -201,7 +201,7 @@
   }
 
   /* ---------- HOME WIDGETS: my ranking and my deck, under the app icons ---------- */
-  function short(n) { n = Math.floor(n || 0); return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : n.toLocaleString('en-US'); }
+  function short(n) { n = Math.floor(n || 0); if (n >= 1e12) return (n / 1e12).toFixed(1).replace(/\.0$/, '') + 'T'; if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B'; return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : n.toLocaleString('en-US'); }
   var CIRC = 2 * Math.PI * 18;
   function buildWidgets() {
     var g = document.querySelector('.agrid'); if (!g || $('wLb')) return;

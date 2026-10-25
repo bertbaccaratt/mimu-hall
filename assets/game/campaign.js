@@ -9,7 +9,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function now() { return Date.now() + C.off; }
   function phase() { var t = now(); return t < C.start ? 'before' : t < C.runEnd ? 'run' : t < C.giveEnd ? 'giving' : 'final'; }
-  function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+  function fmt(n) { return P.big ? P.big(Math.round(n)) : Math.round(n).toLocaleString('en-US'); }
   function when(ts) { try { return new Date(ts).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).toUpperCase() + ' PT'; } catch (e) { return new Date(ts).toUTCString().toUpperCase(); } }
   function left(ms) {
     ms = Math.max(0, ms); var d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000);
@@ -115,9 +115,9 @@
       body = '<div class="gvbox"><b>LOADING&hellip;</b></div>';
       api('/final').then(function (r) { tp.rows = r.locked ? [] : r.top; tp.err = false; paintTop(); }).catch(function () { tp.err = true; paintTop(); });
     } else {
-      body = '<div class="t5note">TOTAL = POINTS + DISTANCE (METRES) + COINS + ' + fmt(C.deckPct) + ' FOR EVERY 1% OF EACH DECK</div>' + (tp.rows.length ? tp.rows.map(function (r, i) {
+      body = '<div class="t5note">TOTAL = POINTS + COINS + ' + C.deckPct.toLocaleString('en-US') + ' FOR EVERY 1% OF EACH DECK. DISTANCE AND X BONUS POINTS ARE ALREADY IN YOUR POINTS.</div>' + (tp.rows.length ? tp.rows.map(function (r, i) {
         return '<div class="t5row r' + (i + 1) + '"><div class="t5h"><span class="t5rk">' + (i + 1) + '</span><span class="t5nm">' + esc(r.name) + '</span><span class="t5tt">' + fmt(r.total) + '</span></div>' +
-          '<div class="t5g"><div><small>POINTS</small><b>' + fmt(r.points) + '</b></div><div><small>DISTANCE</small><b>' + (r.distance / 1609.34).toFixed(1) + ' MI</b></div><div><small>COINS</small><b>' + fmt(r.coins) + '</b></div><div><small>REGULAR DECK</small><b>' + r.regPct + '%</b></div><div><small>FOIL DECK</small><b>' + r.foilPct + '%</b></div></div></div>';
+          '<div class="t5g"><div><small>POINTS</small><b>' + fmt(r.points) + '</b></div><div><small>COINS</small><b>' + fmt(r.coins) + '</b></div><div><small>X POINTS</small><b>' + fmt(r.xPoints || 0) + '</b></div><div><small>REGULAR DECK</small><b>' + r.regPct + '%</b></div><div><small>FOIL DECK</small><b>' + r.foilPct + '%</b></div></div></div>';
       }).join('') : '<div class="gvbox"><b>NO PLAYERS YET</b></div>');
     }
     el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">TOP 5 &middot; ALL TIME</h2><div class="pgsub">THE FINAL RESULTS</div></div>' + body + '</div>';

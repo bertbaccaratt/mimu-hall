@@ -66,6 +66,8 @@
     totals: function () { return adapter && adapter.totals ? adapter.totals() : { lifetime: 0, best: 0, last: 0, coins: 0, balance: 0 }; },   // coins = every coin ever collected, balance = coins earned minus coins spent
     messages: function () { return adapter && adapter.messages ? adapter.messages : null; },   // { threads(), thread(id), send(id, body), block(id, on), players() }
     mail: function () { return adapter && adapter.mail ? adapter.mail : null; },   // { inbox(), read(id) }
+    big: function (n) { n = Math.floor(n || 0); var w = [[1e12, 'TRILLION'], [1e9, 'BILLION'], [1e6, 'MILLION']], i, v; for (i = 0; i < w.length; i++) if (Math.abs(n) >= w[i][0]) { v = (n / w[i][0]).toFixed(2).replace(/\.?0+$/, ''); return v + ' ' + w[i][1]; } return n.toLocaleString('en-US'); },   // 1,234,567,890 becomes 1.23 BILLION
+    xbonus: function () { return adapter && adapter.xbonus ? adapter.xbonus : null; },   // { status(), claim(url) }: the X bonus
     give: function () { return adapter && adapter.give ? adapter.give : null; },   // { status(), players(), send(to, amount) }: The Giving
     market: function () { return adapter && adapter.market ? adapter.market : null; },   // { listings(), sellable(), buy(n), sell(n) }
     lifeCost: function () { var pts = Math.floor((adapter && adapter.totals ? adapter.totals().lifetime : 0) || 0); return Math.max(1, Math.ceil(pts * CONFIG.life.share)); },

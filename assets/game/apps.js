@@ -6,7 +6,7 @@
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function pad3(n) { n = String(n); while (n.length < 3) n = '0' + n; return n; }
-  function fmt(n) { return Math.floor(n || 0).toLocaleString('en-US'); }
+  function fmt(n) { return P.big ? P.big(n) : Math.floor(n || 0).toLocaleString('en-US'); }
   var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
 
   /* ---------- COLLECTED ---------- */
@@ -145,14 +145,14 @@
     $('myDeck').innerHTML = '<div class="mydk"><div class="mdh"><b>YOUR DECK</b><span>' + (P.isSignedIn() ? esc(String(P.username() || '').toUpperCase()) : 'DEMO MODE') + '</span></div>' +
       '<div class="mdr"><span>REGULAR</span><div class="dkb"><i style="width:' + Math.min(100, mine / total * 100) + '%"></i></div><b>' + mine + '/' + total + '</b></div>' +
       '<div class="mdr foil"><span>FOIL</span><div class="dkb foil"><i style="width:' + Math.min(100, fs0.cards / total * 100) + '%"></i></div><b>' + fs0.cards + '/' + total + '</b></div>' +
-      '<div class="mdn">' + fs0.pieces + ' OF ' + (total * 2) + ' FOIL PIECES COLLECTED</div></div>';
+      '<div class="mdn">' + fs0.pieces + ' OF ' + (total * 2) + ' FOIL PIECES COLLECTED</div>' + '<div class="mdn">X POINTS EARNED &middot; ' + fmt((P.stats && P.stats().xPoints) || 0) + '</div></div>';
     P.deckBoard().then(function (rows) {
       rows = (rows || []).slice(0, 5); var out = '', i, r, pct, dash = '&mdash;';
       for (i = 0; i < 5; i++) {
         r = rows[i];
         if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0%</span></div><div class="dkb"><i style="width:0"></i></div><div class="dkb foil"><i style="width:0"></i></div><div class="dka"><span>CARDS ' + dash + '/' + total + '</span><span>FOIL ' + dash + '/' + total + '</span><span>RAREST ' + dash + '</span><span>FAMILY ' + dash + '</span><span>RUNS ' + dash + '</span><span>BEST ' + dash + '</span></div></div>'; continue; }
         pct = Math.min(100, Math.round((r.owned || 0) / total * 1000) / 10); var fpct = Math.min(100, Math.round((r.foilCards || 0) / total * 1000) / 10);
-        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + pct + '%</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>CARDS ' + fmt(r.owned || 0) + '/' + total + '</span><span>FOIL ' + fmt(r.foilCards || 0) + '/' + total + '</span><span>RAREST ' + esc((r.rarest || dash).toString().toUpperCase()) + '</span><span>FAMILY ' + esc((r.family || dash).toString().toUpperCase()) + '</span><span>RUNS ' + (r.runs == null ? dash : fmt(r.runs)) + '</span><span>BEST ' + (r.best == null ? dash : fmt(r.best)) + '</span></div></div>';
+        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + pct + '%</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>CARDS ' + fmt(r.owned || 0) + '/' + total + '</span><span>FOIL ' + fmt(r.foilCards || 0) + '/' + total + '</span><span>RAREST ' + esc((r.rarest || dash).toString().toUpperCase()) + '</span><span>FAMILY ' + esc((r.family || dash).toString().toUpperCase()) + '</span><span>X POINTS ' + fmt(r.xPoints || 0) + '</span><span>RUNS ' + (r.runs == null ? dash : fmt(r.runs)) + '</span><span>BEST ' + (r.best == null ? dash : fmt(r.best)) + '</span></div></div>';
       }
       $('dList').innerHTML = out + (rows.length ? '' : '<div class="dknote">USERNAMES APPEAR HERE ONCE GLYPH IS CONNECTED</div>');
     });
