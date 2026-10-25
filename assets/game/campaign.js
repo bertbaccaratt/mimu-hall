@@ -43,7 +43,7 @@
     var steps = [
       ['THE HALL RUN', '14 DAYS &middot; ' + when(C.start) + ' TO ' + when(C.runEnd), 'Play THE HALL and collect points, coins and cards. When the 14 days end, the Hall closes. Its app goes gray and cannot be opened.', 1],
       ['THE GIVING', '48 HOURS &middot; UNTIL ' + when(C.giveEnd), 'A green app opens. Anyone who is not in the top 5 can give their coins to other players. After 48 hours it goes gray and closes.', 2],
-      ['THE TOP 5', 'OPENS ' + when(C.giveEnd), 'The Top 5 app opens in glowing gold and shows the top 5 players of all time: distance, points, coins, regular deck % and foil deck %, all totaled. This is the end of the game.', 3]
+      ['THE TOP 5', 'OPENS ' + when(C.giveEnd), 'The Top 5 app opens in glowing gold and shows the top 5 players of all time: points, coins, Regular deck % and Foil deck %, all totaled. This is the end of the game.', 3]
     ];
     var keep = el.querySelector('.pg'), top = keep ? keep.scrollTop : 0;
     el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">ALARM</h2><div class="pgsub">THE CAMPAIGN CLOCK</div></div>' +

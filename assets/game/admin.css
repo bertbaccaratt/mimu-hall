@@ -150,3 +150,8 @@
 .adm .btab .dr.banned { opacity: .55; } .adm .btab .dr em { font-style: normal; font-size: 9px; letter-spacing: .14em; color: #ff6b6b; }
 .adm .bdeck { display: block; } .adm .bdeck .bb { display: block; height: 5px; margin-top: 5px; background: rgba(217,172,92,.15); } .adm .bdeck .bb i { display: block; height: 100%; background: linear-gradient(90deg, #7a1118, #e8c673); } .adm .bdeck.foil .bb i { background: linear-gradient(90deg, #b8862e, #ffd45a, #fff3c9); box-shadow: 0 0 6px rgba(255,205,90,.6); } .adm .bdeck small { display: block; margin-top: 3px; font-size: 10px; letter-spacing: .06em; color: #8a7448; }
 @media (max-width: 900px) { .adm .btab .dr { grid-template-columns: 1fr; } }
+/* the whole control room in white text; the gold and green buttons keep dark text so they stay readable */
+.adm-shade, .adm-shade * { color: #fff !important; }
+.adm-shade .cr-nav button.on, .adm-shade .cr-nav button.on i, .adm-shade .ctier .cct, .adm-shade .mmh, .adm-shade .hxnew .go, .adm-shade .hxt .tm i, .adm-shade .fga button.ok, .adm-shade .adm .api.on i, .adm-shade .cfilt button.on, .adm-shade .whow i, .adm-shade .cmp .go, .adm-shade .mtabs button.on, .adm-shade .adm-login .go, .adm-shade .amh { color: #1a0306 !important; }
+.adm-shade input::placeholder, .adm-shade textarea::placeholder { color: rgba(255,255,255,.55) !important; }
+.adm-shade svg text { fill: #fff !important; }

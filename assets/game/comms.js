@@ -277,7 +277,6 @@
       if (name === 'mail') drawMail();
       if (name === 'market') drawMarket();
       if (name === 'camera') buildCamera();
-      if (name === 'x') drawShot('xApp', 'x');
       if (name === 'opensea') drawShot('osApp', 'os');
     }
   };

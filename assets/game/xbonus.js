@@ -1,37 +1,23 @@
-/* X BONUS: post your picture on X, paste the link, earn bonus points every 12 hours.
+/* THE X APP: post your picture on X, paste the link, earn bonus points every 12 hours.
    The picture is one real frame from the game (share-run.jpg); the page draws the player's name and numbers on it. The server checks the post (public, tags @mimuonape, has a picture, new, one use each). */
 (function () {
   'use strict';
   var P = window.HallProfile; if (!P) return;
-  var ST = null, off = 0, msg = '', ok = false, busy = false, link = '', img = null, shown = false;
+  var ST = null, off = 0, msg = '', ok = false, busy = false, link = '', img = null;
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmt(n) { return P.big ? P.big(n) : Math.floor(n || 0).toLocaleString('en-US'); }
   function now() { return Date.now() + off; }
   function A() { return P.xbonus ? P.xbonus() : null; }
-  function left(ms) { ms = Math.max(0, ms); var h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000); return h + 'H ' + (m < 10 ? '0' : '') + m + 'M ' + (s < 10 ? '0' : '') + s + 'S'; }
-  function state() {   // locked | demo | norun | ready | wait
+  var EVERY = 12 * 3600000;
+  function left(ms) { ms = Math.max(0, ms); var h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000); return h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
+  function state() {   // demo | load | norun | ready | wait
     if (!P.isSignedIn() || !A()) return 'demo'; if (!ST) return 'load'; if (!ST.ran) return 'norun'; return ST.canClaim && now() >= ST.nextAt ? 'ready' : 'wait';
   }
+  function cur() { var s = $('pScreen'); return s && s.classList.contains('inapp') ? s.dataset.app : ''; }
   function load() {
     var a = A(); if (!a) { ST = null; return Promise.resolve(); }
-    return a.status().then(function (s) { ST = s; off = s.now - Date.now(); paintBox(); if (cur() === 'xbonus') paintPage(); }, function () {});
-  }
-  function cur() { var s = $('pScreen'); return s && s.classList.contains('inapp') ? s.dataset.app : ''; }
-
-  /* ---------- the box at the very top of Badges: green when you are covered, red and wiggling when you can post and earn ---------- */
-  function boxInner() {
-    var s = state(), amt = ST ? ST.amount : 50000;
-    if (s === 'demo') return ['off', 'X BONUS &middot; SIGN IN FIRST', 'SIGN IN WITH GLYPH, FINISH A RUN, THEN POST ON X TO EARN ' + fmt(amt) + ' POINTS EVERY 12 HOURS'];
-    if (s === 'load') return ['off', 'X BONUS', 'LOADING&hellip;'];
-    if (s === 'norun') return ['off', 'X BONUS &middot; LOCKED', 'FINISH ONE RUN IN THE HALL TO UNLOCK ' + fmt(amt) + ' BONUS POINTS'];
-    if (s === 'ready') return ['red', 'POST ON X &middot; EARN ' + fmt(amt) + ' POINTS', 'TAP HERE FOR THE STEPS. YOUR X BONUS IS READY'];
-    return ['green', 'X BONUS CLAIMED', 'NEXT BONUS IN <span class="xbt">' + left(ST.nextAt - now()) + '</span> &middot; ' + fmt(ST.xPoints) + ' X POINTS EARNED'];
-  }
-  function paintBox() {
-    var el = $('xbBox'); if (!el) return; var b = boxInner();
-    el.className = 'xbox ' + b[0]; el.innerHTML = '<b>' + b[1] + '</b><span>' + b[2] + '</span><i class="xbgo">' + (b[0] === 'off' ? '' : '&rsaquo;') + '</i>';
-    el.onclick = function () { if (typeof window.MimuOpenApp === 'function' && state() !== 'demo') window.MimuOpenApp('xbonus'); };
+    return a.status().then(function (s) { ST = s; off = s.now - Date.now(); if (cur() === 'x') paintPage(); }, function () {});
   }
 
   /* ---------- the picture: one real run frame, the player's numbers drawn over it ---------- */
@@ -81,38 +67,43 @@
     }, 'image/png');
   }
 
-  /* ---------- the page: the steps, the picture, the claim ---------- */
+  /* ---------- the page ---------- */
+  var XLOGO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+  var CIRC = 2 * Math.PI * 52;
+  function hero(s, amt) {
+    var pct = 0, big = '', sub = '', cls = 'off', title = '';
+    if (s === 'ready') { cls = 'red'; pct = 1; big = 'READY'; title = 'POST ON X &middot; EARN ' + fmt(amt) + ' POINTS'; sub = 'FOLLOW THE 4 STEPS BELOW'; }
+    else if (s === 'wait') { cls = 'green'; pct = Math.min(1, Math.max(0, (now() - ST.lastAt) / EVERY)); big = '<span class="xbt">' + left(ST.nextAt - now()) + '</span>'; title = 'X BONUS CLAIMED'; sub = 'NEXT BONUS OF ' + fmt(amt) + ' POINTS OPENS WHEN THE CLOCK ENDS'; }
+    else if (s === 'norun') { big = 'LOCKED'; title = 'FINISH ONE RUN TO UNLOCK'; sub = 'PLAY THE HALL ONCE, THEN COME BACK HERE'; }
+    else if (s === 'load') { big = '&hellip;'; title = 'X BONUS'; sub = 'LOADING'; }
+    else { big = 'SIGN IN'; title = 'SIGN IN TO USE THE X BONUS'; sub = 'SIGN IN WITH GLYPH, FINISH A RUN, THEN POST ON X TO EARN ' + fmt(amt) + ' POINTS EVERY 12 HOURS'; }
+    return '<div class="xhero ' + cls + '"><div class="xring"><svg viewBox="0 0 120 120"><circle class="rb" cx="60" cy="60" r="52"/><circle class="rf" cx="60" cy="60" r="52" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + (CIRC * (1 - pct)).toFixed(1) + '" transform="rotate(-90 60 60)"/></svg><div class="xrc"><span class="xlg">' + XLOGO + '</span><b>' + big + '</b></div></div><div class="xht"><b>' + title + '</b><span>' + sub + '</span></div></div>';
+  }
   function paintPage() {
-    var el = $('xbApp'); if (!el) return; el.classList.add('page'); var s = state(), amt = ST ? ST.amount : 50000, tag = ST ? ST.tag : '@mimuonape';
-    var chip = s === 'ready' ? '<div class="xbchip red">YOUR BONUS IS READY</div>' : s === 'wait' ? '<div class="xbchip green">CLAIMED &middot; NEXT IN <span class="xbt">' + left(ST.nextAt - now()) + '</span></div>' : s === 'norun' ? '<div class="xbchip off">FINISH ONE RUN TO UNLOCK</div>' : '<div class="xbchip off">SIGN IN TO USE THE X BONUS</div>';
+    var el = $('xApp'); if (!el) return; el.classList.add('page'); var s = state(), amt = ST ? ST.amount : 50000, tag = ST ? ST.tag : '@mimuonape';
     var keep = el.querySelector('.pg'), top = keep ? keep.scrollTop : 0, typed = $('xbLink') ? $('xbLink').value : link;
-    el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">X BONUS</h2><div class="pgsub">EARN ' + fmt(amt) + ' POINTS EVERY 12 HOURS</div></div>' + chip +
-      '<div class="xbsteps"><b>HOW TO GET YOUR BONUS</b><ol>' +
-      '<li><span>1</span><div>SAVE YOUR PICTURE BELOW.</div></li>' +
-      '<li><span>2</span><div>POST IT ON X AND TAG <b>' + esc(tag.toUpperCase()) + '</b>. THE PICTURE MUST BE IN THE POST.</div></li>' +
-      '<li><span>3</span><div>COPY THE LINK TO YOUR POST.</div></li>' +
-      '<li><span>4</span><div>PASTE THE LINK HERE AND PRESS CLAIM. YOUR POINTS ARE ADDED TO YOUR SCORE AT ONCE.</div></li></ol>' +
-      '<p>YOUR POST MUST BE PUBLIC AND NEW. EACH POST CAN BE USED ONCE. THE FIRST POST LINKS YOUR X ACCOUNT TO YOUR PLAYER' + (ST && ST.handle ? ': <b>@' + esc(ST.handle.toUpperCase()) + '</b>' : '') + '.</p></div>' +
+    var steps = [['1', 'SAVE YOUR PICTURE', 'IT HAS YOUR NAME, RANK AND NUMBERS ON A REAL FRAME FROM THE HALL.'], ['2', 'POST IT ON X', 'TAG <b>' + esc(tag.toUpperCase()) + '</b> AND KEEP THE PICTURE IN THE POST. MAKE THE POST PUBLIC.'], ['3', 'COPY THE LINK', 'OPEN YOUR POST ON X, PRESS SHARE, THEN COPY LINK.'], ['4', 'PASTE IT AND CLAIM', 'THE POINTS ARE ADDED TO YOUR SCORE AT ONCE.']];
+    el.innerHTML = '<div class="pg cm xa"><div class="pgh"><h2 class="gold">X BONUS</h2><div class="pgsub">POST ON X &middot; EARN ' + fmt(amt) + ' POINTS EVERY 12 HOURS</div></div>' + hero(s, amt) +
+      '<div class="xstats"><div><small>X POINTS EARNED</small><b>' + fmt(ST ? ST.xPoints : 0) + '</b></div><div><small>POSTS CLAIMED</small><b>' + fmt(ST ? ST.posts : 0) + '</b></div><div><small>YOUR X ACCOUNT</small><b>' + (ST && ST.handle ? '@' + esc(ST.handle.toUpperCase()) : 'NOT LINKED') + '</b></div></div>' +
+      '<div class="xsteps">' + steps.map(function (x) { return '<div class="xstep"><i>' + x[0] + '</i><div><b>' + x[1] + '</b><span>' + x[2] + '</span></div></div>'; }).join('') + '</div>' +
       '<div class="xbpic"><canvas id="xbCv" width="1080" height="1080" aria-label="Your Hall picture to post on X"></canvas></div>' +
-      '<div class="xbrow"><button type="button" class="xbbtn" id="xbSave">SAVE PICTURE</button><a class="xbbtn alt" id="xbOpen" href="https://x.com/intent/post?text=' + encodeURIComponent(tag + ' ') + '" target="_blank" rel="noopener noreferrer">OPEN X</a></div>' +
-      '<div class="xbform"><label>LINK TO YOUR POST<input id="xbLink" type="url" inputmode="url" autocomplete="off" placeholder="https://x.com/yourname/status/..." value="' + esc(typed) + '"></label>' +
-      '<button type="button" class="xbbtn go" id="xbClaim"' + (s === 'ready' && !busy ? '' : ' disabled') + '>' + (busy ? 'CHECKING&hellip;' : 'CLAIM ' + fmt(amt) + ' POINTS') + '</button>' +
-      (msg ? '<div class="xbmsg' + (ok ? ' ok' : '') + '">' + esc(msg) + '</div>' : '') + '</div></div>';
+      '<div class="xbrow"><button type="button" class="xbbtn" id="xbSave">SAVE PICTURE</button><a class="xbbtn alt" id="xbOpen" href="https://x.com/intent/post?text=' + encodeURIComponent(tag + ' ') + '" target="_blank" rel="noopener noreferrer"><span class="xlg">' + XLOGO + '</span> OPEN X</a></div>' +
+      '<div class="xbform"><label>PASTE THE LINK TO YOUR POST<input id="xbLink" type="url" inputmode="url" autocomplete="off" placeholder="https://x.com/yourname/status/..." value="' + esc(typed) + '"></label>' +
+      '<button type="button" class="xbbtn go" id="xbClaim"' + (s === 'ready' && !busy ? '' : ' disabled') + '>' + (busy ? 'CHECKING&hellip;' : s === 'ready' ? 'CLAIM ' + fmt(amt) + ' POINTS' : s === 'wait' ? 'NEXT BONUS NOT READY YET' : 'CLAIM LOCKED') + '</button>' +
+      (msg ? '<div class="xbmsg' + (ok ? ' ok' : '') + '">' + esc(msg) + '</div>' : '') + '</div>' +
+      '<div class="xrules"><b>THE RULES</b><span>YOUR POST MUST BE PUBLIC, NEW, AND TAG ' + esc(tag.toUpperCase()) + ' WITH THE PICTURE. EACH POST COUNTS ONCE. YOUR FIRST POST LINKS YOUR X ACCOUNT TO YOUR PLAYER, AND LATER POSTS MUST COME FROM IT. A NEW BONUS OPENS 12 HOURS AFTER YOUR LAST ONE.</span></div></div>';
     var pg = el.querySelector('.pg'); if (pg) pg.scrollTop = top; paintCard();
     $('xbSave').onclick = save; $('xbLink').oninput = function () { link = this.value; };
     $('xbClaim').onclick = function () {
       var u = ($('xbLink').value || '').trim(); if (!u) { msg = 'PASTE THE LINK TO YOUR POST FIRST'; ok = false; paintPage(); return; }
       busy = true; msg = ''; paintPage();
-      A().claim(u).then(function (r) { busy = false; ok = true; link = ''; msg = 'DONE! ' + fmt(ST.amount) + ' POINTS ADDED TO YOUR SCORE'; return load(); }, function (e) { busy = false; ok = false; msg = String((e && e.message) || 'COULD NOT CHECK THE POST').toUpperCase(); paintPage(); });
+      A().claim(u).then(function () { busy = false; ok = true; link = ''; msg = 'DONE! ' + fmt(ST.amount) + ' POINTS ADDED TO YOUR SCORE'; return load(); }, function (e) { busy = false; ok = false; msg = String((e && e.message) || 'COULD NOT CHECK THE POST').toUpperCase(); paintPage(); });
     };
   }
   setInterval(function () {
-    var a = document.querySelectorAll('.xbt'); if (!a.length || !ST) return; var t = left(ST.nextAt - now()); Array.prototype.forEach.call(a, function (e) { e.textContent = t; });
-    if (ST.nextAt && now() >= ST.nextAt && !ST.canClaim) { ST.canClaim = true; paintBox(); if (cur() === 'xbonus') paintPage(); }
+    if (!ST || cur() !== 'x') return; var a = document.querySelectorAll('#xApp .xbt'); Array.prototype.forEach.call(a, function (e) { e.textContent = left(ST.nextAt - now()); });
+    if (ST.nextAt && now() >= ST.nextAt && !ST.canClaim) { ST.canClaim = true; paintPage(); }
   }, 1000);
-  window.HallXBonus = {
-    paintBox: function () { paintBox(); if (!ST || !shown) { shown = true; load(); } else if (P.isSignedIn()) load(); },
-    open: function (name) { if (name !== 'xbonus') return; msg = ''; paintPage(); load(); }
-  };
-  P.onChange(function (what) { if (what === 'connect' || what === 'scores') { ST = null; if ($('xbBox')) { paintBox(); load(); } if (cur() === 'xbonus') paintPage(); } });
+  window.HallXBonus = { open: function (name) { if (name !== 'x') return; msg = ''; paintPage(); load(); } };
+  P.onChange(function (what) { if (what === 'connect' || what === 'scores') { ST = null; if (cur() === 'x') { paintPage(); load(); } } });
 })();
