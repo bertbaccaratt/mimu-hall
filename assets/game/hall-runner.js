@@ -24,6 +24,16 @@
   var MPH = 6.5, MILES = 0.001806;   // game speed units to miles per hour, and game distance units to miles (1 unit is about 2.9 metres)
   var hbot = el('div', 'hbot', '<div class="hsp"><svg viewBox="0 0 60 36" aria-hidden="true"><path class="gtr" d="M6 32 A24 24 0 0 1 54 32"/><path class="gfl" d="M6 32 A24 24 0 0 1 54 32" stroke-dasharray="75.4" stroke-dashoffset="75.4"/><line class="gnd" x1="30" y1="32" x2="30" y2="13"/><circle class="ghb" cx="30" cy="32" r="2.6"/></svg><b class="hv">0</b><span>MPH</span></div><div class="hdi"><b class="hd">0.00</b><span>MILES</span></div>');
   root.appendChild(hbot);
+  var hbuff = el('div', 'hbuff', '<div class="hbm" hidden><i class="hbi"></i><span>MAGNET</span><b></b><u><i></i></u></div><div class="hbx" hidden><i class="hbi">&times;</i><span>COINS</span><b></b><u><i></i></u></div>');
+  root.appendChild(hbuff);
+  var elBm = hbuff.querySelector('.hbm'), elBx = hbuff.querySelector('.hbx'), lastBm = '', lastBx = '', lastBp = -1;
+  function phoneBat(bp, hot) {   // the phone's own battery readout, live during a run
+    var a = document.querySelector('.bpct'), b = document.querySelector('.batt'); if (!a || !b) return;
+    a.textContent = bp + '%'; b.style.setProperty('--bp', bp + '%'); var low = bp <= 20 && S.mode !== 'idle';
+    a.classList.toggle('low', low); b.classList.toggle('low', low);
+    if (hot) { a.classList.add('hot'); b.classList.add('hot'); setTimeout(function () { a.classList.remove('hot'); b.classList.remove('hot'); }, 900); }
+  }
+  function resetBat() { lastBp = -1; phoneBat(69, false); }
   var elMph = hbot.querySelector('.hv'), elNeedle = hbot.querySelector('.gnd'), elArc = hbot.querySelector('.gfl'), elDist = hbot.querySelector('.hd'), lastMph = -1, lastDist = '', lastSlow = null;
   var hpSegs = hud.querySelectorAll('.hhp i'), elScore = hud.querySelector('.hs b'), elCoins = hud.querySelector('.hc b'), elCards = hud.querySelector('.hk b'), elSlow = hud.querySelector('.hsl');
   var ovStart = el('div', 'hov hstart', '<div class="ht gold">THE HALL</div><div class="hline"></div><div class="hsub">RUN THE HALL &middot; STEER CLEAR OF THE BOXES &middot; COLLECT THE COINS</div><div class="hbest">BEST <b>00000</b></div><div class="htap">TAP TO RUN</div><div class="hkeys">SWIPE LEFT OR RIGHT TO CHANGE LANE &middot; UP TO JUMP &middot; DOWN TO SLIDE</div>');
@@ -71,7 +81,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, netFoilAt: 60, netStaggerAt: 2100, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
+    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, batt: 100, magT: 0, mult: 1, multT: 0, multCool: 0, itemReq: { magnet: 0, multi: 0, battery: 0 }, diedBy: '', battLow: 0, netFoilAt: 60, netStaggerAt: 2100, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -87,7 +97,7 @@
   if (window.ResizeObserver) new ResizeObserver(resize).observe(root); window.addEventListener('resize', resize);
 
   /* ---------- spawning: boxes (obstacles) and coins ---------- */
-  function specialNear(z, lane) { for (var i = 0; i < S.ents.length; i++) { var e = S.ents[i]; if ((e.k === 'card' || e.k === 'pack') && e.lane === lane && Math.abs(e.z - z) < 1.8) return true; } return false; }
+  function specialNear(z, lane) { for (var i = 0; i < S.ents.length; i++) { var e = S.ents[i]; if ((e.k === 'card' || e.k === 'pack' || e.k === 'item') && e.lane === lane && Math.abs(e.z - z) < 1.8) return true; } return false; }
   function box(z, lane) { if (specialNear(z, lane - 1)) return; var r = Math.random(); S.ents.push({ k: 'box', z: z, lane: lane - 1, sc: 0.94 + Math.random() * 0.12, tier: r < 0.55 ? 0 : r < 0.8 ? 1 : 2 }); }
   function coin(z, lane) { S.ents.push({ k: 'coin', z: z, lane: lane - 1, ph: Math.random() * 20, got: false }); }
   function pattern() {
@@ -134,6 +144,44 @@
     var c = pickCard(); if (!c) return; cardImg(c.n);
     var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false });
   }
+  /* ---------- power-ups: the coin magnet, the coin multiplier and the phone battery ---------- */
+  function itemDue(kind, t) {   // how many of this power-up are due by this many seconds alive (the server uses the same timetable)
+    var it = HallProfile.config.items[kind], x = t - it.firstSec + 3; if (x < 0) return 0;
+    if (kind === 'multi') { var k = Math.floor(x / it.periodSec), w = x - k * it.periodSec; return k * it.chips + Math.min(it.chips, Math.floor(w / it.gapSec) + 1); }
+    return 1 + Math.floor(x / it.everySec);
+  }
+  function requestItem(kind, nr) {
+    var cur = S; if (nr) nr.drop(kind).then(function (r) { if (S === cur && r && r.dropId) spawnItem(kind, r.dropId); }, function () {}); else spawnItem(kind, null);
+  }
+  function spawnItem(kind, dropId) {
+    var spot = freeLane(16.5, null); S.ents.push({ k: 'item', item: kind, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, dropId: dropId });
+    hint(kind === 'magnet' ? 'A COIN MAGNET! JUMP IT!' : kind === 'multi' ? 'A COIN MULTIPLIER! JUMP IT!' : 'A PHONE BATTERY! JUMP IT!', 3);
+  }
+  function collectItem(e) {
+    var cf = HallProfile.config.items, nr = HallProfile.netRun && HallProfile.netRun(); if (e.dropId && nr) nr.collect(e.dropId).then(function () {}, function () {});
+    if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
+    if (e.item === 'magnet') { S.magT = cf.magnet.durSec; hint('COIN MAGNET! ' + cf.magnet.durSec + ' SECONDS', 3); }
+    else if (e.item === 'multi') {
+      if (S.mult >= cf.multi.max || S.multCool > 0) return;
+      S.mult++; S.multT = cf.multi.levelSec; if (S.mult >= cf.multi.max) S.multCool = cf.multi.cooldownSec;
+      hint('COIN MULTIPLIER x' + S.mult + (S.mult >= cf.multi.max ? '! MAXED, THEN A COOLDOWN' : '!'), 3);
+    } else { S.batt = Math.min(cf.battery.start, S.batt + cf.battery.gain); S.battLow = 0; hint('PHONE BATTERY +' + cf.battery.gain + '%', 3); phoneBat(Math.round(S.batt), true); lastBp = Math.round(S.batt); }
+  }
+  function tickItems(dt) {
+    var cf = HallProfile.config.items, nr = HallProfile.netRun && HallProfile.netRun(), kinds = ['magnet', 'multi', 'battery'], i, kind, due;
+    if (nr && !S.net) return;
+    for (i = 0; i < kinds.length; i++) {
+      kind = kinds[i]; due = itemDue(kind, S.alive);
+      while (S.itemReq[kind] < due) { S.itemReq[kind]++; if (kind === 'multi' && (S.multCool > 0 || S.mult >= cf.multi.max)) continue; requestItem(kind, nr); }
+    }
+    if (S.magT > 0) S.magT = Math.max(0, S.magT - dt);
+    if (S.mult > 1) { S.multT -= dt; if (S.multT <= 0) { S.mult--; S.multT = S.mult > 1 ? cf.multi.levelSec : 0; } }
+    if (S.multCool > 0) S.multCool = Math.max(0, S.multCool - dt);
+    S.batt -= dt * cf.battery.drainPerMin / 60;
+    if (S.batt <= 20 && S.battLow < 1) { S.battLow = 1; hint('LOW BATTERY! GRAB A GREEN BATTERY', 4); }
+    if (S.batt <= 8 && S.battLow < 2) { S.battLow = 2; hint('PHONE ABOUT TO DIE!', 4); }
+    if (S.batt <= 0) { S.batt = 0; S.diedBy = 'battery'; phoneBat(0, false); die(true); }
+  }
   function spawnPack() {
     var spot = freeLane(16.5, S.packLane); S.packLane = spot.lane; S.ents.push({ k: 'pack', z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false });
   }
@@ -158,7 +206,7 @@
     var cf = HallProfile.config, test = HallProfile.isTest();
     S.rc = { test: test, sightEvery: test ? HallProfile.testConfig.sight.everySec : cf.sight.everySec, packEvery: test ? HallProfile.testConfig.pack.everySec : cf.pack.everySec };
     S.nextSight = S.rc.sightEvery; S.nextPack = test ? HallProfile.testConfig.pack.firstSec : cf.pack.firstSec;
-    ovStart.style.display = 'none'; ovDead.style.display = 'none';
+    ovStart.style.display = 'none'; ovDead.style.display = 'none'; root.classList.remove('phonedead'); resetBat();
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
     var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
     if (window.HallNet && HallNet.ev) HallNet.ev('played');
@@ -208,7 +256,7 @@
   function decline() { if (!S.offer) return; S.offer = false; ovLife.style.display = 'none'; finalize(); }
   function leave() { forfeit(); decline(); }
   function finalize() {
-    var sc = Math.floor(S.score), isBest = sc > bestScore;
+    var sc = Math.floor(S.score), isBest = sc > bestScore; ovDead.querySelector('.ht').textContent = S.diedBy === 'battery' ? 'PHONE DIED' : 'GAME OVER'; root.classList.toggle('phonedead', S.diedBy === 'battery');
     if (isBest) bestScore = sc;
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rk').textContent = S.cards.length; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
     showBest();
@@ -253,7 +301,7 @@
       S.run += dt * (6 + v);
       if (S.alive >= S.nextSight) { S.nextSight += S.rc.sightEvery; spawnCard(); }
       if (S.alive >= S.nextPack) { S.nextPack += S.rc.packEvery; spawnPack(); }
-      netTick();
+      netTick(); tickItems(dt);
       // the road: now and then it swings and curves, and it always drifts a little
       S.curveNext -= dt;
       if (S.curveNext <= 0) { var r = Math.random(); S.curveT = r < 0.36 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.5); S.curveNext = 3 + Math.random() * 5; }
@@ -266,11 +314,15 @@
       // world
       for (var i = S.ents.length - 1; i >= 0; i--) {
         var e = S.ents[i], pz = e.z; e.z -= step;
+        if (e.k === 'coin' && !e.got) {   // the coin magnet: coins near you (your lane and the lanes beside you) fly into the runner
+          if (S.magT > 0 && !e.mag && e.z < PZ + HallProfile.config.items.magnet.reachZ && e.z > PZ - 0.05 && Math.abs(e.lane - S.px) <= 1.01) e.mag = true;
+          if (e.mag) { e.lane += (S.px - e.lane) * Math.min(1, dt * 9); e.z -= step * 0.55; if (e.z <= PZ + 0.12 && Math.abs(e.lane - S.px) < 0.45) { e.got = true; S.coins += S.mult; S.score += 25; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); } }
+        }
         if (e.lane === Math.round(S.px) && Math.abs(S.px - e.lane) < 0.62) {
           var cross = pz >= PZ - 0.10 && e.z <= PZ + 0.10;
           if (cross) {
-            if (e.k === 'coin' && !e.got) { e.got = true; S.coins++; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
-            else if ((e.k === 'card' || e.k === 'pack') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else collectPack(); } }
+            if (e.k === 'coin' && !e.got) { e.got = true; S.coins += S.mult; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
+            else if ((e.k === 'card' || e.k === 'pack' || e.k === 'item') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else if (e.k === 'item') collectItem(e); else collectPack(); } }
             else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } else if (jh >= 0.42 && !e.jumped) { e.jumped = true; S.boxesJumped++; } }
           }
         }
@@ -299,6 +351,10 @@
       if (dd !== lastDist) { lastDist = dd; elDist.textContent = dd; }
       if (slow !== lastSlow) { lastSlow = slow; hbot.classList.toggle('slow', slow); }
     }
+    var bp = S.mode === 'idle' ? 69 : Math.max(0, Math.round(S.batt)); if (bp !== lastBp) { lastBp = bp; phoneBat(bp, false); }
+    var cfi = HallProfile.config.items, bm = S.magT > 0 ? Math.ceil(S.magT) + 's|' + Math.round(S.magT / cfi.magnet.durSec * 100) : '', bx = S.mult > 1 ? 'x' + S.mult + '|' + Math.round(S.multT / cfi.multi.levelSec * 100) : S.multCool > 0 && S.mode === 'run' ? 'CD ' + Math.floor(S.multCool / 60) + ':' + pad(Math.floor(S.multCool % 60), 2) + '|0' : '';
+    if (bm !== lastBm) { lastBm = bm; elBm.hidden = !bm; if (bm) { var pm = bm.split('|'); elBm.querySelector('b').textContent = pm[0]; elBm.querySelector('u i').style.width = pm[1] + '%'; } }
+    if (bx !== lastBx) { lastBx = bx; elBx.hidden = !bx; if (bx) { var px2 = bx.split('|'); elBx.querySelector('b').textContent = px2[0]; elBx.querySelector('u i').style.width = px2[1] + '%'; elBx.classList.toggle('cool', S.mult <= 1); } }
     var sl = S.slowT > 0 ? 'SLOW ' + Math.floor(S.slowT / 60) + ':' + pad(Math.floor(S.slowT % 60), 2) : ''; if (elSlow.textContent !== sl) elSlow.textContent = sl;
     S.cardPulse = Math.max(0, (S.cardPulse || 0) - dt * 2); S.packPulse = Math.max(0, (S.packPulse || 0) - dt * 2);
   }
@@ -468,6 +524,42 @@
     if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
+  /* power-ups: drawn in code to match the chosen look: a red and gold U magnet, a black poker-chip coin with a gold rim, and a green glowing battery with a bolt */
+  function drawItem(e) {
+    if (e.got) return;
+    var hh = H - y0, s = 1 / e.z, y = y0 + s * hh; if (e.z < 0.62 || y > H + 120) return;
+    var x = cxAt(s) + e.lane * LANE * W * s, iw = 0.30 * W * s, cy = y - 0.66 * W * s + Math.sin(S.t * 2.4 + e.ph) * 0.02 * W * s, pulse = 0.8 + 0.2 * Math.sin(S.t * 4 + e.ph), kind = e.item, g, i;
+    var glow = kind === 'magnet' ? '255,170,60' : kind === 'multi' ? '255,205,90' : '60,255,130';
+    ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
+    shadow(x, y, iw * 0.3);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    g = ctx.createRadialGradient(x, cy, iw * 0.1, x, cy, iw * 0.95); g.addColorStop(0, 'rgba(' + glow + ',' + (0.55 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + glow + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + glow + ',0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy, iw * 0.95, 0, 6.3); ctx.fill(); ctx.restore();
+    ctx.translate(x, cy); ctx.lineCap = 'butt';
+    if (kind === 'magnet') {
+      var r = iw * 0.26, t = iw * 0.17, leg = iw * 0.34;
+      ctx.lineWidth = t; ctx.strokeStyle = '#d9ac5c'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI, false); ctx.moveTo(-r, 0); ctx.lineTo(-r, -leg * 0.5); ctx.moveTo(r, 0); ctx.lineTo(r, -leg * 0.5); ctx.stroke();
+      ctx.lineWidth = t * 0.28; ctx.strokeStyle = '#fff0c4'; ctx.beginPath(); ctx.arc(0, 0, r - t * 0.28, 0.15, Math.PI - 0.15, false); ctx.stroke();
+      ctx.lineWidth = t; ctx.strokeStyle = '#d6203a'; ctx.beginPath(); ctx.moveTo(-r, -leg * 0.5); ctx.lineTo(-r, -leg); ctx.moveTo(r, -leg * 0.5); ctx.lineTo(r, -leg); ctx.stroke();
+      ctx.fillStyle = '#e9e6df'; ctx.fillRect(-r - t / 2, -leg - t * 0.18, t, t * 0.18); ctx.fillRect(r - t / 2, -leg - t * 0.18, t, t * 0.18);
+      ctx.fillStyle = '#ffd45a'; for (i = 0; i < 3; i++) { var ang = S.t * 3 + i * 2.1 + e.ph, rr = iw * (0.34 + 0.08 * Math.sin(S.t * 5 + i)); ctx.beginPath(); ctx.arc(Math.cos(ang) * rr, -leg * 0.6 + Math.sin(ang) * rr * 0.5, iw * 0.04, 0, 6.3); ctx.fill(); }
+    } else if (kind === 'multi') {
+      var R2 = iw * 0.40;
+      ctx.fillStyle = '#0b0809'; ctx.beginPath(); ctx.arc(0, 0, R2, 0, 6.3); ctx.fill();
+      ctx.lineWidth = R2 * 0.13; ctx.strokeStyle = '#d9ac5c'; ctx.stroke();
+      ctx.fillStyle = '#d9ac5c'; for (i = 0; i < 8; i++) { ctx.save(); ctx.rotate(i * Math.PI / 4 + S.t * 0.6); ctx.fillRect(-R2 * 0.09, -R2 * 0.99, R2 * 0.18, R2 * 0.2); ctx.restore(); }
+      ctx.lineWidth = R2 * 0.05; ctx.strokeStyle = 'rgba(255,220,140,0.7)'; ctx.beginPath(); ctx.arc(0, 0, R2 * 0.7, 0, 6.3); ctx.stroke();
+      ctx.font = '700 ' + Math.max(8, R2 * 0.8) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffd45a'; ctx.shadowColor = 'rgba(255,200,70,0.9)'; ctx.shadowBlur = R2 * 0.3; ctx.fillText('x' + Math.min(HallProfile.config.items.multi.max, S.mult + 1), 0, R2 * 0.04);
+    } else {
+      var bw = iw * 0.46, bh = iw * 0.74;
+      ctx.fillStyle = '#d9ac5c'; ctx.fillRect(-bw * 0.22, -bh / 2 - iw * 0.07, bw * 0.44, iw * 0.07);
+      ctx.fillStyle = '#0a0d0a'; ctx.strokeStyle = '#d9ac5c'; ctx.lineWidth = iw * 0.05; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-bw / 2, -bh / 2, bw, bh, iw * 0.07); else ctx.rect(-bw / 2, -bh / 2, bw, bh); ctx.fill(); ctx.stroke();
+      g = ctx.createLinearGradient(0, bh / 2, 0, -bh / 2); g.addColorStop(0, '#0fae4a'); g.addColorStop(1, '#5cffa0'); ctx.fillStyle = g; ctx.shadowColor = 'rgba(60,255,130,0.95)'; ctx.shadowBlur = iw * 0.2;
+      ctx.fillRect(-bw / 2 + iw * 0.05, -bh / 2 + iw * 0.05, bw - iw * 0.1, bh - iw * 0.1); ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fffbd0'; ctx.beginPath(); ctx.moveTo(iw * 0.03, -bh * 0.36); ctx.lineTo(-bw * 0.28, iw * 0.03); ctx.lineTo(-iw * 0.01, iw * 0.03); ctx.lineTo(-iw * 0.05, bh * 0.36); ctx.lineTo(bw * 0.28, -iw * 0.04); ctx.lineTo(iw * 0.01, -iw * 0.04); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
   /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */
   function drawPack(e) {
     if (e.got) return;
@@ -564,7 +656,7 @@
     for (j = 0; j < S.ents.length; j++) list.push({ z: S.ents[j].z, e: S.ents[j] });
     list.push({ z: PZ, p: 1 });
     list.sort(function (a, b) { return b.z - a.z; });
-    for (j = 0; j < list.length; j++) { var it = list[j]; if (it.p) drawPlayer(); else if (it.e) { if (it.e.k === 'box') drawBox(it.e); else if (it.e.k === 'card') drawCard(it.e); else if (it.e.k === 'pack') drawPack(it.e); else drawCoin(it.e); } }
+    for (j = 0; j < list.length; j++) { var it = list[j]; if (it.p) drawPlayer(); else if (it.e) { if (it.e.k === 'box') drawBox(it.e); else if (it.e.k === 'card') drawCard(it.e); else if (it.e.k === 'pack') drawPack(it.e); else if (it.e.k === 'item') drawItem(it.e); else drawCoin(it.e); } }
     // embers
     ctx.globalCompositeOperation = 'lighter';
     for (j = 0; j < embers.length; j++) { var em = embers[j], a = 0.35 + 0.35 * Math.sin(S.t * 2 + em.p); ctx.fillStyle = 'rgba(255,190,100,' + a + ')'; ctx.beginPath(); ctx.arc(em.x * W, em.y * H, em.r, 0, 6.3); ctx.fill(); }
@@ -618,8 +710,8 @@
   document.addEventListener('visibilitychange', function () { if (document.hidden) leave(); });
   window.addEventListener('pagehide', leave);
   window.HallRunner = {
-    open: function () { leave(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
-    close: function () { leave(); active = false; },
+    open: function () { leave(); root.classList.remove('phonedead'); resetBat(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
+    close: function () { leave(); active = false; resetBat(); },
     state: function () { return S; },
     // what the admin page shows about the run in progress on this device
     live: function () { return { mode: S.mode, score: Math.floor(S.score), alive: Math.floor(S.alive), speed: S.v, hp: S.hp, cards: S.cards.length, coins: S.coins, slow: S.slowT > 0, life: !!S.lifeUsed }; }

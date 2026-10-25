@@ -13,6 +13,11 @@
       locksSec: [0, 0, 0, 7200, 10800],                                  // only Prestige (2:00) and Legendary (3:00) wait for time alive in the run; Common, Uncommon and Rare are open from the first sighting
       odds: [62, 24, 10, 3, 1]                                           // the rarity lottery: Common, Uncommon, Rare, Prestige, Legendary (a sighting is always a new card: duplicates are the stagger card's job)
     },
+    items: {                                                             // power-ups (the server hands them out in a signed-in run; the demo runs the same timetable)
+      magnet: { firstSec: 120, everySec: 240, durSec: 15, reachZ: 5.5 },   // a coin magnet at 2:00, then every 4 minutes; coins fly in for 15 seconds (your lane and the lanes beside you, about 5 steps ahead)
+      multi: { firstSec: 240, periodSec: 300, chips: 5, gapSec: 6, levelSec: 15, max: 5, cooldownSec: 180 },   // a chain of 5 chips every 5 minutes from 4:00; each chip adds a level (x2 to x5), a level lasts 15 s, the top fades first; a 3 minute cooldown after x5
+      battery: { firstSec: 480, everySec: 600, start: 100, gain: 20, drainPerMin: 1.2 }   // the phone: 100% at the start, -1.2% a minute, +20% for each green battery from 8:00, then every 10 minutes; at 0% the run ends
+    },
     stagger: { firstSec: 2100, everySec: 900 },                          // a duplicate of a card you own: at 35 minutes alive, then every 15 minutes (same lottery, only rarities you own)
     foil: { firstSec: 60, everySec: 1800, bothChance: 1 / 30 },           // a glowing foil half: after 1 minute of TOTAL play, then every 30 minutes of total play; rare cards come less often
     pack: { firstSec: 3600, everySec: 3600, slowPct: 20, slowSec: 60 },  // the black pack: at 1 hour, then every hour alive; slows you 20% for 60 s

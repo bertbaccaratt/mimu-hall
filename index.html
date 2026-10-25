@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261025i"><link rel="stylesheet" href="assets/game/comms.css?v=20261025i"><link rel="stylesheet" href="assets/game/admin.css?v=20261025i">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261025j"><link rel="stylesheet" href="assets/game/comms.css?v=20261025j"><link rel="stylesheet" href="assets/game/admin.css?v=20261025j">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -121,7 +121,7 @@
   .pstatus { position: absolute; left: 0; right: 0; top: 2.5%; display: flex; justify-content: space-between; align-items: center; padding: 0 9%; font-size: max(8px, calc(var(--h) * .0165)); letter-spacing: .24em; color: #d9ac5c; }
   .pright { display: flex; align-items: center; gap: calc(var(--h) * .012); }
   .bars { display: flex; align-items: flex-end; gap: 2px; height: calc(var(--h) * .016); } .bars b { width: calc(var(--h) * .004); background: #d9ac5c; } .bars b:nth-child(1) { height: 35%; } .bars b:nth-child(2) { height: 55%; } .bars b:nth-child(3) { height: 78%; } .bars b:nth-child(4) { height: 100%; }
-  .batt { width: calc(var(--h) * .03); height: calc(var(--h) * .0145); border: 1px solid #d9ac5c; border-radius: 3px; position: relative; } .batt::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: calc(69% - 1px); background: #d9ac5c; border-radius: 1px; } .bpct { letter-spacing: .06em; }
+  .batt { width: calc(var(--h) * .03); height: calc(var(--h) * .0145); border: 1px solid #d9ac5c; border-radius: 3px; position: relative; } .batt::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: calc(var(--bp, 69%) - 1px); max-width: calc(100% - 2px); background: #d9ac5c; border-radius: 1px; transition: width .4s, background .3s; } .batt.low::after { background: #e0414f; } .batt.hot { box-shadow: 0 0 10px 2px rgba(60,255,130,.9); border-color: #5cffa0; } .batt.hot::after { background: #5cffa0; } .bpct.low { color: #ff6b6b; animation: lowbat 1s steps(2) infinite; } .bpct.hot { color: #8dffb8; text-shadow: 0 0 8px rgba(60,255,130,.9); } @keyframes lowbat { 50% { opacity: .35; } } .bpct { letter-spacing: .06em; }
   .plock { position: absolute; left: 50%; top: 11.5%; transform: translateX(-50%); width: calc(var(--h) * .036); height: calc(var(--h) * .036); color: #d9ac5c; filter: drop-shadow(0 0 8px rgba(217,172,92,.5)); }
   .pdate { position: absolute; left: 0; right: 0; top: 17%; text-align: center; font-size: max(8px, calc(var(--h) * .0175)); letter-spacing: .28em; color: #d9ac5c; text-shadow: 0 1px 8px #000; }
   .pclock small, .hclock small { font-size: .26em; letter-spacing: .12em; margin-left: .3em; vertical-align: .5em; }
@@ -480,10 +480,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261025i" defer></script>
-<script src="assets/game/hall-runner.js?v=20261025i" defer></script>
-<script src="assets/game/eyes.js?v=20261025i" defer></script> <script src="assets/game/comms.js?v=20261025i" defer></script> <script src="assets/game/net.js?v=20261025i" defer></script> <script src="assets/game/egg.js?v=20261025i" defer></script> <script src="assets/game/badges.js?v=20261025i" defer></script> <script src="assets/game/apps.js?v=20261025i" defer></script>
-<script src="assets/game/admin-docs.js?v=20261025i" defer></script> <script src="assets/game/admin.js?v=20261025i" defer></script>
+<script src="assets/game/profile.js?v=20261025j" defer></script>
+<script src="assets/game/hall-runner.js?v=20261025j" defer></script>
+<script src="assets/game/eyes.js?v=20261025j" defer></script> <script src="assets/game/comms.js?v=20261025j" defer></script> <script src="assets/game/net.js?v=20261025j" defer></script> <script src="assets/game/egg.js?v=20261025j" defer></script> <script src="assets/game/badges.js?v=20261025j" defer></script> <script src="assets/game/apps.js?v=20261025j" defer></script>
+<script src="assets/game/admin-docs.js?v=20261025j" defer></script> <script src="assets/game/admin.js?v=20261025j" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -671,8 +671,8 @@ window.MIMUAudio = (function () {
   function closeGames(keepTab) { phoneEl.classList.remove('open'); gShade.classList.remove('open'); document.body.classList.remove('phone-open'); phoneEl.setAttribute('aria-hidden', 'true'); if (window.HallRunner) HallRunner.close(); if (!keepTab) setActive(null); }
   // Hall Rules and About are placeholders for now ("coming soon")
   var RULES = [
-    '<div class="rtoc"><b>JUMP TO</b><button type="button" data-j="r-basics">The basics</button><button type="button" data-j="r-road">Road and speed</button><button type="button" data-j="r-boxes">Boxes and health</button><button type="button" data-j="r-coins">Coins and scores</button><button type="button" data-j="r-cards">How cards drop</button><button type="button" data-j="r-foil">Foil cards</button><button type="button" data-j="r-collected">Collected</button><button type="button" data-j="r-market">Marketplace</button><button type="button" data-j="r-badges">Badges</button><button type="button" data-j="r-talk">Texts and mail</button><button type="button" data-j="r-phone">The phone</button><button type="button" data-j="r-fair">Fair play</button><span class="rall"><button type="button" data-j="all-open">Open all</button><button type="button" data-j="all-close">Close all</button></span></div>',
-    '<div class="rquick"><h3>THE QUICK VERSION</h3><ul><li><strong>Run:</strong> tap to run the hall. Change lane, jump the boxes, slide, and grab coins.</li><li><strong>Cards:</strong> they float down the road. Jump into one to collect it. There are 120 cards and 5 rarities.</li><li><strong>Five ways to get cards:</strong> your first card, sightings (new cards), stagger cards (duplicates), foil halves (glowing, ripped cards) and the wanted card.</li><li><strong>Your deck:</strong> the Collected app shows your Regular deck and your Foil deck. The leaderboard shows both completions.</li><li><strong>Fair play:</strong> the server checks every run. Right now the game is a demo and nothing is saved.</li></ul><p>Tap a heading below to open it. Everything is explained step by step.</p></div>',
+    '<div class="rtoc"><b>JUMP TO</b><button type="button" data-j="r-basics">The basics</button><button type="button" data-j="r-road">Road and speed</button><button type="button" data-j="r-boxes">Boxes and health</button><button type="button" data-j="r-coins">Coins and scores</button><button type="button" data-j="r-cards">How cards drop</button><button type="button" data-j="r-foil">Foil cards</button><button type="button" data-j="r-power">Power-ups and battery</button><button type="button" data-j="r-collected">Collected</button><button type="button" data-j="r-market">Marketplace</button><button type="button" data-j="r-badges">Badges</button><button type="button" data-j="r-talk">Texts and mail</button><button type="button" data-j="r-phone">The phone</button><button type="button" data-j="r-fair">Fair play</button><span class="rall"><button type="button" data-j="all-open">Open all</button><button type="button" data-j="all-close">Close all</button></span></div>',
+    '<div class="rquick"><h3>THE QUICK VERSION</h3><ul><li><strong>Run:</strong> tap to run the hall. Change lane, jump the boxes, slide, and grab coins.</li><li><strong>Cards:</strong> they float down the road. Jump into one to collect it. There are 120 cards and 5 rarities.</li><li><strong>Five ways to get cards:</strong> your first card, sightings (new cards), stagger cards (duplicates), foil halves (glowing, ripped cards) and the wanted card.</li><li><strong>Power-ups:</strong> a coin magnet, a coin multiplier, and green batteries that keep your phone alive. If the phone hits 0%, the run ends.</li><li><strong>Your deck:</strong> the Collected app shows your Regular deck and your Foil deck. The leaderboard shows both completions.</li><li><strong>Fair play:</strong> the server checks every run. Right now the game is a demo and nothing is saved.</li></ul><p>Tap a heading below to open it. Everything is explained step by step.</p></div>',
     '<details class="rs" id="r-basics" open><summary>The basics</summary><div class="rsb">',
     '<p>THE HALL is a three-lane runner on the phone in the middle of the page. Unlock the phone (swipe up on the lock screen, or press the lock button on the side), open the app <strong>THE HALL</strong>, and tap to run. Run as far as you can, grab coins, dodge or jump the boxes, and collect cards.</p>',
     '<div class="rtab"><div class="rh">ACTION</div><div class="rh">TOUCH / MOUSE</div><div class="rh">KEYBOARD</div>',
@@ -742,6 +742,17 @@ window.MIMUAudio = (function () {
     '<li><strong>The pace:</strong> about two pieces for every hour of play, so all 240 pieces take about 120 hours of play. It is a long chase.</li>',
     '<li>See your foil progress in the <strong>Foil deck</strong> tab of the Collected app and on the leaderboard.</li></ul>',
     '</div></details>',
+    '<details class="rs" id="r-power"><summary>Power-ups and the phone battery</summary><div class="rsb">',
+    '<p>Three power-ups float down the road during a run. Jump into one to collect it, the same way you jump a card. The server decides when they appear.</p>',
+    '<div class="rtab rdrop"><div class="rh">POWER-UP</div><div class="rh">WHEN</div><div class="rh">WHAT IT DOES</div>',
+    '<div class="rk">Coin magnet</div><div>2:00 alive, then every 4 minutes</div><div>For <strong>15 seconds</strong>, coins fly into the runner: your lane and the lanes beside you, about 5 steps ahead.</div>',
+    '<div class="rk">Coin multiplier</div><div>A chain of 5 poker chips, 6 seconds apart, every 5 minutes from 4:00 alive</div><div>Each chip adds a level: <strong>x2, x3, x4, up to x5</strong>. Your coins count times the level (points per coin stay 25).</div>',
+    '<div class="rk">Phone battery</div><div>8:00 alive, then every 10 minutes</div><div>A glowing green battery: <strong>+20%</strong> phone power (never above 100%).</div></div>',
+    '<h3>How the multiplier works</h3>',
+    '<ul><li>Each level lasts <strong>15 seconds</strong>. When the time runs out the top level fades first (x5 to x4 to x3 and so on), so you can keep a high multiplier by grabbing the next chip in time.</li><li>At <strong>x5</strong> the chain is maxed. Then there is a <strong>3 minute cooldown</strong>: no more chips appear until it is over.</li></ul>',
+    '<h3>The phone battery</h3>',
+    '<ul><li>The battery in the phone&rsquo;s top bar is <strong>live during a run</strong>. It starts at <strong>100%</strong> and loses about <strong>1.2% every minute</strong>, so a full charge lasts about 83 minutes.</li><li>Grab green batteries to add 20%. Below 20% the battery turns <strong>red</strong> and you get a warning.</li><li>At <strong>0% the phone dies and the run ends.</strong> Your score is kept, like any other run.</li><li>You do not need every battery: catching about 6 out of every 10 keeps you going. Ignore them and a run ends at 83 minutes.</li></ul>',
+    '</div></details>',
     '<details class="rs" id="r-collected"><summary>The Collected app</summary><div class="rsb">',
     '<ul><li>Open <strong>COLLECTED</strong> on the phone. It has two tabs: <strong>REGULAR DECK</strong> and <strong>FOIL DECK</strong>.</li>',
     '<li><strong>Regular deck:</strong> all 120 cards laid out face down. A card you earn flips over and shows its picture. Filter by tier, family, or collected and missing. If you have more than one copy, a gold <strong>&times;2</strong> shows, and a small <strong>SELL 1</strong> button lets you sell one extra copy to the Hall (tap twice, so it is never an accident). The button only appears while you have more than one.</li>',
@@ -767,7 +778,7 @@ window.MIMUAudio = (function () {
     '</div></details>',
     '<details class="rs" id="r-phone"><summary>The phone and every icon</summary><div class="rsb">',
     '<ul><li>Buttons on the left edge: the <strong>silent switch</strong> mutes the whole site, and the two below it turn the <strong>volume</strong> up and down. The button on the right edge is the <strong>lock button</strong>: on the lock screen it unlocks to the home screen, anywhere else it locks the phone.</li>',
-    '<li><strong>There is no pause.</strong> The run ends the moment you leave the game: pressing the home bar, pressing the lock button, closing the phone, switching browser tab, or anything that freezes the page for more than half a second. Coming back starts a fresh run.</li>',
+    '<li>The battery shown in the phone&rsquo;s top bar is for show until you run. During a run it is your real phone power (see Power-ups).</li><li><strong>There is no pause.</strong> The run ends the moment you leave the game: pressing the home bar, pressing the lock button, closing the phone, switching browser tab, or anything that freezes the page for more than half a second. Coming back starts a fresh run.</li>',
     '<li><strong>The phone is always up.</strong> Closing Hall Rules, About or Apechain brings it straight back. Only pressing <strong>MIMU</strong> in the top menu clears the page to the bare hall (press Games to bring the phone back).</li>',
     '<li>Browsers keep a page silent until you click it, which is why the loading screen asks for a click first.</li></ul>',
     '<div class="rtab"><div class="rh">ICON</div><div class="rh">WHAT IT DOES</div><div class="rh">STATUS</div>',

@@ -43,6 +43,9 @@
       ['SIGHTING LOTTERY', P.tiers.map(function (t, i) { return t.name + ' ' + s.odds[i] + '%'; }).join(' · ') + ' (a sighting is always a new card; duplicates come from stagger cards)'],
       ['STAGGER CARDS', 'a duplicate of a card you own (same lottery, only rarities you own): first at ' + hms(c.stagger.firstSec) + ', then every ' + hms(c.stagger.everySec)],
       ['FOIL PIECES', 'a glowing half of a card after ' + hms(c.foil.firstSec) + ' of total play, then every ' + hms(c.foil.everySec) + ' of total play; 240 pieces; about 1 drop in 30 is both halves; rare cards come less often'],
+      ['COIN MAGNET', 'at ' + hms(c.items.magnet.firstSec) + ' alive, then every ' + hms(c.items.magnet.everySec) + '; coins fly in for ' + c.items.magnet.durSec + ' s (your lane and the lanes beside you)'],
+      ['COIN MULTIPLIER', 'a chain of ' + c.items.multi.chips + ' chips every ' + hms(c.items.multi.periodSec) + ' from ' + hms(c.items.multi.firstSec) + '; each adds a level up to x' + c.items.multi.max + ', a level lasts ' + c.items.multi.levelSec + ' s, a ' + hms(c.items.multi.cooldownSec) + ' cooldown after x' + c.items.multi.max],
+      ['PHONE BATTERY', 'starts at ' + c.items.battery.start + '%, loses ' + c.items.battery.drainPerMin + '% a minute; a green battery gives +' + c.items.battery.gain + '% at ' + hms(c.items.battery.firstSec) + ', then every ' + hms(c.items.battery.everySec) + '; at 0% the run ends'],
       ['THE PACK', 'first at ' + hms(pk.firstSec) + ', then every ' + hms(pk.everySec) + '; jump it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' s, no other bonus'],
       ['HEALTH', hp.segments + ' segments. Plain box ' + hp.dmg.plain + ' (3 hits), blue ' + hp.dmg.blue + ' (2 hits), red ' + hp.dmg.red + ' (1 hit)'],
       ['SCORING', 'distance + ' + c.coinPoints + ' per coin; every run adds to the lifetime total'],
@@ -239,7 +242,7 @@
     TIME_MISMATCH: 'The time the run claims does not match the clock on the server.', DISTANCE_TOO_FAR: 'More distance than the speed limit allows for that time.', SCORE_TOO_HIGH: 'The score is higher than distance and coins can explain.',
     COINS_TOO_HIGH: 'More coins than a run could have picked up.', INPUT_TOO_FAST: 'Jumps, slides or lane changes faster than a hand can do.', TOO_MANY_HITS: 'More box hits than a run can survive.', BOXES_TOO_MANY: 'More boxes cleared than the road holds.',
     PACK_TOO_EARLY: 'A black pack was collected before the first one could appear.', TOO_MANY_CARDS: 'More cards than the sighting timetable allows.', TIER_NOT_OPEN: 'A card of a rarity that was not open yet at that time.', UNKNOWN_CARD: 'A card number that does not exist.',
-    NO_INPUT: 'A long run with no moves at all (a bot or an idle script).', FEW_HEARTBEATS: 'The game did not report in while it ran (a result sent without playing).', LIFE_NOT_PURCHASED: 'An extra life was used without being bought.'
+    NO_INPUT: 'A long run with no moves at all (a bot or an idle script).', FEW_HEARTBEATS: 'The game did not report in while it ran (a result sent without playing).', BATTERY_IMPOSSIBLE: 'A run longer than the phone battery allows (too few batteries collected).', LIFE_NOT_PURCHASED: 'An extra life was used without being bought.'
   };
   var flagSig = '', flagTab = 'l';
   function flagCard(r, held) {
