@@ -49,6 +49,7 @@
     foil: function () { return S.me ? S.me.foil || {} : {}; },
     totals: function () { return S.me ? S.me.totals : { lifetime: 0, best: 0, last: 0, coins: 0, balance: 0 }; },
     stats: function () { return S.me ? S.me.stats : {}; },
+    nft: function () { return S.me ? S.me.nft || null : null; },   // { enabled, need, count, eligible, foilGranted }: the Mimu On Ape holder reward
     addCard: function (n) { if (S.me) { S.me.cards[n] = (S.me.cards[n] || 0) + 1; } return true; },   // shown at once; the server adds the card for real when the run is verified
     recordRun: function (r) { return finishRun(r); },
     leaderboard: function (kind) { return call('/leaderboard?kind=' + encodeURIComponent(kind)).catch(function () { return []; }); },

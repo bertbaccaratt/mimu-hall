@@ -181,3 +181,23 @@ a.srow { cursor: pointer; } a.srow:hover { background: rgba(217,172,92,.08); }
 
 /* the leaderboard shows each player X bonus points under their lifetime total */
 .lbrow .lbx { grid-column: 2 / 4; font-size: calc(var(--h) * .0135); letter-spacing: .1em; color: #9bd0ff; opacity: .9; margin-top: calc(var(--h) * -.004); }
+
+/* THE MIMU HOLDER REWARD widget at the top of the Foil deck */
+.fholder { display: grid; grid-template-columns: calc(var(--h) * .105) 1fr; gap: calc(var(--h) * .016); align-items: center; margin: 0 4% calc(var(--h) * .016); padding: calc(var(--h) * .016); border-radius: 10px; border: 1px solid rgba(232,198,115,.65); background: linear-gradient(135deg, rgba(92,22,34,.92), rgba(24,6,12,.94) 60%, rgba(60,40,10,.9)); box-shadow: 0 0 calc(var(--h) * .03) rgba(232,198,115,.22), inset 0 0 calc(var(--h) * .03) rgba(0,0,0,.55); position: relative; overflow: hidden; }
+.fholder::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 38%, rgba(255,240,200,.16) 50%, transparent 62%); background-size: 260% 100%; animation: fhsheen 4.5s ease-in-out infinite; }
+.fholder.got, .fholder.max { border-color: #ffe08a; box-shadow: 0 0 calc(var(--h) * .04) rgba(255,205,90,.55), inset 0 0 calc(var(--h) * .03) rgba(0,0,0,.5); }
+.fholder.locked, .fholder.none { filter: saturate(.55); } .fholder.locked::after { display: none; }
+.fhtile { position: relative; width: 100%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 10px; background: radial-gradient(circle at 30% 25%, rgba(255,240,200,.3), rgba(0,0,0,.4)); border: 1px solid rgba(255,230,160,.7); transform-origin: 50% 85%; }
+.fholder.got .fhtile, .fholder.max .fhtile { animation: fhwig 2.2s ease-in-out infinite; box-shadow: 0 0 calc(var(--h) * .03) rgba(255,205,90,.7); }
+.fhtile svg { width: 78%; height: 78%; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); } .fholder.locked .fhtile svg, .fholder.none .fhtile svg { opacity: .55; }
+.fhtile b { position: absolute; right: -6%; top: -8%; min-width: 1.7em; padding: .12em .35em; border-radius: 99px; background: #ff2a2a; border: 1px solid #fff; color: #fff; font: 900 max(10px, calc(var(--h) * .0165)) 'Cinzel', Georgia, serif; text-align: center; box-shadow: 0 0 8px rgba(255,60,60,.8); }
+.fhbody { min-width: 0; position: relative; z-index: 1; font-family: 'Cinzel', Georgia, serif; color: #f1d9a0; }
+.fhk { font-size: max(9px, calc(var(--h) * .0125)); letter-spacing: .24em; color: #ffe08a; } .fhbig { display: flex; align-items: baseline; gap: calc(var(--h) * .008); flex-wrap: wrap; margin-top: calc(var(--h) * .004); } .fhbig span { font-size: max(20px, calc(var(--h) * .042)); font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,205,90,.6); } .fhbig small { font-size: max(8px, calc(var(--h) * .0115)); letter-spacing: .14em; color: #f1d9a0; }
+.fhline { margin-top: calc(var(--h) * .004); font-size: max(9px, calc(var(--h) * .0128)); letter-spacing: .08em; line-height: 1.45; color: #fff; }
+.fhbar { margin-top: calc(var(--h) * .008); height: calc(var(--h) * .008); border-radius: 99px; background: rgba(255,255,255,.14); overflow: hidden; } .fhbar i { display: block; height: 100%; background: linear-gradient(90deg, #b8862e, #ffd45a, #fff3c9); border-radius: 99px; }
+.fhsq { margin-top: calc(var(--h) * .01); display: grid; grid-template-columns: repeat(10, 1fr); gap: calc(var(--h) * .0045); } .fhsq i { aspect-ratio: 1; border-radius: 3px; background: rgba(255,255,255,.1); border: 1px solid rgba(232,198,115,.3); } .fhsq i.on { background: linear-gradient(135deg, #ff6ad5, #ffd45a, #5affc8); border-color: #fff3c9; box-shadow: 0 0 6px rgba(255,220,120,.7); } .fhsq i.nx { border-color: #ffe08a; animation: fhnext 1.6s ease-in-out infinite; }
+.fhnote { margin-top: calc(var(--h) * .008); font-size: max(7px, calc(var(--h) * .0105)); letter-spacing: .1em; color: #c9b078; }
+.fholder, .fholder * { color-scheme: dark; }
+@keyframes fhwig { 0%, 52%, 100% { transform: rotate(0); } 6% { transform: rotate(-9deg) scale(1.04); } 12% { transform: rotate(8deg) scale(1.04); } 18% { transform: rotate(-6deg); } 24% { transform: rotate(5deg); } 30% { transform: rotate(-3deg); } 36% { transform: rotate(2deg); } }
+@keyframes fhsheen { 0% { background-position: 130% 0; } 60%, 100% { background-position: -30% 0; } } @keyframes fhnext { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fholder .fhtile, .fholder::after, .fhsq i.nx { animation: none !important; } }

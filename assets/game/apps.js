@@ -37,12 +37,31 @@
   function foilPage() {
     var cs = P.cards().map(function (c) { return '<div class="fc" data-n="' + c.n + '" data-t="' + c.tier + '"><div class="fcf"><div class="fcb"><img src="assets/game/card-back.webp" alt="" loading="lazy" decoding="async"></div><div class="fh fl"><img data-src="' + c.file + '" alt="" decoding="async"></div><div class="fh fr"><img data-src="' + c.file + '" alt="" decoding="async"></div><i class="fshine"></i></div><span class="cn">' + pad3(c.n) + '</span></div>'; }).join('');
     var chips = ['all', 'full', 'half', 'missing'].map(function (v, i) { return '<button class="chip' + (i ? '' : ' on') + '" data-fv="' + v + '">' + ({ all: 'ALL', full: 'FOIL CARDS', half: 'HALVES ONLY', missing: 'MISSING' })[v] + '</button>'; }).join('');
-    return HOWTO_FOIL + '<div class="sec"><div class="pb total foil"><span>FOIL CARDS</span><div class="tr"><i id="fCardBar"></i></div><span class="ct" id="fCardCt">0/120</span></div><div class="pb total foil"><span>PIECES</span><div class="tr"><i id="fPieceBar"></i></div><span class="ct" id="fPieceCt">0/240</span></div></div>' +
+    return '<div id="fHolder" class="fholder"></div>' + HOWTO_FOIL + '<div class="sec"><div class="pb total foil"><span>FOIL CARDS</span><div class="tr"><i id="fCardBar"></i></div><span class="ct" id="fCardCt">0/120</span></div><div class="pb total foil"><span>PIECES</span><div class="tr"><i id="fPieceBar"></i></div><span class="ct" id="fPieceCt">0/240</span></div></div>' +
       '<div class="sec"><div class="sech">FILTER</div><div class="fl"><div class="chips" id="fChips">' + chips + '</div></div></div><div class="sec"><div class="sech"><span id="fShow">SHOWING 120</span></div></div><div class="cgrid foilgrid" id="fGrid">' + cs + '</div>';
   }
   function foilStats() { var fm = P.foil ? P.foil() : {}, cards = 0, pieces = 0; Object.keys(fm).forEach(function (k) { var h = String(fm[k] || ''); pieces += h.length; if (h.length >= 2) cards++; }); return { map: fm, cards: cards, pieces: pieces }; }
+  /* THE MIMU HOLDER REWARD: a widget at the top of the Foil deck. Players who hold Mimu On Ape NFTs are given 1 free foil card at 10, and 1 more for every 10 more, up to 20 at 200. It is different for every player. */
+  function paintHolder() {
+    var el = $('fHolder'); if (!el) return; var n = P.nft ? P.nft() : null, signed = P.isSignedIn(), MAX = 20, STEP = 10, i, sq = '', html, key;
+    var count = n && n.enabled ? (n.count || 0) : 0, got = n && n.enabled ? Math.min(MAX, n.foilGranted || 0) : 0, live = !!(n && n.enabled), next = got < MAX ? (got + 1) * STEP : 0;
+    key = [signed, live, count, got].join('|'); if (el.getAttribute('data-k') === key) return; el.setAttribute('data-k', key);
+    for (i = 1; i <= MAX; i++) sq += '<i class="' + (i <= got ? 'on' : i === got + 1 ? 'nx' : '') + '" title="' + (i * STEP) + ' MIMUS = ' + i + ' FOIL CARD' + (i === 1 ? '' : 'S') + '"></i>';
+    var big, line, bar = '';
+    if (!signed || !live) {
+      big = '0 / ' + MAX; line = signed ? 'THE HOLDER REWARD IS NOT ON YET' : 'SIGN IN WITH GLYPH TO SEE YOUR MIMU REWARD';
+      html = 'locked';
+    } else if (got >= MAX) { big = got + ' / ' + MAX; line = 'ALL 20 FREE FOIL CARDS RECEIVED. YOU HOLD ' + count + ' MIMUS.'; html = 'max'; }
+    else if (got > 0) { big = got + ' / ' + MAX; line = 'YOU HOLD ' + count + ' MIMUS. NEXT FREE FOIL CARD AT ' + next + '.'; html = 'got'; bar = Math.min(100, Math.round(count / next * 100)); }
+    else { big = '0 / ' + MAX; line = count >= STEP ? 'YOUR FIRST FREE FOIL CARD IS BEING ADDED' : 'YOU HOLD ' + count + ' MIMUS. HOLD ' + STEP + ' FOR YOUR FIRST FREE FOIL CARD.'; html = 'none'; bar = Math.min(100, Math.round(count / STEP * 100)); }
+    el.className = 'fholder ' + html;
+    el.innerHTML = '<div class="fhtile" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="fhg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6ad5"/><stop offset=".33" stop-color="#ffd45a"/><stop offset=".66" stop-color="#5affc8"/><stop offset="1" stop-color="#7a8bff"/></linearGradient></defs><rect x="14" y="6" width="36" height="52" rx="5" fill="url(#fhg)" stroke="#fff3c9" stroke-width="2.4"/><path d="M33 12 l3.2 9 9.2.4 -7.3 5.6 2.6 9 -7.7 -5.2 -7.7 5.2 2.6 -9 -7.3 -5.6 9.2 -.4z" fill="#fff" fill-opacity=".92"/><path d="M21 48 h22" stroke="#fff" stroke-opacity=".75" stroke-width="2.4" stroke-linecap="round"/></svg>' + (got ? '<b>' + got + '</b>' : '') + '</div>' +
+      '<div class="fhbody"><div class="fhk">MIMU HOLDER REWARD</div><div class="fhbig"><span>' + big + '</span><small>FREE FOIL CARDS RECEIVED</small></div><div class="fhline">' + line + '</div>' +
+      (bar !== '' ? '<div class="fhbar"><i style="width:' + bar + '%"></i></div>' : '') +
+      '<div class="fhsq" aria-label="' + got + ' of ' + MAX + ' free foil cards received">' + sq + '</div><div class="fhnote">10 MIMUS = 1 FREE FOIL CARD &middot; 1 MORE FOR EVERY 10 &middot; 200 MIMUS = 20</div></div>';
+  }
   function refreshFoil() {
-    if (!cBuilt) return; var st = foilStats(), total = (P.cards().length || 120), els = cEl.querySelectorAll('.fc');
+    if (!cBuilt) return; paintHolder(); var st = foilStats(), total = (P.cards().length || 120), els = cEl.querySelectorAll('.fc');
     $('fCardCt').textContent = st.cards + '/' + total; $('fCardBar').style.width = (st.cards / total * 100) + '%'; $('fPieceCt').textContent = st.pieces + '/' + (total * 2); $('fPieceBar').style.width = (st.pieces / (total * 2) * 100) + '%';
     Array.prototype.forEach.call(els, function (el) {
       var n = el.getAttribute('data-n'), h = String(st.map[n] || ''), l = h.indexOf('L') >= 0, r = h.indexOf('R') >= 0;
