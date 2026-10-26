@@ -180,7 +180,9 @@
       xrecheck: function (id) { return call('/admin/x/recheck', { body: { id: id }, admin: tk() }).then(function (r) { return adminFeed().then(function () { return r; }); }, fail); },
       flag: function (runId, action) { return call('/admin/flag', { body: { runId: runId, action: action }, admin: tk() }).then(adminFeed, fail); }
     });
-    adminFeed().catch(fail); clearInterval(adm.timer); adm.timer = setInterval(function () { adminFeed().catch(function (e) { if (e && e.status === 401) adminLogout(); }); }, 4000);
+    adminFeed().catch(fail); clearInterval(adm.timer);
+    var pull = function () { if (adm.busy || document.hidden) return; adm.busy = true; adminFeed().catch(function (e) { if (e && e.status === 401) adminLogout(); }).then(function () { adm.busy = false; }); };
+    adm.timer = setInterval(pull, 2000); if (!adm.vis) { adm.vis = true; document.addEventListener('visibilitychange', function () { if (!document.hidden && adm.timer) pull(); }); }   /* the numbers are about 2 seconds old at most */
   }
 
   window.HallNet = { api: call, vid: vid, ev: ev, connectThen: connectThen, signIn: signIn, restore: restore, admin: { login: adminLogin, start: adminStart, stop: function () { clearInterval(adm.timer); adm.timer = 0; }, logout: adminLogout, token: admToken, feed: adminFeed }, base: API };

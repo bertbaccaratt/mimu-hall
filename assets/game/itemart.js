@@ -69,5 +69,13 @@
     ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#04120a'; ctx.lineWidth = iw * 0.02; ctx.beginPath(); ctx.moveTo(iw * 0.03, -bh * 0.36); ctx.lineTo(-bw * 0.28, iw * 0.03); ctx.lineTo(-iw * 0.01, iw * 0.03); ctx.lineTo(-iw * 0.05, bh * 0.36); ctx.lineTo(bw * 0.28, -iw * 0.04); ctx.lineTo(iw * 0.01, -iw * 0.04); ctx.closePath(); ctx.fill(); ctx.stroke();
   }
 
-  window.HallItemArt = { draw: draw, glow: GLOW };
+  /* PHONES AND TABLETS: each item is drawn once into a small picture and then just placed (and pulsed a little) every frame */
+  var SPR = {};
+  function drawCached(ctx, kind, iw, t, ph, label) {
+    var key = kind + '|' + (kind === 'multi' ? label : ''), c = SPR[key];
+    if (!c) { c = SPR[key] = document.createElement('canvas'); c.width = c.height = 300; var g = c.getContext('2d'); g.translate(150, 150); draw(g, kind, 150, 0, 0, label); }
+    var k = 1 + 0.035 * Math.sin(t * 4 + ph), s = iw / 150 * k;
+    ctx.drawImage(c, -150 * s, -150 * s, 300 * s, 300 * s);
+  }
+  window.HallItemArt = { draw: draw, drawCached: drawCached, glow: GLOW };
 })();

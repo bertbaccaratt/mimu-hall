@@ -78,7 +78,7 @@
 
   /* ---------- state ---------- */
   /* PHONES ONLY: the picture is drawn a little less sharp when the phone cannot keep up, and the game clock always follows real time (computers are untouched) */
-  var TOUCH = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches), qLevel = 0, qEma = 0.0167, qN = 0, QS = [1, 0.82, 0.68, 0.55], FSTEP = [2, 2, 3, 4];
+  var TOUCH = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches), qLevel = 0, qEma = 0.0167, qN = 0, qUp = 0, qDropAt = 0, qRaised = 0, qNoRaise = false, QS = [1, 0.82, 0.68, 0.55], FSTEP = [2, 2, 3, 4];
   var W = 0, H = 0, y0 = 0, dpr = 1, active = false, raf = 0, last = 0, S, embers = [], bestScore = 0, cardImgs = {};
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
@@ -227,7 +227,7 @@
   function netTick() {
     var nr = HallProfile.netRun && HallProfile.netRun(), cur = S; if (!nr || !S.net) return;
     if (S.alive >= S.netBeat) {
-      S.netBeat = S.alive + 10;
+      S.netBeat = S.alive + 5;   /* a live update every 5 seconds, so the control room's LIVE RUNS is never more than a few seconds behind */
       nr.beat({ score: Math.floor(S.score), alive: Math.floor(S.alive), coins: S.coins, hp: S.hp, cards: S.cards.length + S.dropGot, speed: Math.round(S.v * MPH * 10) }).then(function (r) { if (S === cur && r && r.wanted) spawnDrop('wanted', r.wanted); }, function () {});
     }
     if (S.net.offerFirst) for (var i = 0; i < 2; i++) if (!S.firstReq[i] && S.alive >= S.net.firstOffers[i]) { S.firstReq[i] = true; nr.drop('first').then(function (r) { if (S === cur && r && r.dropId) spawnDrop('first', r); }, function () {}); }
@@ -454,12 +454,18 @@
   function shadow(x, y, w) { ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.beginPath(); ctx.ellipse(x, y, w, w * 0.22, 0, 0, 6.3); ctx.fill(); ctx.restore(); }
 
   var AURA = [null, { c: 'rgba(255,36,48,', rim: 'rgba(255,70,80,' }, { c: 'rgba(70,140,255,', rim: 'rgba(110,170,255,' }];
+  /* PHONES AND TABLETS: a glow is a ready-made soft sprite (made once) instead of a canvas shadow blur or a new gradient every frame. The look is the same; blurred shadows are the slowest thing a phone canvas can draw. Computers keep the original drawing. */
+  var GLOWS = {}, RGBS = {};
+  function rgbOf(p) { var r = RGBS[p]; if (!r) r = RGBS[p] = p.replace('rgba(', '').replace(/,\s*$/, ''); return r; }
+  function glowSpr(rgb) { var c = GLOWS[rgb]; if (c) return c; c = GLOWS[rgb] = document.createElement('canvas'); c.width = c.height = 96; var g = c.getContext('2d'), gr = g.createRadialGradient(48, 48, 5, 48, 48, 48); gr.addColorStop(0, 'rgba(' + rgb + ',0.95)'); gr.addColorStop(0.5, 'rgba(' + rgb + ',0.38)'); gr.addColorStop(1, 'rgba(' + rgb + ',0)'); g.fillStyle = gr; g.fillRect(0, 0, 96, 96); return c; }
+  function glowAt(rgb, x, y, rx, ry, a) { var ga = ctx.globalAlpha, gc = ctx.globalCompositeOperation; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = ga * Math.min(1, a); ctx.drawImage(glowSpr(rgb), x - rx, y - ry, rx * 2, ry * 2); ctx.globalAlpha = ga; ctx.globalCompositeOperation = gc; }
   function drawBox(e) {
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh, im = imgs.box; if (e.z < 0.62 || !im.naturalWidth || y > H + 90) return;
     var x = cxAt(s) + e.lane * LANE * W * s, bw = 0.42 * W * s * e.sc, bh = bw * im.naturalHeight / im.naturalWidth, au = AURA[e.tier], pulse = 0.82 + 0.18 * Math.sin(S.t * 5 + e.z * 2);
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, bw * 0.55);
-    if (au) {
+    if (au && TOUCH) { var gyT = y - bh * 0.35, grT = bw * 1.15; glowAt(rgbOf(au.c), x, gyT + bh * 0.1, grT, grT * 0.78, 0.85 * pulse); glowAt(rgbOf(au.rim), x, y - bh * 0.4, bw * 0.85, bh * 0.75, 0.6 * pulse); }
+    else if (au) {
       // the glow lights the floor around the box, then a soft coloured edge light hugs the box itself
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       var gy = y - bh * 0.35, gr = bw * 1.15, g = ctx.createRadialGradient(x, gy, bw * 0.1, x, gy, gr);
@@ -506,7 +512,7 @@
       ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(l, t, cw, ch);
       ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(255,215,120,0.12)'; ctx.fillRect(l, t, cw, ch);
       ctx.restore();
-      ctx.strokeStyle = 'rgba(255,215,100,0.95)'; ctx.shadowColor = 'rgba(255,200,70,0.95)'; ctx.shadowBlur = Math.max(5, cw * 0.18); ctx.lineWidth = Math.max(1, cw * 0.03); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,215,100,0.95)'; if (!TOUCH) { ctx.shadowColor = 'rgba(255,200,70,0.95)'; ctx.shadowBlur = Math.max(5, cw * 0.18); } ctx.lineWidth = Math.max(1, cw * 0.03); ctx.stroke();
       ctx.restore();
     });
   }
@@ -520,14 +526,14 @@
     shadow(x, y, cw * 0.5);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; if (dk === 'wanted') pulse = 0.9 + 0.3 * Math.sin(S.t * 7);
     var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'foil' ? [['255,205,90', 0]] : dk === 'stagger' ? [['190,140,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
-    cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
+    if (TOUCH) cols.forEach(function (cc) { glowAt(cc[0], x + cc[1] * cw, cy, gr, gr, 0.62 * pulse); }); else cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
     ctx.restore();
-    ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5);
+    if (!TOUCH) { ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5); }
     if (dk === 'foil') drawFoil(im, e, x, cy, cw, ch);
     else if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
     ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); if (dk !== 'foil') ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
-    if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'FIRST', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
+    if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; if (!TOUCH) { ctx.shadowColor = '#000'; ctx.shadowBlur = 4; } ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'FIRST', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
   /* power-ups: drawn in itemart.js (a red and black ACME magnet, a violet chip, a neon green battery), none of them gold like the coins */
@@ -538,7 +544,7 @@
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, iw * 0.3);
     ctx.translate(x, cy);
-    if (window.HallItemArt) HallItemArt.draw(ctx, kind, iw * 1.1, S.t, e.ph, 'x' + Math.min(HallProfile.config.items.multi.max, S.mult + 1));   /* itemart.js: the ACME magnet, the violet multiplier chip and the neon green battery */
+    if (window.HallItemArt) (TOUCH && HallItemArt.drawCached ? HallItemArt.drawCached : HallItemArt.draw)(ctx, kind, iw * 1.1, S.t, e.ph, 'x' + Math.min(HallProfile.config.items.multi.max, S.mult + 1));   /* itemart.js: the ACME magnet, the violet multiplier chip and the neon green battery */
     ctx.restore();
   }
   /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */
@@ -551,7 +557,7 @@
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     var g = ctx.createRadialGradient(x, cy, pw * 0.1, x, cy, pw * 0.9); g.addColorStop(0, 'rgba(232,198,115,' + (0.42 * pulse) + ')'); g.addColorStop(0.6, 'rgba(200,150,60,' + (0.16 * pulse) + ')'); g.addColorStop(1, 'rgba(200,150,60,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy, pw * 0.9, 0, 6.3); ctx.fill(); ctx.restore();
-    ctx.shadowColor = 'rgba(232,198,115,' + (0.7 * pulse) + ')'; ctx.shadowBlur = Math.max(4, pw * 0.3);
+    if (!TOUCH) { ctx.shadowColor = 'rgba(232,198,115,' + (0.7 * pulse) + ')'; ctx.shadowBlur = Math.max(4, pw * 0.3); } else glowAt('232,198,115', x, cy, pw * 0.75, pw * 0.75, 0.5 * pulse);
     ctx.drawImage(im, x - pw / 2, cy - ph / 2, pw, ph);
     ctx.restore();
   }
@@ -653,7 +659,9 @@
     if (!active) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
     var raw = (now - last) / 1000 || 0.016, dt = Math.min(0.05, raw); last = now;
-    if (TOUCH && raw < 0.5) { qEma += (raw - qEma) * 0.08; if (++qN > 12 && qEma > 0.0245 && qLevel < QS.length - 1 && S.mode !== 'dead') { qLevel = Math.min(QS.length - 1, qLevel + (qEma > 0.05 ? 2 : 1)); qN = 0; qEma = 0.0167; resize(); } }
+    if (TOUCH && raw < 0.5) { qEma += (raw - qEma) * 0.08; if (++qN > 12 && qEma > 0.0245 && qLevel < QS.length - 1 && S.mode !== 'dead') { qLevel = Math.min(QS.length - 1, qLevel + (qEma > 0.05 ? 2 : 1)); qN = 0; qEma = 0.0167; qUp = 0; qDropAt = now; if (qRaised && now - qRaised < 15000) qNoRaise = true; resize(); } }
+    /* MAX FPS on phones and tablets: if the picture was made smaller during a rough moment but the device is now running far above 80 fps, give the sharpness back (once it has been fast for 6 seconds, never within 20 seconds of a drop, and never again if it has to drop twice) */
+    if (TOUCH && raw < 0.5 && qLevel > 0 && !qNoRaise && S.mode === 'run' && qEma < 0.0125) { qUp += raw; if (qUp > 6 && now - qDropAt > 20000) { qLevel--; qUp = 0; qN = 0; qRaised = now; resize(); } } else qUp = 0;
     if (raw > 0.5 && S.mode === 'run') leave();   // the page stalled or was frozen: no pausing by freezing it
     if (!W) { resize(); if (!W) return; }
     if (pending > 0) return;
