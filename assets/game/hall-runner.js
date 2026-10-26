@@ -325,6 +325,7 @@
           if (cross) {
             if (e.k === 'coin' && !e.got) { e.got = true; S.coins += S.mult; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
             else if (e.k === 'item' && !e.got) { e.got = true; collectItem(e); }
+            else if (e.k === 'pack' && !e.got) { e.got = true; collectPack(); }   /* the black pack is run into too: foil cards are the only thing that needs a jump */
             else if (e.k === 'card' && !(e.drop && e.drop.kind === 'foil') && !e.got) { e.got = true; collectCard(e); }   /* regular cards are picked up by running into them: only a foil card needs a jump */   /* the magnet, the multiplier and the battery are picked up just by running through them: no jump needed */
             else if ((e.k === 'card' || e.k === 'pack' || e.k === 'item') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else if (e.k === 'item') collectItem(e); else collectPack(); } }
             else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } else if (jh >= 0.42 && !e.jumped) { e.jumped = true; S.boxesJumped++; } }
@@ -529,40 +530,15 @@
     if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'FIRST', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
-  /* power-ups: drawn in code to match the chosen look: a red and gold U magnet, a black poker-chip coin with a gold rim, and a green glowing battery with a bolt */
+  /* power-ups: drawn in itemart.js (a red and black ACME magnet, a violet chip, a neon green battery), none of them gold like the coins */
   function drawItem(e) {
     if (e.got) return;
     var hh = H - y0, s = 1 / e.z, y = y0 + s * hh; if (e.z < 0.62 || y > H + 120) return;
     var x = cxAt(s) + e.lane * LANE * W * s, iw = 0.30 * W * s, cy = y - 0.66 * W * s + Math.sin(S.t * 2.4 + e.ph) * 0.02 * W * s, pulse = 0.8 + 0.2 * Math.sin(S.t * 4 + e.ph), kind = e.item, g, i;
-    var glow = kind === 'magnet' ? '255,170,60' : kind === 'multi' ? '255,205,90' : '60,255,130';
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, iw * 0.3);
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    g = ctx.createRadialGradient(x, cy, iw * 0.1, x, cy, iw * 0.95); g.addColorStop(0, 'rgba(' + glow + ',' + (0.55 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + glow + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + glow + ',0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy, iw * 0.95, 0, 6.3); ctx.fill(); ctx.restore();
-    ctx.translate(x, cy); ctx.lineCap = 'butt';
-    if (kind === 'magnet') {
-      var r = iw * 0.26, t = iw * 0.17, leg = iw * 0.34;
-      ctx.lineWidth = t; ctx.strokeStyle = '#d9ac5c'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI, false); ctx.moveTo(-r, 0); ctx.lineTo(-r, -leg * 0.5); ctx.moveTo(r, 0); ctx.lineTo(r, -leg * 0.5); ctx.stroke();
-      ctx.lineWidth = t * 0.28; ctx.strokeStyle = '#fff0c4'; ctx.beginPath(); ctx.arc(0, 0, r - t * 0.28, 0.15, Math.PI - 0.15, false); ctx.stroke();
-      ctx.lineWidth = t; ctx.strokeStyle = '#d6203a'; ctx.beginPath(); ctx.moveTo(-r, -leg * 0.5); ctx.lineTo(-r, -leg); ctx.moveTo(r, -leg * 0.5); ctx.lineTo(r, -leg); ctx.stroke();
-      ctx.fillStyle = '#e9e6df'; ctx.fillRect(-r - t / 2, -leg - t * 0.18, t, t * 0.18); ctx.fillRect(r - t / 2, -leg - t * 0.18, t, t * 0.18);
-      ctx.fillStyle = '#ffd45a'; for (i = 0; i < 3; i++) { var ang = S.t * 3 + i * 2.1 + e.ph, rr = iw * (0.34 + 0.08 * Math.sin(S.t * 5 + i)); ctx.beginPath(); ctx.arc(Math.cos(ang) * rr, -leg * 0.6 + Math.sin(ang) * rr * 0.5, iw * 0.04, 0, 6.3); ctx.fill(); }
-    } else if (kind === 'multi') {
-      var R2 = iw * 0.40;
-      ctx.fillStyle = '#0b0809'; ctx.beginPath(); ctx.arc(0, 0, R2, 0, 6.3); ctx.fill();
-      ctx.lineWidth = R2 * 0.13; ctx.strokeStyle = '#d9ac5c'; ctx.stroke();
-      ctx.fillStyle = '#d9ac5c'; for (i = 0; i < 8; i++) { ctx.save(); ctx.rotate(i * Math.PI / 4 + S.t * 0.6); ctx.fillRect(-R2 * 0.09, -R2 * 0.99, R2 * 0.18, R2 * 0.2); ctx.restore(); }
-      ctx.lineWidth = R2 * 0.05; ctx.strokeStyle = 'rgba(255,220,140,0.7)'; ctx.beginPath(); ctx.arc(0, 0, R2 * 0.7, 0, 6.3); ctx.stroke();
-      ctx.font = '700 ' + Math.max(8, R2 * 0.8) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffd45a'; ctx.shadowColor = 'rgba(255,200,70,0.9)'; ctx.shadowBlur = R2 * 0.3; ctx.fillText('x' + Math.min(HallProfile.config.items.multi.max, S.mult + 1), 0, R2 * 0.04);
-    } else {
-      var bw = iw * 0.46, bh = iw * 0.74;
-      ctx.fillStyle = '#d9ac5c'; ctx.fillRect(-bw * 0.22, -bh / 2 - iw * 0.07, bw * 0.44, iw * 0.07);
-      ctx.fillStyle = '#0a0d0a'; ctx.strokeStyle = '#d9ac5c'; ctx.lineWidth = iw * 0.05; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-bw / 2, -bh / 2, bw, bh, iw * 0.07); else ctx.rect(-bw / 2, -bh / 2, bw, bh); ctx.fill(); ctx.stroke();
-      g = ctx.createLinearGradient(0, bh / 2, 0, -bh / 2); g.addColorStop(0, '#0fae4a'); g.addColorStop(1, '#5cffa0'); ctx.fillStyle = g; ctx.shadowColor = 'rgba(60,255,130,0.95)'; ctx.shadowBlur = iw * 0.2;
-      ctx.fillRect(-bw / 2 + iw * 0.05, -bh / 2 + iw * 0.05, bw - iw * 0.1, bh - iw * 0.1); ctx.shadowBlur = 0;
-      ctx.fillStyle = '#fffbd0'; ctx.beginPath(); ctx.moveTo(iw * 0.03, -bh * 0.36); ctx.lineTo(-bw * 0.28, iw * 0.03); ctx.lineTo(-iw * 0.01, iw * 0.03); ctx.lineTo(-iw * 0.05, bh * 0.36); ctx.lineTo(bw * 0.28, -iw * 0.04); ctx.lineTo(iw * 0.01, -iw * 0.04); ctx.closePath(); ctx.fill();
-    }
+    ctx.translate(x, cy);
+    if (window.HallItemArt) HallItemArt.draw(ctx, kind, iw * 1.1, S.t, e.ph, 'x' + Math.min(HallProfile.config.items.multi.max, S.mult + 1));   /* itemart.js: the ACME magnet, the violet multiplier chip and the neon green battery */
     ctx.restore();
   }
   /* the black pack: same height, a dark-gold glow; jump into it to slow the world down */

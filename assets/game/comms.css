@@ -553,3 +553,8 @@ body:has(.adm-shade.open) .adminlink, body.phone-open:has(.adm-shade.open) .admi
 /* the slowdown pack row under the cards infographic */
 .pstrip { display: block; line-height: 0; } .pstrip svg { display: block; width: 100%; height: auto; }
 .adm .pstrip svg { border: 1px solid rgba(232,198,115,.45); border-top: 0; }
+
+/* the power-up timers match the new item colours: red (ACME magnet) and violet (multiplier), no longer gold like the coins */
+.hbuff .hbm { border-color: rgba(255,80,70,.85); background: rgba(40,4,6,.78); } .hbuff .hbm .hbi { background: #e01c1c; box-shadow: 0 0 8px rgba(255,70,60,.9); } .hbuff .hbm b { color: #ff9a90; text-shadow: 0 0 6px rgba(255,80,70,.7); } .hbuff .hbm u i { background: linear-gradient(90deg, #b01212, #ff5a4d); } .hbuff .hbm u { background: rgba(255,90,80,.18); }
+.hbuff .hbx { border-color: rgba(190,100,255,.9); background: rgba(24,6,44,.8); } .hbuff .hbx .hbi { background: #8a22e8; border: 1px solid #ffffff; color: #ffffff; box-shadow: 0 0 8px rgba(190,95,255,.9); } .hbuff .hbx b { color: #e3b8ff; text-shadow: 0 0 6px rgba(190,95,255,.8); } .hbuff .hbx u i { background: linear-gradient(90deg, #6a14d9, #c660ff); } .hbuff .hbx u { background: rgba(190,100,255,.2); } .hbuff .hbx.cool { border-color: rgba(150,140,170,.45); }
+

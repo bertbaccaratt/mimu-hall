@@ -8,7 +8,7 @@
   function svg() {
     var P = window.HallProfile, it = P && P.config && P.config.items; if (!it) return '';
     var MIN = 30, L = 34, R = 690, X = function (sec) { return L + (R - L) * sec / (MIN * 60); };
-    var mg = it.magnet, mu = it.multi, ba = it.battery, pk = P.config.pack || { firstSec: 300, everySec: 300, slowPct: 20, slowSec: 60 }, o = [], i, t, y, H = 670;
+    var mg = it.magnet, mu = it.multi, ba = it.battery, pk = P.config.pack || { firstSec: 300, everySec: 300, slowPct: 20, slowSec: 60 }, o = [], i, t, y, H = 700;
     o.push('<svg viewBox="0 0 720 ' + H + '" xmlns="' + NS + '" role="img" aria-label="Timeline of the coin magnet, the coin multiplier, the phone battery and the black pack over the first 30 minutes of one run" font-family="Cinzel, Georgia, serif">');
     o.push('<rect width="720" height="' + H + '" fill="#12050a"/><rect x="1" y="1" width="718" height="' + (H - 2) + '" fill="none" stroke="#d9ac5c" stroke-opacity=".6"/>');
     o.push('<text x="360" y="34" text-anchor="middle" fill="#f6dc95" font-size="22" font-weight="700" letter-spacing="3">THE FIRST 30 MINUTES OF ONE RUN</text>');
@@ -45,6 +45,7 @@
     o.push('<polyline points="' + none.join(' ') + '" fill="none" stroke="#ff6b6b" stroke-width="2.4" stroke-dasharray="7 6"/>');
     o.push('<polyline points="' + pts.join(' ') + '" fill="none" stroke="#6af0a0" stroke-width="3.2"/>');
     o.push('<text x="' + (X(8.5 * 60)) + '" y="' + (PY(26)) + '" fill="#ff9a8f" font-size="14">NO BATTERIES: DEAD AT ' + mmss(ba.start / drain) + '</text><text x="' + (X(12.5 * 60)) + '" y="' + (PY(100) - 8) + '" fill="#6af0a0" font-size="14">CATCH 6 OF 10 BATTERIES: YOU STAY ALIVE</text>');
+    o.push('<text x="360" y="676" text-anchor="middle" fill="#f6dc95" font-size="14" letter-spacing="1">THE CHART STOPS AT 30 MINUTES. THE SAME PACE REPEATS FOR THE WHOLE RUN.</text>');
     o.push('</svg>');
     return o.join('');
   }
@@ -59,7 +60,7 @@
     o.push('<rect x="64" y="34" width="34" height="34" rx="5" fill="#17100c" stroke="#d7bd86" stroke-width="2.4"/><path d="M73 51 h16 M81 43 v16" stroke="#d7bd86" stroke-width="2.4"/>');
     o.push('<text x="112" y="46" fill="#f1d9a0" font-size="24">SLOWDOWN</text><text x="112" y="72" fill="#f1d9a0" font-size="24">PACK</text><text x="112" y="100" fill="#f1d9a0" fill-opacity=".85" font-size="19">Random lane</text>');
     for (t = pk.firstSec; t <= SPAN; t += pk.everySec) { var px = X(t); o.push('<rect x="' + (px - 7) + '" y="42" width="14" height="14" rx="2" fill="#17100c" stroke="#d7bd86" stroke-width="1.6"/><path d="M' + (px - 3.5) + ' 49 h7 M' + px + ' 45.5 v7" stroke="#d7bd86" stroke-width="1.3"/>'); }
-    o.push('<text x="' + (X0 + 21) + '" y="100" fill="#fff" fill-opacity=".92" font-size="19">Every ' + (pk.everySec / 60) + ' min, random lane. Jump it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' seconds. No points, no cards.</text>');
+    o.push('<text x="' + (X0 + 21) + '" y="100" fill="#fff" fill-opacity=".92" font-size="19">Every ' + (pk.everySec / 60) + ' min, random lane. Run into it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' seconds. No points, no cards.</text>');
     o.push('</svg>');
     return o.join('');
   }
