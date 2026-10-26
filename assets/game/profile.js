@@ -70,7 +70,7 @@
     xbonus: function () { return adapter && adapter.xbonus ? adapter.xbonus : null; },   // { status(), claim(url) }: the X bonus
     give: function () { return adapter && adapter.give ? adapter.give : null; },   // { status(), players(), send(to, amount) }: The Giving
     market: function () { return adapter && adapter.market ? adapter.market : null; },   // { listings(), sellable(), buy(n), sell(n) }
-    lifeCost: function () { var tt = adapter && adapter.totals ? adapter.totals() : {}, pts = Math.floor((tt.points != null ? tt.points : tt.lifetime) || 0); return Math.max(1, Math.ceil(pts * CONFIG.life.share)); },
+    lifeCost: function () { var tt = adapter && adapter.totals ? adapter.totals() : {}, pts = Math.floor((tt.points != null ? tt.points : tt.lifetime) || 0); return Math.ceil(pts * CONFIG.life.share); },
     buyLife: function (cost) { if (!adapter) return Promise.resolve({ demo: true }); return adapter.buyLife ? Promise.resolve(adapter.buyLife(cost)) : Promise.reject(new Error('NOT AVAILABLE YET')); },   // the server takes the points and answers; rejects with a message
     nft: function () { return adapter && adapter.nft ? adapter.nft() : null; },   // the Mimu On Ape holder status of the signed-in player (null in the demo)
     stats: function () { return adapter && adapter.stats ? adapter.stats() : {}; },   // what the server has counted for this player: runs, distance, aliveSec, longestSec, bestScore, coins, bestCoinsRun, packs, boxesJumped, jumps, slides, lanes, hits, extraLives, bought, boughtUp, sold, listed, textsSent, textPartners, mailRead, photos, calls, daysPlayed, bestStreak
