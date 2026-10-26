@@ -171,10 +171,10 @@
   }
   function tickItems(dt) {
     var cf = HallProfile.config.items, nr = HallProfile.netRun && HallProfile.netRun(), kinds = ['magnet', 'multi', 'battery'], i, kind, due;
-    if (nr && !S.net) return;
+    if (nr && !S.net && !S.netFailed) return;   /* wait for the server run to open; if it was refused (under 5 NFTs) this is a demo run and the power-ups come from the game itself */
     for (i = 0; i < kinds.length; i++) {
       kind = kinds[i]; due = itemDue(kind, S.alive);
-      while (S.itemReq[kind] < due) { S.itemReq[kind]++; if (kind === 'multi' && (S.multCool > 0 || S.mult >= cf.multi.max)) continue; requestItem(kind, nr); }
+      while (S.itemReq[kind] < due) { S.itemReq[kind]++; if (kind === 'multi' && (S.multCool > 0 || S.mult >= cf.multi.max)) continue; requestItem(kind, S.netFailed ? null : nr); }
     }
     if (S.magT > 0) S.magT = Math.max(0, S.magT - dt);
     if (S.mult > 1) { S.multT -= dt; if (S.multT <= 0) { S.mult--; S.multT = S.mult > 1 ? cf.multi.levelSec : 0; } }
@@ -212,7 +212,7 @@
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
     var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
     if (window.HallNet && HallNet.ev) HallNet.ev('played');
-    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 2100; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function (e) { if (S === cur) { S.net = null; if (e && e.data && e.data.nft) hint(String(e.data.error || 'YOU NEED NFTS TO PLAY FOR REAL. THIS IS A DEMO RUN.'), 7); } });
+    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 2100; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function (e) { if (S === cur) { S.net = null; S.netFailed = true; if (e && e.data && e.data.nft) hint(String(e.data.error || 'YOU NEED NFTS TO PLAY FOR REAL. THIS IS A DEMO RUN.'), 7); } });
   }
   /* ---------- cards the server puts in a run: the new-player card, echoes and the wanted card ---------- */
   var elHint = el('div', 'hhint', ''); root.appendChild(elHint);
