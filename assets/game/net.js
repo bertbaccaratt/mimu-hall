@@ -35,6 +35,8 @@
   function saveSession() { var s = lsGet(SKEY) || {}; lsSet(SKEY, { token: S.token, exp: s.exp, me: S.me }); }
   function signOutLocal() { S.token = null; S.me = null; S.active = false; lsDel(SKEY); P.disconnect(); }
   function setMe(patch) { if (!S.me) return; for (var k in patch) S.me[k] = patch[k]; saveSession(); }
+  /* under 5 NFTs: the demo run only. The player is NOT kept signed in, so they see exactly what a guest sees (no Marketplace, texts, mail or saved anything) */
+  function refused(me) { return !!(me && me.nft && me.nft.enabled && me.nft.eligible === false); }
   function activate(token, exp, me) {
     S.token = token; S.me = me; lsSet(SKEY, { token: token, exp: exp, me: me });
     if (!S.active) { S.active = true; P.connect(adapter); } else P.notify('connect');
@@ -113,7 +115,7 @@
           return call('/auth/verify', { body: { address: id.address, nonce: n.nonce, issuedAt: n.issuedAt, signature: signature, name: id.name, picture: id.picture }, noAuth: true });
         });
       });
-    }).then(function (r) { activate(r.token, r.expiresAt, r.me); return r; });
+    }).then(function (r) { if (refused(r.me)) { S.token = null; S.me = null; S.active = false; lsDel(SKEY); r.refused = true; S.demoOnly = true; return r; } activate(r.token, r.expiresAt, r.me); return r; });
   }
 
   /* ---------- the entrance: CONNECT GLYPH ---------- */
@@ -125,10 +127,13 @@
   function hideNote() { if (note) note.classList.remove('on'); }
   var GLYPH_LIVE = false;   // flip to true when HYPE has approved the demo and Glyph is ready: until then everyone plays the demo
   function connectThen(go) {
-    if (S.active || !GLYPH_LIVE) { go(); return; }
+    if (S.active || !GLYPH_LIVE || S.demoOnly) { go(); return; }   // demoOnly: signed in but under 5 NFTs, so no more sign-in windows until the page is reloaded
     var attempt = function () {
       showNote('<span class="gn">OPENING GLYPH&hellip;</span><small>APPROVE THE SIGN-IN IN THE GLYPH WINDOW</small>');
-      signIn().then(function () { hideNote(); go(); }, function (e) {
+      signIn().then(function (r) {
+        if (r && r.refused) { showNote('<span class="gn bad">YOU NEED 5 MIMU ON APE NFTS TO PLAY FOR REAL</span><small>YOU CAN PLAY THE DEMO RUN</small><span class="gb"><button type="button" id="gnDemo">PLAY THE DEMO</button></span>'); $('gnDemo').onclick = function () { hideNote(); go(); }; return; }
+        hideNote(); go();
+      }, function (e) {
         var m = String((e && e.message) || 'Sign-in did not finish.'); if (/Refusing|Glyph is not ready/.test(m)) m = 'Sign-in did not finish.';
         showNote('<span class="gn bad">' + esc(m.toUpperCase()) + '</span><span class="gb"><button type="button" id="gnRetry">TRY AGAIN</button><button type="button" id="gnGuest">CONTINUE AS A GUEST (DEMO)</button></span>');
         $('gnRetry').onclick = attempt; $('gnGuest').onclick = function () { hideNote(); go(); };
@@ -140,8 +145,9 @@
   function restore() {
     if (!GLYPH_LIVE) { lsDel(SKEY); return; }
     var s = lsGet(SKEY); if (!s || !s.token || !s.exp || s.exp < Date.now() + 60000) { lsDel(SKEY); return; }
+    if (refused(s.me)) { lsDel(SKEY); return; }
     S.token = s.token; S.me = s.me || null; if (S.me) { S.active = true; P.connect(adapter); }
-    call('/me').then(function (me) { S.me = me; S.active = true; saveSession(); if (P.isSignedIn()) { P.notify('connect'); } else P.connect(adapter); var b = $('enter'); if (b) { var i = b.querySelector('.inner'); if (i) i.textContent = 'WELCOME BACK'; } ev('signedIn'); }).catch(function (e) { if (e.status === 401) { signOutLocal(); } });
+    call('/me').then(function (me) { if (refused(me)) { signOutLocal(); return; } S.me = me; S.active = true; saveSession(); if (P.isSignedIn()) { P.notify('connect'); } else P.connect(adapter); var b = $('enter'); if (b) { var i = b.querySelector('.inner'); if (i) i.textContent = 'WELCOME BACK'; } ev('signedIn'); }).catch(function (e) { if (e.status === 401) { signOutLocal(); } });
   }
 
   /* ---------- funnel and usage counts ---------- */
