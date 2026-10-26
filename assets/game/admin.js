@@ -221,25 +221,13 @@
       '<div class="cols3"><div class="box"><h4>WHERE FROM</h4>' + rankList(v.countries, hint) + '</div><div class="box"><h4>HOW THEY ARRIVED</h4>' + rankList(v.referrers, hint) + '</div><div class="box"><h4>DEVICES</h4>' + rankList(v.devices, hint) + '</div></div>' +
       '<div class="cols3"><div class="box"><h4>BROWSERS</h4>' + rankList(v.browsers, hint) + '</div><div class="box"><h4>TOP BAR TABS OPENED</h4>' + rankList(v.tabs, hint) + '</div><div class="box"><h4>PHONE APPS OPENED</h4>' + rankList(v.apps, hint) + '</div></div>';
   }
-  /* ---------- the top of the overview: the wanted card shortcut, and the list HYPE has to approve (shared by everyone who is signed in to the control room) ---------- */
-  var APPR = [['length', 'THE PLAN: A 14-DAY HALL RUN, THEN A 48-HOUR GIVING, THEN THE TOP 5'], ['start', 'THE HALL RUN STARTS MONDAY, OCT 26, 12:00 PM (NOON) PACIFIC'], ['end', 'THE HALL CLOSES MONDAY, NOV 9, NOON PACIFIC (ITS APP GOES GRAY)'], ['haul', 'THE GIVING RUNS 48 HOURS (TO WED, NOV 11, NOON PACIFIC), THEN THE TOP 5 OPENS IN GOLD'], ['demo', 'HYPE HAS PLAYED THE DEMO, SO WE CAN FINISH CONNECTING GLYPH'], ['live', 'WE ARE READY TO GO LIVE']], apprSig = '', apprMsg = '', apprPend = {};
+  /* ---------- the top of the overview: the wanted card shortcut ---------- */
   function paintWNow() {
     var el = $('admWNow'); if (!el) return; var w = feed && feed.wanted && feed.wanted.active, sig = w ? 'live' + w.id : 'none'; if (el.getAttribute('data-s') === sig) return; el.setAttribute('data-s', sig);
     el.innerHTML = '<div class="wnt"><small>' + (w ? 'A WANTED CARD IS LIVE' : 'WANTED CARD') + '</small><b>' + (w ? esc(w.name.toUpperCase()) + ' #' + String(w.card).padStart(3, '0') : 'LAUNCH A WANTED CARD NOW') + '</b><span>' + (w ? 'See the timer, or end it, on the Cards page.' : 'Pick a card, choose how many hours, and every player gets the email.') + '</span></div><button type="button" class="wgo" data-go="cards">' + (w ? 'OPEN THE CARDS PAGE' : 'GO TO LAUNCH') + ' &rarr;</button>';
   }
-  function pendMerge(src) { var o = Object.assign({}, src); Object.keys(apprPend).forEach(function (k) { if (apprPend[k]) o[k] = apprPend[k]; else delete o[k]; }); return o; }
-  function paintAppr() {
-    var el = $('admAppr'); if (!el) return; var ap = pendMerge((feed && feed.approvals) || {}), sig = JSON.stringify([ap, !!feed, apprMsg]); if (sig === apprSig) return; apprSig = sig;
-    var n = APPR.filter(function (a) { return ap[a[0]]; }).length;
-    el.innerHTML = '<h4>FOR HYPE TO APPROVE <em>' + n + ' OF ' + APPR.length + '</em></h4><div class="apl">' + APPR.map(function (a) { var at = ap[a[0]]; return '<button type="button" class="api' + (at ? ' on' : '') + '" data-ap="' + a[0] + '" aria-pressed="' + !!at + '"><i>' + (at ? '&#10003;' : '') + '</i><span>' + a[1] + '</span><em>' + (at ? 'APPROVED &middot; ' + stamp(at) : 'WAITING') + '</em></button>'; }).join('') + '</div><div class="apn">' + (apprMsg || (feed ? 'Tap a box to approve it. It turns green for every admin, on any device, within a few seconds. Tap again to take the approval back.' : 'NOT CONNECTED YET: THE LIST FILLS IN WHEN THE LIVE FEED IS CONNECTED.')) + '</div>';
-  }
-  function apprToggle(k) {
-    if (!handlers.approve || !feed) { apprMsg = 'NOT CONNECTED YET'; apprSig = ''; paintAppr(); return; }
-    var cur = (feed.approvals && feed.approvals[k]) || 0, shown = k in apprPend ? apprPend[k] : cur, on = !shown; apprPend[k] = on ? Date.now() : false; apprMsg = ''; apprSig = ''; paintAppr();
-    handlers.approve(k, on).then(function () { delete apprPend[k]; apprMsg = ''; apprSig = ''; paintAppr(); }, function (e) { delete apprPend[k]; apprMsg = String((e && e.message) || 'COULD NOT SAVE').toUpperCase(); apprSig = ''; paintAppr(); });
-  }
   function ovHtml() {
-    return '<section data-p="ov"><div class="wnow" id="admWNow"></div><div class="tiles vis" id="admVT"></div><div class="appr" id="admAppr"></div>' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
+    return '<section data-p="ov"><div class="wnow" id="admWNow"></div><div class="tiles vis" id="admVT"></div>' + mindMap() + (feed ? '' : '<div class="crnote">THE LIVE NUMBERS FILL IN WHEN CLOUDFLARE IS CONNECTED &middot; UNTIL THEN THE SYSTEM CHECK AND THIS BROWSER BOX ARE REAL</div>') +
       '<div id="admVis"></div>' +
       '<div class="box dbox"><h4>THE GAME AT A GLANCE</h4><div class="tiles" id="admTiles"></div></div>' +
       '<div class="cols2"><div class="box"><h4>SYSTEM CHECK</h4><div class="sys one" id="admSys"></div></div><div class="box"><h4>THIS BROWSER</h4>' + thisBrowser() + '</div></div>' +
@@ -465,7 +453,7 @@
   }
   function buildPanel() {
     /* the panel is drawn fresh every time it opens, so every page must forget what it last drew; otherwise a page that did not change would stay empty */
-    apprSig = ''; flagSig = ''; wSig = ''; boardSig = ''; xSig = ''; eggSig = ''; secSig = ''; hxSig = ''; hxListSig = ''; bq = ''; shade.classList.add('open');
+    flagSig = ''; wSig = ''; boardSig = ''; xSig = ''; eggSig = ''; secSig = ''; hxSig = ''; hxListSig = ''; bq = ''; shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
       '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + (n[0] === 'flag' ? ' <em id=\"admFlagN\"></em>' : '') + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
@@ -500,7 +488,6 @@
       var bsb = ev.target.closest('[data-bs]'); if (bsb) { bsort = bsb.getAttribute('data-bs'); boardSig = ''; paintBoard(); return; }
       
       var xr = ev.target.closest('[data-xr]'); if (xr) { if (!handlers.xrecheck) { xMsg = 'NOT CONNECTED YET'; paintX(); return; } var xid = xr.getAttribute('data-xr'); xMsg = 'CHECKING THE POSTS ON X…'; xSig = ''; paintX(); handlers.xrecheck(xid === 'all' ? 0 : Number(xid)).then(function (r) { xMsg = r && r.checked != null ? 'CHECKED ' + r.checked + ': ' + r.verified + ' VERIFIED, ' + r.unverified + ' UNVERIFIED' + (r.unknown ? ', ' + r.unknown + ' COULD NOT BE REACHED' : '') : 'DONE'; xSig = ''; paintX(); }, function (e) { xMsg = String((e && e.message) || 'COULD NOT CHECK').toUpperCase(); xSig = ''; paintX(); }); return; }
-      var ap = ev.target.closest('[data-ap]'); if (ap) { apprToggle(ap.getAttribute('data-ap')); return; }
       var tf = ev.target.closest('[data-tf2]'); if (tf) { var gr = root.querySelector('.cgrid'), v = tf.getAttribute('data-tf2'); gr.setAttribute('data-f', v); Array.prototype.forEach.call(root.querySelectorAll('[data-tf2]'), function (x) { x.classList.toggle('on', x === tf); }); return; }
       var c = ev.target.closest('.cth[data-cn]'); if (c) { wsel = +c.getAttribute('data-cn'); wMsg = ''; wSig = ''; paintWanted(); return; }
       if (ev.target.closest('#admWLaunch')) { if (!wsel) return; wantedAct(handlers.wantedLaunch ? handlers.wantedLaunch(wsel, wHours) : Promise.reject(new Error('Not connected yet')), 'LAUNCHED. THE EMAIL IS ON ITS WAY TO EVERY PLAYER'); return; }
@@ -555,7 +542,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintX(); paintEgg(); paintSec(); paintNft(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintX(); paintEgg(); paintSec(); paintNft(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists(); paintHype();
     }
