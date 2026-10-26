@@ -156,7 +156,7 @@
     ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['flag', 'FLAGGED RUNS', 'runs held for review: approve, deny or ban'], ['board', 'PLAYER BOARD', 'every player, points and deck completion'], ['cards', 'CARDS', 'the 120 cards, pictured'], ['wanted', 'LAUNCH A WANTED CARD', 'pick a card, set the hours and launch it']]],
     ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
     ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, the Marketplace and the Giving'], ['xbonus', 'X BONUS', 'who posted on X, every post link and its check']]],
-    ['SECRET', 'g5', [['egg', 'EASTER EGG', 'the hidden phone number puzzle: the order, the number and who found it']]],
+    ['SECRET', 'g5', [['egg', 'EASTER EGG', 'the hidden phone number puzzle: the order, the number and who found it'], ['sec', 'SECURITY', 'admin login attacks: wrong guesses, many visitors at once, who is locked out']]],
     ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works']]]
   ];
   function mindMap() {
@@ -384,6 +384,25 @@
     el.innerHTML = h + '</div>';
   }
   /* ---------- the EASTER EGG page: the secret order, the number, who found it, and the click tickers ---------- */
+  /* ---------- the SECURITY page: attacks on the admin login ---------- */
+  var secSig = '';
+  function paintSec() {
+    var el = $('admSec'); if (!el) return; var g = feed && feed.security; var sig = JSON.stringify([g, !!feed]); if (sig === secSig) return; secSig = sig;
+    if (!g) { el.innerHTML = '<div class="box dbox"><h4>WAITING FOR THE LIVE FEED</h4></div>'; return; }
+    var L = { CALM: ['#3ddc84', 'CALM', 'Nothing unusual on the admin login.'], WATCH: ['#ffcf4a', 'WATCH', 'More wrong guesses than normal. Keep an eye on it.'], ATTACK: ['#ff5a52', 'POSSIBLE ATTACK', 'Many wrong guesses from several visitors at once, which looks like a bot spread over many addresses. The lock-outs are working, but change the admin password in Cloudflare if this keeps going.'] }[g.level] || ['#3ddc84', 'CALM', ''];
+    var h = '<div class="box dbox" style="border-color:' + L[0] + ';box-shadow:0 0 14px ' + L[0] + '55"><h4 style="color:' + L[0] + '">LOGIN SECURITY: ' + L[1] + '</h4><p class="dp">' + esc(L[2]) + '</p></div>';
+    h += '<div class="box dbox"><h4>WRONG GUESSES</h4><div class="dtab" style="--c:4"><div class="dh"><span>WINDOW</span><span>WRONG GUESSES</span><span>DIFFERENT VISITORS</span><span>NOTE</span></div>' +
+      '<div class="dr"><span>LAST 10 MINUTES</span><span>' + fmt(g.fails10) + '</span><span>' + fmt(g.who10) + '</span><span>' + (g.who10 >= 5 ? 'MANY AT ONCE' : '') + '</span></div>' +
+      '<div class="dr"><span>LAST HOUR</span><span>' + fmt(g.failsH) + '</span><span>' + fmt(g.whoH) + '</span><span></span></div>' +
+      '<div class="dr"><span>LAST 24 HOURS</span><span>' + fmt(g.failsD) + '</span><span>' + fmt(g.whoD) + '</span><span>' + fmt(g.locksD) + ' LOCK-OUTS</span></div></div></div>';
+    h += '<div class="box dbox"><h4>RIGHT NOW</h4><div class="dtab" style="--c:3"><div class="dh"><span>LOCKED OUT NOW</span><span>ADMIN SIGN-INS (24H)</span><span>LAST SIGN-IN</span></div><div class="dr"><span>' + fmt(g.lockedNow) + ' VISITOR' + (g.lockedNow === 1 ? '' : 'S') + '</span><span>' + fmt(g.okD) + '</span><span>' + (g.lastOk ? stamp(g.lastOk) : '\u2014') + '</span></div></div></div>';
+    var top = g.top || [];
+    h += '<div class="box dbox"><h4>VISITORS WITH THE MOST WRONG GUESSES (24 HOURS)</h4>' + (top.length ? '<div class="dtab" style="--c:4"><div class="dh"><span>VISITOR CODE</span><span>WRONG GUESSES</span><span>LOCK-OUTS</span><span>LAST TRY</span></div>' + top.map(function (t) { return '<div class="dr"><span>' + esc(t.tag) + '</span><span>' + fmt(t.fails) + '</span><span>' + fmt(t.locks) + '</span><span>' + stamp(t.last) + '</span></div>'; }).join('') + '</div>' : '<p class="dp">No wrong guesses in the last 24 hours.</p>') + '</div>';
+    var rc = g.recent || [];
+    h += '<div class="box dbox"><h4>THE LAST 40 LOGIN TRIES</h4>' + (rc.length ? '<div class="dtab" style="--c:3"><div class="dh"><span>WHEN</span><span>VISITOR CODE</span><span>RESULT</span></div>' + rc.map(function (t) { return '<div class="dr"><span>' + stamp(t.ts) + '</span><span>' + esc(t.tag) + '</span><span>' + (t.outcome === 'ok' ? 'SIGNED IN' : t.outcome === 'lock' ? 'WRONG, LOCKED OUT' : 'WRONG PASSWORD') + '</span></div>'; }).join('') + '</div>' : '<p class="dp">No login tries yet.</p>') + '</div>';
+    h += '<div class="box dbox"><h4>HOW IT WORKS</h4><ul class="dl"><li>Every wrong password is counted for one hour for each visitor. Every 3rd wrong guess locks that visitor out, and each lock is twice as long as the last: 30 seconds, 1 minute, 2 minutes and so on, up to 1 hour. During a lock even the right password is refused.</li><li>A visitor code is a short scramble made from the visitor&rsquo;s address. It lets you tell visitors apart without ever storing or showing the address.</li><li><b>POSSIBLE ATTACK</b> shows when 5 or more different visitors guess wrong within 10 minutes, or there are 30 wrong guesses in 10 minutes. That looks like a bot using many addresses to get around the lock-outs. <b>WATCH</b> shows for a smaller version of the same thing.</li><li>The server does not lock everyone out at once, because an attacker could use that to lock you out of your own admin. The real protection against many addresses is a long random password: change it in Cloudflare (the ADMIN_PASSWORD secret) if you ever see POSSIBLE ATTACK.</li><li>Every try is also written to the activity feed on the Overview page. Records are kept for 30 days.</li></ul></div>';
+    el.innerHTML = h;
+  }
   var eggSig = '', eggMsg = '';
   function paintEgg() {
     var el = $('admEgg'); if (!el) return; var g = (feed && feed.egg) || null, none = feed ? '' : 'WAITING FOR LIVE FEED'; var sig = JSON.stringify([g, eggMsg, !!feed]); if (sig === eggSig) return; eggSig = sig;
@@ -423,7 +442,7 @@
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['xbonus', 'X BONUS'], ['egg', 'EASTER EGG'], ['cards', 'CARDS'], ['wanted', 'LAUNCH A WANTED CARD'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['xbonus', 'X BONUS'], ['egg', 'EASTER EGG'], ['sec', 'SECURITY'], ['cards', 'CARDS'], ['wanted', 'LAUNCH A WANTED CARD'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS']];
   var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
@@ -436,7 +455,7 @@
   }
   function buildPanel() {
     /* the panel is drawn fresh every time it opens, so every page must forget what it last drew; otherwise a page that did not change would stay empty */
-    apprSig = ''; flagSig = ''; wSig = ''; boardSig = ''; xSig = ''; eggSig = ''; hxSig = ''; hxListSig = ''; bq = ''; shade.classList.add('open');
+    apprSig = ''; flagSig = ''; wSig = ''; boardSig = ''; xSig = ''; eggSig = ''; secSig = ''; hxSig = ''; hxListSig = ''; bq = ''; shade.classList.add('open');
     shade.innerHTML = '<div class="adm v2" role="dialog" aria-label="Administration"><button class="adm-x" type="button" aria-label="Close">&times;</button>' +
       '<div class="cr-head"><div><h2 class="gold">ADMINISTRATION</h2><div class="sub">THE HALL &middot; CONTROL ROOM</div></div><div class="cr-right"><div class="cr-clock" id="admClock"></div><div class="cr-pills" id="admPills"></div></div></div>' +
       '<div class="cr-body"><nav class="cr-nav" id="admNav">' + NAV.map(function (n, i) { return '<button type="button" data-t="' + n[0] + '"' + (n[0] === curTab ? ' class="on"' : '') + '><i>' + (i + 1) + '</i>' + n[1] + (n[0] === 'flag' ? ' <em id=\"admFlagN\"></em>' : '') + '</button>'; }).join('') + '<button type="button" class="cr-out" id="admOut">LOG OUT</button></nav>' +
@@ -450,6 +469,7 @@
       '<section data-p="eco"><div id="admEco"></div></section>' +
       '<section data-p="xbonus"><div id="admX"></div></section>' +
       '<section data-p="egg"><div id="admEgg"></div></section>' +
+      '<section data-p="sec"><div id="admSec"></div></section>' +
       '<section data-p="cards"><div class="box dbox"><h4>BY RARITY</h4>' + tierCards() + '</div><div class="box dbox"><h4>BY FAMILY</h4>' + famCards() + '</div><div class="box dbox"><h4>THE WHOLE DECK &middot; ALL 120 CARDS</h4><div class="whow"><b>HOW TO LAUNCH A WANTED CARD</b><span><i>1</i>CLICK A CARD in the deck below</span><span><i>2</i>PICK HOURS in the red box at the bottom</span><span><i>3</i>PRESS LAUNCH</span></div><div class="hint" style="margin-bottom:12px">Every card in the game, with its border colored by rarity. Each card shows how many times it has been found.</div>' + deckGrid() + '<div id="admWanted"></div></div><div class="box dbox"><h4>THE NUMBERS</h4><div id="admCards"></div></div></section>' +
       '<section data-p="rules"><div class="box"><h4>WHEN CARDS DROP IN ONE RUN</h4><a href="assets/game/card-timeline.png" target="_blank" rel="noopener"><img class="tlimg" src="assets/game/card-timeline.png" alt="Timeline of the first card, sightings, stagger cards, foil pieces, and when Prestige and Legendary open during one run" loading="lazy"></a><div class="hint" style="margin-top:10px">Time is time alive in one run; dying starts it over. Press the picture to open it full size.</div></div><div class="box"><h4>POWER-UPS AND THE PHONE BATTERY</h4><div class="pchart" data-pchart="admin"></div><div class="hint" style="margin-top:10px">The first 30 minutes of one run, drawn from the game&rsquo;s real numbers (so it is always current).</div></div><div class="box gbox"><h4>THE CAMPAIGN: HALL RUN, THE GIVING, THE TOP 5</h4><p><b>Monday, Oct 26, 12:00 AM Pacific:</b> the Hall run starts and lasts <b>14 days</b>. <b>Monday, Nov 9:</b> the Hall closes (its app goes gray and new runs are refused). The <b>Giving</b> opens in green for <b>48 hours</b>: players outside the top 5 can give their coins to other players. <b>Wednesday, Nov 11:</b> the Giving closes and the <b>Top 5</b> opens in gold with the final results: the five highest <b>lifetime totals</b> (distance points + coin points + coins + 1,000 per 1% of the Regular deck + 1,000 per 1% of the Foil deck + X bonus). The Alarm app counts it all down.</p><div class="hint">The times live on the server (CAMPAIGN in the Worker) and the page reads them from there.</div></div><div class="box"><h4>HOW THE GAME WORKS RIGHT NOW</h4><div class="works">' + worksCards() + '</div></div></section>' +
       '<section data-p="site">' + (DOCS.pages.site || '<div class="box">GUIDE NOT LOADED</div>') + '</section>' +
@@ -525,7 +545,7 @@
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
-      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintX(); paintEgg(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
+      clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); paintAppr(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintX(); paintEgg(); paintSec(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
       lists(); paintHype();
     }

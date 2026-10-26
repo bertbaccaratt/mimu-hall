@@ -537,3 +537,6 @@ body .adminlink, body.phone-open .adminlink { opacity: 1 !important; visibility:
 body .adminlink, body.phone-open .adminlink { opacity: .5 !important; }
 body .adminlink:hover, body .adminlink:focus-visible { opacity: 1 !important; }
 @media (max-width: 520px), (max-height: 600px) { body .adminlink, body.phone-open .adminlink { opacity: .5 !important; } }
+
+/* the ADMIN link steps aside while the login box or the control room is open, so it never sits on top of them */
+body:has(.adm-shade.open) .adminlink, body.phone-open:has(.adm-shade.open) .adminlink { display: none !important; }
