@@ -164,19 +164,31 @@
   function connectThen(go) {
     if (!gOpen() && !S.active) { gPaint(); gSync(); return; }   // still locked: nothing opens
     if (S.active || !GLYPH_LIVE || S.demoOnly) { go(); return; }   // demoOnly: signed in but under 5 NFTs, so no more sign-in windows until the page is reloaded
+    var cur = 0;
     var attempt = function () {
-      showNote('<span class="gn">OPENING GLYPH&hellip;</span><small>APPROVE THE SIGN-IN IN THE GLYPH WINDOW</small>');
+      var id = ++cur; S.signing = true;
+      showNote('<span class="gn">OPENING GLYPH&hellip;</span><small>APPROVE THE SIGN-IN IN THE GLYPH WINDOW. IF NOTHING OPENS, YOUR BROWSER MAY BE BLOCKING POP-UPS</small>');
       signIn().then(function (r) {
+        S.signing = false; if (id !== cur && !S.active) return;   // an older try that finished late is ignored unless it really signed the player in
         if (r && r.refused) { showNote('<span class="gn bad">YOU NEED 5 MIMU ON APE NFTS TO PLAY FOR REAL</span><small>YOU CAN PLAY THE DEMO RUN</small><span class="gb"><button type="button" id="gnDemo">PLAY THE DEMO</button></span>'); $('gnDemo').onclick = function () { hideNote(); go(); }; return; }
         hideNote(); go();
       }, function (e) {
+        if (id !== cur) return; S.signing = false;
         var m = String((e && e.message) || 'Sign-in did not finish.'); if (/Refusing|Glyph is not ready/.test(m)) m = 'Sign-in did not finish.';
         showNote('<span class="gn bad">' + esc(m.toUpperCase()) + '</span><span class="gb"><button type="button" id="gnRetry">TRY AGAIN</button><button type="button" id="gnGuest">CONTINUE AS A GUEST (DEMO)</button></span>');
         $('gnRetry').onclick = attempt; $('gnGuest').onclick = function () { hideNote(); go(); };
       });
     };
+    /* the browser blocked the Glyph window: say so, and tell them how to allow it (TRY AGAIN is a fresh tap, which the browser trusts) */
+    S.onBlocked = function () {
+      if (!S.signing || S.active) return;
+      showNote('<span class="gn bad">YOUR BROWSER BLOCKED THE GLYPH WINDOW</span><small>ALLOW POP-UPS FOR THIS SITE: TAP THE POP-UP BLOCKED ICON AT THE RIGHT END OF THE ADDRESS BAR (OR THE LOCK ICON, THEN SITE SETTINGS) AND CHOOSE ALLOW. THEN TAP TRY AGAIN</small><span class="gb"><button type="button" id="gnRetry">TRY AGAIN</button><button type="button" id="gnGuest">CONTINUE AS A GUEST (DEMO)</button></span>');
+      $('gnRetry').onclick = function () { if (S.active) { hideNote(); go(); } else attempt(); }; $('gnGuest').onclick = function () { S.signing = false; hideNote(); go(); };
+    };
     attempt();
   }
+  /* every window the page opens is watched: a null answer means the browser's pop-up blocker said no (only while the Glyph sign-in is running) */
+  (function () { var open = window.open; if (typeof open !== 'function') return; window.open = function () { var w = null; try { w = open.apply(window, arguments); } catch (e) { w = null; } if (!w && S.signing && S.onBlocked) { try { S.onBlocked(); } catch (e) {} } return w; }; })();
   /* a returning player is welcomed back without opening Glyph again */
   function restore() {
     if (!GLYPH_LIVE) { lsDel(SKEY); return; }
