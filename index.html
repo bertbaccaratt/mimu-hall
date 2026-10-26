@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027y"><link rel="stylesheet" href="assets/game/comms.css?v=20261027y"><link rel="stylesheet" href="assets/game/admin.css?v=20261027y">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027z"><link rel="stylesheet" href="assets/game/comms.css?v=20261027z"><link rel="stylesheet" href="assets/game/admin.css?v=20261027z">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -526,10 +526,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027y" defer></script>
-<script src="assets/game/hall-runner.js?v=20261027y" defer></script>
-<script src="assets/game/eyes.js?v=20261027y" defer></script> <script src="assets/game/comms.js?v=20261027y" defer></script> <script src="assets/game/campaign.js?v=20261027y" defer></script> <script src="assets/game/xbonus.js?v=20261027y" defer></script> <script src="assets/game/hunt.js?v=20261027y" defer></script> <script src="assets/game/powerchart.js?v=20261027y" defer></script> <script src="assets/game/net.js?v=20261027y" defer></script> <script src="assets/game/egg.js?v=20261027y" defer></script> <script src="assets/game/badges.js?v=20261027y" defer></script> <script src="assets/game/apps.js?v=20261027y" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027y" defer></script> <script src="assets/game/admin.js?v=20261027y" defer></script>
+<script src="assets/game/profile.js?v=20261027z" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027z" defer></script>
+<script src="assets/game/eyes.js?v=20261027z" defer></script> <script src="assets/game/comms.js?v=20261027z" defer></script> <script src="assets/game/campaign.js?v=20261027z" defer></script> <script src="assets/game/xbonus.js?v=20261027z" defer></script> <script src="assets/game/hunt.js?v=20261027z" defer></script> <script src="assets/game/powerchart.js?v=20261027z" defer></script> <script src="assets/game/net.js?v=20261027z" defer></script> <script src="assets/game/egg.js?v=20261027z" defer></script> <script src="assets/game/badges.js?v=20261027z" defer></script> <script src="assets/game/apps.js?v=20261027z" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027z" defer></script> <script src="assets/game/admin.js?v=20261027z" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -915,15 +915,25 @@ window.MIMUAudio = (function () {
     '<div class="rk">THE GIVING, TOP 5</div><div>Give coins to other players (green, 48 hours after the Hall run), and the final top five players of all time (gold)</div><div>open at the end of the campaign</div></div>',
     '</div></details>',
     '<details class="rs" id="r-campaign"><summary>The campaign: the Alarm, the Giving and the Top 5</summary><div class="rsb">',
-    '<p>The game runs on a clock. The <strong>Alarm</strong> app counts it down and shows every date.</p>',
+    '<p>The game runs on a clock. The <strong>Alarm</strong> app counts it down and shows every date. <strong>Everything below happens by itself</strong> at the times shown in the Alarm: nobody has to switch anything on, and you do not have to reload the page.</p>',
     '<ol class="rsn"><li><strong>The Hall run: 14 days.</strong> It starts Monday, October 26, 12:00 PM (noon) Pacific and ends Monday, November 9, at noon. Play, collect points, coins and cards. When the 14 days end, the Hall closes: its app goes gray and cannot be opened.</li>',
-    '<li><strong>The Giving: 48 hours.</strong> A green app opens. Anyone who is <strong>not in the top 5</strong> can give their coins to other players. After 48 hours (Wednesday, November 11, at noon Pacific) it goes gray and closes.</li>',
-    '<li><strong>The Top 5.</strong> The app opens in glowing gold and shows the top 5 lifetime totals of all time, with every part listed: distance and coin points, coins, Regular deck %, Foil deck % and X bonus. This is the end of the game and the final results.</li></ol>',
+    '<li><strong>The Giving: 48 hours.</strong> A green app opens. Anyone who is <strong>not in the top 5</strong> can give their coins to other players, including players in the top 5. After 48 hours (Wednesday, November 11, at noon Pacific) it goes gray and closes.</li>',
+    '<li><strong>The Top 5.</strong> The app opens in glowing gold and shows the top 5 lifetime totals of all time, with every part listed: distance and coin points, coins, Regular deck %, Foil deck %, X bonus and any complete-deck bonuses. This is the end of the game and the final results.</li></ol>',
+    '<h3>What changes on its own</h3>',
+    '<div class="rtab rdrop"><div class="rh">WHEN</div><div class="rh">WHAT HAPPENS</div><div class="rh">WHAT YOU SEE</div>',
+    '<div class="rk">Before the start</div><div>Runs are demo runs: nothing is saved or ranked.</div><div>The Alarm counts down to the start. The Giving and Top 5 icons are dark.</div>',
+    '<div class="rk">Monday, Oct 26, noon Pacific</div><div>The Hall run starts. Saved, ranked play begins for signed-in players.</div><div>The Alarm shows the 14 day countdown to the close.</div>',
+    '<div class="rk">Monday, Nov 9, noon Pacific</div><div>The Hall closes: new runs are refused. A run you already started can still finish and count. The Giving opens.</div><div>The Hall icon turns gray. The Giving icon turns green.</div>',
+    '<div class="rk">Wednesday, Nov 11, noon Pacific</div><div>The Giving closes and the Top 5 opens with the final results.</div><div>The Giving icon turns gray. The Top 5 icon turns gold.</div></div>',
+    '<p>The server decides all of this, not your phone, so the times cannot be changed from the page.</p>',
+    '<h3>The Giving, in detail</h3>',
+    '<ul><li>You give <strong>coins</strong> (your coin balance) to any other player, including players in the top 5. You can give 25%, 50% or all of your coins, or any amount you type. A confirm step asks you first, and a gift <strong>cannot be undone</strong>.</li><li>The players in the <strong>top 5 are locked in</strong>: they keep their coins and cannot give. Your rank is checked at the moment you give, and the Giving app tells you if you are in the top 5.</li><li>Coins you give leave your total and are added to the player you give them to. Players who have not started playing cannot be given to.</li></ul>',
     '<p>The Top 5 uses the same <strong>lifetime total</strong> as the leaderboard: <strong>distance points + coin points (25 per coin) + your coins + 1,000 per 1% of your Regular deck + 1,000 per 1% of your Foil deck + a 100,000 bonus for a complete Regular deck and 250,000 for a complete Foil deck + your X bonus points</strong>. Coins you give away go to the player you give them to. See <strong>Your lifetime total</strong> for a worked example.</p>',
     '</div></details>',
     '<details class="rs" id="r-xbonus"><summary>The X bonus: post and earn 50,000 points</summary><div class="rsb">',
     '<p>Post your picture on X and earn <strong>50,000 bonus points</strong>, again and again every <strong>12 hours</strong>. The points are added to your lifetime total at once, so they count on the Leaderboard and in the Top 5.</p>',
     '<ul><li>Finish <strong>one run</strong> first. That unlocks your first bonus. After that, each bonus opens 12 hours after the last one.</li>',
+    '<li><strong>The X icon on your phone reminds you.</strong> Every 12 hours, when your next bonus is ready, the X icon on the home screen turns <strong>red and wiggles</strong> until you claim it, then turns <strong>green</strong> until the next one.</li>',
     '<li>Open the <strong>X</strong> app (the black icon). At the top, a ring is <strong>red and wiggling</strong> when you can post and earn points, and <strong>green</strong> with a countdown when you are covered.</li>',
     '<li><strong>Step 1:</strong> save your picture. It is one real frame from the Hall with your name, rank, points, coins and decks drawn on it.</li>',
     '<li><strong>Step 2:</strong> post it on X and tag <strong>@mimuonape</strong>. The picture must be in the post.</li>',

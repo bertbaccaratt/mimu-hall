@@ -212,7 +212,7 @@
     /* signed in: the server opens a run for us, and later hands out the new-player card, echo cards and the wanted card */
     var cur = S, nr = HallProfile.netRun && HallProfile.netRun();
     if (window.HallNet && HallNet.ev) HallNet.ev('played');
-    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 2100; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function (e) { if (S === cur) { S.net = null; S.netFailed = true; if (e && e.data && e.data.nft) hint(String(e.data.error || 'YOU NEED NFTS TO PLAY FOR REAL. THIS IS A DEMO RUN.'), 7); } });
+    if (nr) nr.start().then(function (info) { if (S === cur) { S.net = info; S.netStaggerAt = info.staggerFirst || 2100; S.netFoilAt = info.foilAt != null ? info.foilAt : 60; } }, function (e) { if (S === cur) { S.net = null; S.netFailed = true; if (e && e.data && (e.data.nft || e.status === 403)) hint(String(e.data.error || 'THIS IS A DEMO RUN.'), 7); } });
   }
   /* ---------- cards the server puts in a run: the new-player card, echoes and the wanted card ---------- */
   var elHint = el('div', 'hhint', ''); root.appendChild(elHint);
