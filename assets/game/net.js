@@ -181,10 +181,11 @@
       flag: function (runId, action) { return call('/admin/flag', { body: { runId: runId, action: action }, admin: tk() }).then(adminFeed, fail); }
     });
     adminFeed().catch(fail); clearInterval(adm.timer);
+    var fast = function () { if (adm.fbusy || adm.busy || document.hidden || !adm.last) return; adm.fbusy = true; call('/admin/live', { admin: admToken() }).then(function (p) { if (!adm.last || adm.busy) return; var f = adm.last, v = {}; for (var k in f.visitors) v[k] = f.visitors[k]; for (k in p.visitors) v[k] = p.visitors[k]; var runs = {}; for (k in f.runs) runs[k] = f.runs[k]; runs.today = p.runs.today; var m = {}; for (k in f) m[k] = f[k]; m.visitors = v; m.runs = runs; m.live = p.live; m.signedIn = p.signedIn; m.activity = p.activity; adm.last = m; if (window.HallAdmin) HallAdmin.setFeed(m); }).catch(function () {}).then(function () { adm.fbusy = false; }); };
     var pull = function () { if (adm.busy || document.hidden) return; adm.busy = true; adminFeed().catch(function (e) { if (e && e.status === 401) adminLogout(); }).then(function () { adm.busy = false; }); };
-    adm.timer = setInterval(pull, 2000); if (!adm.vis) { adm.vis = true; document.addEventListener('visibilitychange', function () { if (!document.hidden && adm.timer) pull(); }); }   /* the numbers are about 2 seconds old at most */
+    clearInterval(adm.ftimer); adm.ftimer = setInterval(fast, 1000); adm.timer = setInterval(pull, 3000); if (!adm.vis) { adm.vis = true; document.addEventListener('visibilitychange', function () { if (!document.hidden && adm.timer) pull(); }); }   /* the numbers are about 2 seconds old at most */
   }
 
-  window.HallNet = { api: call, vid: vid, ev: ev, connectThen: connectThen, signIn: signIn, restore: restore, admin: { login: adminLogin, start: adminStart, stop: function () { clearInterval(adm.timer); adm.timer = 0; }, logout: adminLogout, token: admToken, feed: adminFeed }, base: API };
+  window.HallNet = { api: call, vid: vid, ev: ev, connectThen: connectThen, signIn: signIn, restore: restore, admin: { login: adminLogin, start: adminStart, stop: function () { clearInterval(adm.timer); clearInterval(adm.ftimer); adm.timer = 0; }, logout: adminLogout, token: admToken, feed: adminFeed }, base: API };
   P.whenReady(restore);
 })();
