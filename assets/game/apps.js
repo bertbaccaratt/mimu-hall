@@ -135,7 +135,7 @@
     P.leaderboard(kind).then(function (rows) {
       var box = $('lList');
       if (!rows || !rows.length) { box.innerHTML = '<div class="empty">' + TROPHY + '<br>NO RANKED RUNS YET<br><span style="opacity:.7">DEMO RUNS ARE NOT RANKED</span></div>'; return; }
-      box.innerHTML = rows.slice(0, 100).map(function (r, i) { return '<div class="lbrow"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || r.name || 'RUNNER') + '</span><span class="sc">' + fmt(r.score) + '</span></div>'; }).join('');
+      box.innerHTML = rows.slice(0, 100).map(function (r, i) { return '<div class="lbrow"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || r.name || 'RUNNER') + '</span><span class="sc">' + fmt(r.score) + '</span>' + (kind === 'lifetime' ? '<span class="lbx">X BONUS ' + fmt(r.xPoints || 0) + '</span>' : '') + '</div>'; }).join('');
     });
     refreshDeck();
   }
@@ -152,7 +152,7 @@
         r = rows[i];
         if (!r) { out += '<div class="dkrow dkx"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">&middot; &middot; &middot;</span><span class="sc">0</span></div><div class="dkb"><i style="width:0"></i></div><div class="dkb foil"><i style="width:0"></i></div><div class="dka"><span>POINTS ' + dash + '</span><span>COINS ' + dash + '</span><span>X BONUS ' + dash + '</span><span>REGULAR ' + dash + '</span><span>FOIL ' + dash + '</span></div></div>'; continue; }
         pct = Math.min(100, r.regPct != null ? r.regPct : Math.round((r.owned || 0) / total * 1000) / 10); var fpct = Math.min(100, r.foilPct != null ? r.foilPct : Math.round((r.foilCards || 0) / total * 1000) / 10), xp = r.xPoints || 0, runPts = Math.max(0, (r.points || 0) - xp);
-        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + fmt(r.total != null ? r.total : r.points || 0) + '</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>DISTANCE + COIN POINTS ' + fmt(runPts) + '</span><span>COINS ' + fmt(r.coins || 0) + '</span><span>REGULAR ' + pct + '% (+' + fmt(Math.round(pct * 1000)) + ')</span><span>FOIL ' + fpct + '% (+' + fmt(Math.round(fpct * 1000)) + ')</span><span>X BONUS ' + fmt(xp) + '</span></div></div>';
+        out += '<div class="dkrow"><div class="dkt"><span class="rk">' + (i + 1) + '</span><span class="nm">' + esc(r.username || 'RUNNER') + '</span><span class="sc">' + fmt(r.total != null ? r.total : r.points || 0) + '</span></div><div class="dkb"><i style="width:' + pct + '%"></i></div><div class="dkb foil"><i style="width:' + fpct + '%"></i></div><div class="dka"><span>DISTANCE + COIN POINTS ' + fmt(runPts) + '</span><span>COINS ' + fmt(r.coins || 0) + '</span><span>REGULAR ' + pct + '% (+' + fmt(Math.round(pct * 1000)) + ')</span><span>FOIL ' + fpct + '% (+' + fmt(Math.round(fpct * 1000)) + ')</span><span>X BONUS ' + fmt(xp) + '</span>' + (r.regBonus ? '<span>REGULAR DECK COMPLETE +' + fmt(r.regBonus) + '</span>' : '') + (r.foilBonus ? '<span>FOIL DECK COMPLETE +' + fmt(r.foilBonus) + '</span>' : '') + '</div></div>';
       }
       $('dList').innerHTML = out + (rows.length ? '' : '<div class="dknote">USERNAMES APPEAR HERE ONCE GLYPH IS CONNECTED</div>');
     });

@@ -178,3 +178,6 @@ a.srow { cursor: pointer; } a.srow:hover { background: rgba(217,172,92,.08); }
 .mdr { display: grid; grid-template-columns: 22% 1fr 20%; align-items: center; gap: 8px; font-size: max(8px, calc(var(--h) * .0098)); letter-spacing: .14em; color: #a88a52; } .mdr b { text-align: right; font-weight: 500; color: #f6dc95; } .mdr.foil span, .mdr.foil b { color: #ffd45a; } .mdr .dkb { margin: 3px 0; }
 .mdn { margin-top: calc(var(--h) * .004); font-size: max(7px, calc(var(--h) * .0088)); letter-spacing: .14em; color: #8a7448; }
 .wfoil { display: block; margin-top: calc(var(--h) * .004); font-size: max(7px, calc(var(--h) * .0085)); letter-spacing: .12em; color: #ffd45a; text-shadow: 0 0 6px rgba(255,205,90,.6); }
+
+/* the leaderboard shows each player X bonus points under their lifetime total */
+.lbrow .lbx { grid-column: 2 / 4; font-size: calc(var(--h) * .0135); letter-spacing: .1em; color: #9bd0ff; opacity: .9; margin-top: calc(var(--h) * -.004); }
