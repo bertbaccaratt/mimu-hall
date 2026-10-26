@@ -688,12 +688,12 @@
   }
 
   /* ---------- controls ---------- */
-  /* the rhythm of the player's moves: only counts and averages are kept (how many moves, the average gap, how much the gaps vary), sent with the run so the server can tell a person from a script */
+  /* the rhythm of the player's lane changes: only counts and averages are kept (how many moves, the average gap, how much the gaps vary), sent with the run so the server can tell a person from a script */
   function beat() { var r = S.rh, t = (window.performance && performance.now) ? performance.now() : Date.now(); if (r.last) { var g = t - r.last, d = g - (r.n ? r.mean : 0); r.n++; r.mean += d / r.n; r.m2 += d * (g - r.mean); if (g < r.min) r.min = g; } r.last = t; }
   function rhythm() { var r = S.rh; return { n: r.n, mean: Math.round(r.mean * 10) / 10, sd: Math.round(Math.sqrt(r.n > 1 ? r.m2 / (r.n - 1) : 0) * 10) / 10, min: r.n ? Math.round(r.min) : 0 }; }
-  function lane(d) { if (S.mode !== 'run') return; var nl = clamp(S.lane + d, -1, 1); if (nl !== S.lane) { S.lanes++; beat(); } S.lane = nl; }
-  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; S.jumps++; beat(); }
-  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; S.slides++; beat(); }
+  function lane(d) { if (S.mode !== 'run') return; var nl = clamp(S.lane + d, -1, 1); if (nl !== S.lane) { S.lanes++; beat(); } S.lane = nl; }   /* only lane changes feed the rhythm: they follow the boxes, so they are never steady. Holding the jump key or spamming taps jumps at an even pace and must never look like a script */
+  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; S.jumps++; }
+  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; S.slides++; }
   var down = null;
   root.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; down = { x: e.clientX, y: e.clientY, t: Date.now(), used: false }; });
   root.addEventListener('pointermove', function (e) {
