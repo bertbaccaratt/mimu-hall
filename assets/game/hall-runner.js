@@ -299,7 +299,7 @@
     S.scrollZ += step;
     if (running) {
       S.dist += step;
-      S.score += step * 4;
+      S.score += step * 20;   /* distance points: 20 per game unit (about 11,000 a mile) */
       S.run += dt * (6 + v);
       if (S.alive >= S.nextSight) { S.nextSight += S.rc.sightEvery; spawnCard(); }
       if (S.alive >= S.nextPack) { S.nextPack += S.rc.packEvery; spawnPack(); }
