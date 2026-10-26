@@ -221,7 +221,7 @@
     if (!r || !r.dropId || S.dropSeen[r.dropId]) return; S.dropSeen[r.dropId] = 1;
     var c = HallProfile.card(r.card); if (!c) return; cardImg(c.n);
     var spot = freeLane(16.5, null); S.ents.push({ k: 'card', n: c.n, tier: c.tier, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, drop: { id: r.dropId, kind: kind, half: r.half || '' } });
-    hint(kind === 'wanted' ? 'THE WANTED CARD! JUMP IT!' : kind === 'foil' ? (r.half === 'B' ? 'BOTH HALVES OF A FOIL CARD! JUMP IT!' : 'A GLOWING FOIL HALF! JUMP IT!') : kind === 'stagger' ? 'A STAGGER CARD: A DUPLICATE! JUMP IT!' : 'YOUR FIRST CARD! JUMP TO COLLECT IT!', 5);
+    hint(kind === 'wanted' ? 'THE WANTED CARD! RUN INTO IT!' : kind === 'foil' ? (r.half === 'B' ? 'BOTH HALVES OF A FOIL CARD! JUMP IT!' : 'A GLOWING FOIL HALF! JUMP IT!') : kind === 'stagger' ? 'A STAGGER CARD: A DUPLICATE! RUN INTO IT!' : 'YOUR FIRST CARD! RUN INTO IT!', 5);
     if (window.MIMUAudio && MIMUAudio.pack) MIMUAudio.pack();
   }
   function netTick() {
@@ -324,7 +324,8 @@
           var cross = pz >= PZ - 0.10 && e.z <= PZ + 0.10;
           if (cross) {
             if (e.k === 'coin' && !e.got) { e.got = true; S.coins += S.mult; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
-            else if (e.k === 'item' && !e.got) { e.got = true; collectItem(e); }   /* the magnet, the multiplier and the battery are picked up just by running through them: no jump needed */
+            else if (e.k === 'item' && !e.got) { e.got = true; collectItem(e); }
+            else if (e.k === 'card' && !(e.drop && e.drop.kind === 'foil') && !e.got) { e.got = true; collectCard(e); }   /* regular cards are picked up by running into them: only a foil card needs a jump */   /* the magnet, the multiplier and the battery are picked up just by running through them: no jump needed */
             else if ((e.k === 'card' || e.k === 'pack' || e.k === 'item') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else if (e.k === 'item') collectItem(e); else collectPack(); } }
             else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } else if (jh >= 0.42 && !e.jumped) { e.jumped = true; S.boxesJumped++; } }
           }
@@ -525,7 +526,7 @@
     else if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
     ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); if (dk !== 'foil') ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
-    if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'JUMP!', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
+    if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; ctx.shadowColor = '#000'; ctx.shadowBlur = 4; ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'FIRST', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }
   /* power-ups: drawn in code to match the chosen look: a red and gold U magnet, a black poker-chip coin with a gold rim, and a green glowing battery with a bolt */
