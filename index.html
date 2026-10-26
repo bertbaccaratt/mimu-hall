@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027f"><link rel="stylesheet" href="assets/game/comms.css?v=20261027f"><link rel="stylesheet" href="assets/game/admin.css?v=20261027f">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027g"><link rel="stylesheet" href="assets/game/comms.css?v=20261027g"><link rel="stylesheet" href="assets/game/admin.css?v=20261027g">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -526,10 +526,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027f" defer></script>
-<script src="assets/game/hall-runner.js?v=20261027f" defer></script>
-<script src="assets/game/eyes.js?v=20261027f" defer></script> <script src="assets/game/comms.js?v=20261027f" defer></script> <script src="assets/game/campaign.js?v=20261027f" defer></script> <script src="assets/game/xbonus.js?v=20261027f" defer></script> <script src="assets/game/hunt.js?v=20261027f" defer></script> <script src="assets/game/net.js?v=20261027f" defer></script> <script src="assets/game/egg.js?v=20261027f" defer></script> <script src="assets/game/badges.js?v=20261027f" defer></script> <script src="assets/game/apps.js?v=20261027f" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027f" defer></script> <script src="assets/game/admin.js?v=20261027f" defer></script>
+<script src="assets/game/profile.js?v=20261027g" defer></script>
+<script src="assets/game/hall-runner.js?v=20261027g" defer></script>
+<script src="assets/game/eyes.js?v=20261027g" defer></script> <script src="assets/game/comms.js?v=20261027g" defer></script> <script src="assets/game/campaign.js?v=20261027g" defer></script> <script src="assets/game/xbonus.js?v=20261027g" defer></script> <script src="assets/game/hunt.js?v=20261027g" defer></script> <script src="assets/game/powerchart.js?v=20261027g" defer></script> <script src="assets/game/net.js?v=20261027g" defer></script> <script src="assets/game/egg.js?v=20261027g" defer></script> <script src="assets/game/badges.js?v=20261027g" defer></script> <script src="assets/game/apps.js?v=20261027g" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027g" defer></script> <script src="assets/game/admin.js?v=20261027g" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -839,18 +839,18 @@ window.MIMUAudio = (function () {
     '</div></details>',
     '<details class="rs" id="r-power"><summary>Power-ups and the phone battery</summary><div class="rsb">',
     '<figure class="rfig"><div class="rimg" style="aspect-ratio:375/150"><img src="assets/rules/power.jpg" alt="The three power-ups floating down the road: a magnet, a multiplier chip and a battery" loading="lazy" style="top:-290.67%"><i class="hl" style="left:9.07%;top:20.00%;width:18.13%;height:46.67%"><b>1</b></i><i class="hl" style="left:35.73%;top:18.67%;width:20.27%;height:49.33%"><b>2</b></i><i class="hl" style="left:66.13%;top:21.33%;width:14.40%;height:49.33%"><b>3</b></i></div><figcaption><ol><li><b>1</b><span><strong>Coin magnet</strong>: coins fly to you for 15 seconds.</span></li><li><b>2</b><span><strong>Coin multiplier</strong>: a poker chip. Each one adds a level, up to x5.</span></li><li><b>3</b><span><strong>Phone battery</strong>: a glowing green battery, +25% power.</span></li></ol></figcaption></figure>',
-    '<figure class="rfig xfig"><a href="assets/game/power-timeline.png" target="_blank" rel="noopener"><img src="assets/game/power-timeline.png" alt="Timeline of the coin magnet, the coin multiplier chain, the phone battery, and how the phone power falls and recovers" loading="lazy"></a><figcaption>The first 30 minutes of one run: when the magnet, the multiplier chips and the batteries arrive, and how the phone power falls and recovers. On a phone, swipe it sideways to see all of it, or tap it to open it full size.</figcaption></figure>',
+    '<figure class="rfig xfig powerfig"><div class="pchart" data-pchart="rules"></div><figcaption>The first 30 minutes of one run: when the magnet, the multiplier chips and the batteries arrive, and how the phone power falls and recovers. It is drawn from the game&rsquo;s real numbers.</figcaption></figure>',
     '<p>Three power-ups float down the road during a run. Jump into one to collect it, the same way you jump a card. The server decides when they appear.</p>',
     '<div class="rtab rdrop"><div class="rh">POWER-UP</div><div class="rh">WHEN</div><div class="rh">WHAT IT DOES</div>',
-    '<div class="rk">Coin magnet</div><div>2:00 alive, then every 4 minutes</div><div>For <strong>15 seconds</strong>, coins fly into the runner: your lane and the lanes beside you, about 5 steps ahead.</div>',
-    '<div class="rk">Coin multiplier</div><div>A chain of 5 poker chips, 6 seconds apart, every 5 minutes from 4:00 alive</div><div>Each chip adds a level: <strong>x2, x3, x4, up to x5</strong>. Your coins count times the level (points per coin stay 25).</div>',
+    '<div class="rk">Coin magnet</div><div>2:00 alive, then every 90 seconds</div><div>For <strong>15 seconds</strong>, coins fly into the runner: your lane and the lanes beside you, about 5 steps ahead.</div>',
+    '<div class="rk">Coin multiplier</div><div>A chain of 5 poker chips, 6 seconds apart, every 3 minutes from 4:00 alive</div><div>Each chip adds a level: <strong>x2, x3, x4, up to x5</strong>. Your coins count times the level (points per coin stay 25).</div>',
     '<div class="rk">Phone battery</div><div>3:00 alive, then every 3 minutes</div><div>A glowing green battery: <strong>+25%</strong> phone power (never above 100%).</div></div>',
     '<h3>The coin magnet</h3>',
     '<figure class="rfig"><div class="rimg" style="aspect-ratio:375/500"><img src="assets/rules/magnet.jpg" alt="The coin magnet active with a timer and coins flying in" loading="lazy" style="top:-16.00%"><i class="hl" style="left:8.00%;top:19.20%;width:32.00%;height:5.60%"><b>1</b></i><i class="hl" style="left:44.27%;top:63.20%;width:29.87%;height:30.00%"><b>2</b></i></div><figcaption><ol><li><b>1</b><span>The <strong>MAGNET</strong> timer shows how long it lasts.</span></li><li><b>2</b><span>Coins near you <strong>fly into the runner</strong>.</span></li></ol></figcaption></figure>',
     '<h3>The multiplier at x5</h3>',
-    '<figure class="rfig"><div class="rimg" style="aspect-ratio:375/200"><img src="assets/rules/multiplier.jpg" alt="The coin multiplier at x5" loading="lazy" style="top:-40.00%"><i class="hl" style="left:7.47%;top:48.00%;width:34.67%;height:15.00%"><b>1</b></i><i class="hl" style="left:70.40%;top:2.00%;width:21.33%;height:22.00%"><b>2</b></i></div><figcaption><ol><li><b>1</b><span>The <strong>x5</strong> chip: every coin now counts five times. Then a 3 minute cooldown.</span></li><li><b>2</b><span>Your <strong>coin count</strong> jumps fast at x5.</span></li></ol></figcaption></figure>',
+    '<figure class="rfig"><div class="rimg" style="aspect-ratio:375/200"><img src="assets/rules/multiplier.jpg" alt="The coin multiplier at x5" loading="lazy" style="top:-40.00%"><i class="hl" style="left:7.47%;top:48.00%;width:34.67%;height:15.00%"><b>1</b></i><i class="hl" style="left:70.40%;top:2.00%;width:21.33%;height:22.00%"><b>2</b></i></div><figcaption><ol><li><b>1</b><span>The <strong>x5</strong> chip: every coin now counts five times. Then a 90 second cooldown.</span></li><li><b>2</b><span>Your <strong>coin count</strong> jumps fast at x5.</span></li></ol></figcaption></figure>',
     '<h3>How the multiplier works</h3>',
-    '<ul><li>Each level lasts <strong>15 seconds</strong>. When the time runs out the top level fades first (x5 to x4 to x3 and so on), so you can keep a high multiplier by grabbing the next chip in time.</li><li>At <strong>x5</strong> the chain is maxed. Then there is a <strong>3 minute cooldown</strong>: no more chips appear until it is over.</li></ul>',
+    '<ul><li>Each level lasts <strong>15 seconds</strong>. When the time runs out the top level fades first (x5 to x4 to x3 and so on), so you can keep a high multiplier by grabbing the next chip in time.</li><li>At <strong>x5</strong> the chain is maxed. Then there is a <strong>90 second cooldown</strong>: no more chips appear until it is over.</li></ul>',
     '<h3>The phone battery</h3>',
     '<ul><li>The battery in the phone&rsquo;s top bar is <strong>live during a run</strong>. It starts at <strong>100%</strong> and loses about <strong>5% every minute</strong>, so a full charge lasts about <strong>20 minutes</strong>.</li><li>Grab green batteries to add 25%. Below 20% the battery turns <strong>red</strong> and you get a warning.</li><li>At <strong>0% the phone dies and the run ends.</strong> Your score is kept, like any other run.</li><li>You do not need every battery: catching about 6 out of every 10 keeps you going. Ignore them completely and the phone dies after about 20 minutes.</li></ul>',
     '<h3>The battery at a glance</h3>',
@@ -1005,7 +1005,7 @@ window.MIMUAudio = (function () {
   function openInfo(t) {
     closeApe(true); closeGames(true); var d = INFO[t.getAttribute('href')] || INFO['#about'];
     $('infoTitle').textContent = d[0]; $('infoLine').innerHTML = d[1]; $('infoSoon').textContent = d[2];
-    var ib = $('infoBody'); ib.innerHTML = d[3] || ''; ib.style.display = d[3] ? 'block' : 'none'; ib.scrollTop = 0; infoEl.classList.toggle('rules', !!d[3]);
+    var ib = $('infoBody'); ib.innerHTML = d[3] || ''; if (window.HallPower) HallPower.fill(ib); ib.style.display = d[3] ? 'block' : 'none'; ib.scrollTop = 0; infoEl.classList.toggle('rules', !!d[3]);
     setActive(t); infoEl.classList.add('open'); infoShade.classList.add('open'); infoEl.setAttribute('aria-hidden', 'false');
   }
   // the phone: swipe up (or press the bar at the bottom) to unlock, then open the app THE HALL; the bar at the bottom goes home

@@ -524,3 +524,7 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
   .top { z-index: 20; } .tab { min-height: 36px; touch-action: manipulation; }
   .rfig.xfig { margin-left: 0; margin-right: 0; } .rfig.xfig a { overflow: visible; } .rfig.xfig img { min-width: 0; width: 100%; }
 }
+
+/* the power-up timeline, drawn from the real numbers */
+.pchart { line-height: 0; } .pchart svg { display: block; width: 100%; height: auto; border: 1px solid rgba(246,220,149,.5); box-shadow: 0 0 18px rgba(255,205,90,.2); }
+.rfig.powerfig { display: block; margin-left: -16px; margin-right: -16px; } .rfig.powerfig figcaption { padding: 6px 16px 0; line-height: 1.5; font-size: 12px; } @media (max-width: 700px) { .rfig.powerfig { margin-left: 0; margin-right: 0; } }
