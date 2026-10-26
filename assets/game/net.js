@@ -221,6 +221,7 @@
       hype: function (to, body) { return call('/admin/hype', { body: { to: to, body: body }, admin: tk() }).then(adminFeed, fail); },
       mail: function (subject, body) { return call('/admin/mail', { body: { subject: subject, body: body }, admin: tk() }).then(adminFeed, fail); },
       markRead: function (name) { var t = adm.last && (adm.last.hypeThreads || []).filter(function (x) { return x.name === name; })[0]; if (t && t.id) call('/admin/read', { body: { id: t.id }, admin: tk() }).then(adminFeed, function () {}); },
+      texts: function (qs) { return call('/admin/texts' + (qs || ''), { admin: tk() }).catch(fail); },
       approve: function (key, on) { return call('/admin/approve', { body: { key: key, on: !!on }, admin: tk() }).then(adminFeed, fail); },
       wantedLaunch: function (card, hours) { return call('/admin/wanted/launch', { body: { card: card, hours: hours }, admin: tk() }).then(adminFeed, fail); },
       wantedEnd: function () { return call('/admin/wanted/end', { body: {}, admin: tk() }).then(adminFeed, fail); },

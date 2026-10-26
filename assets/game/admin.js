@@ -158,7 +158,7 @@
   /* ---------- the OVERVIEW page: a mind map to learn the control room, then everything about the visitors ---------- */
   var MAP = [
     ['WATCH', 'g1', [['ov', 'OVERVIEW', 'visitors, funnel and site health'], ['live', 'LIVE RUNS', 'who is playing right now'], ['flag', 'FLAGGED RUNS', 'runs held for review: approve, deny or ban'], ['board', 'PLAYER BOARD', 'every player, points and deck completion'], ['cards', 'CARDS', 'the 120 cards, pictured'], ['wanted', 'LAUNCH A WANTED CARD', 'pick a card, set the hours and launch it']]],
-    ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
+    ['TALK', 'g2', [['msg', 'HYPE TEXTS', 'text players as HYPE and read their replies'], ['utx', 'USER TEXTS', 'every text players send each other, to moderate'], ['mail', 'MIMU MAIL', 'send announcements as MIMU (outgoing only)']]],
     ['MONEY', 'g3', [['eco', 'ECONOMY', 'coins, points, the Marketplace and the Giving'], ['xbonus', 'X BONUS', 'who posted on X, every post link and its check']]],
     ['SECRET', 'g5', [['egg', 'EASTER EGG', 'the hidden phone number puzzle: the order, the number and who found it'], ['sec', 'SECURITY', 'admin login attacks: wrong guesses, many visitors at once, who is locked out']]],
     ['LEARN', 'g4', [['rules', 'GAME RULES', 'the live game numbers'], ['site', 'SITE GUIDE', 'every page and icon'], ['sys', 'SYSTEMS', 'how each part works']]]
@@ -441,7 +441,7 @@
     ];
     return rows.map(function (r) { return '<div class="sysr ' + r[1] + '"><i></i><b>' + r[0] + '</b><span>' + r[2] + '</span></div>'; }).join('');
   }
-  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['xbonus', 'X BONUS'], ['egg', 'EASTER EGG'], ['sec', 'SECURITY'], ['cards', 'CARDS'], ['wanted', 'LAUNCH A WANTED CARD'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS']];
+  var NAV = [['ov', 'OVERVIEW'], ['live', 'LIVE RUNS'], ['flag', 'FLAGGED RUNS'], ['board', 'PLAYER BOARD'], ['msg', 'HYPE TEXTS'], ['utx', 'USER TEXTS'], ['mail', 'MIMU MAIL'], ['eco', 'ECONOMY'], ['xbonus', 'X BONUS'], ['egg', 'EASTER EGG'], ['sec', 'SECURITY'], ['cards', 'CARDS'], ['wanted', 'LAUNCH A WANTED CARD'], ['rules', 'GAME RULES'], ['site', 'SITE GUIDE'], ['sys', 'SYSTEMS']];
   var DOCS = window.HallAdminDocs || { pages: {} };
   var curTab = 'ov';
   function openPanel() {
@@ -463,7 +463,19 @@
       '<section data-p="live"><div class="livebox off" id="admLB2"></div></section><section data-p="flag"><div id="admFlag"></div></section>' +
       '<section data-p="board"><div class="box dbox"><h4 id="admBoardH">PLAYER BOARD</h4><div class="hint" style="margin-bottom:10px">Every signed-in player with their <b>lifetime total</b> (distance points + coin points + coins + Regular deck % + Foil deck % + X bonus; the points part is shown underneath), their coins and how complete their Regular and Foil decks are. Press a column title to sort.</div><div class="bsearch"><input id="admBq" maxlength="40" placeholder="SEARCH A PLAYER" autocomplete="off"></div><div id="admBoardList"></div></div></section>' +
       '<section data-p="msg"><div class="hx"><div class="box hxl"><h4>CONVERSATIONS</h4><div class="hxnew"><input id="admHTo" list="admPl" maxlength="40" placeholder="START A NEW TEXT: PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><button type="button" class="go" id="admHNew">NEW</button></div><div class="hxlist" id="admHT"></div></div><div class="box hxr"><h4 id="admHTitle">PICK A CONVERSATION</h4><div class="hint">HYPE is the account you text players from. Players can and will text HYPE back, so their replies land here. Players can also text HYPE first.</div><div class="hxlog" id="admHLog"></div><div class="cmp"><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div></div></section>' +
-      '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
+      '<section data-p="utx"><div class="box dbox"><h4>USER TEXTS &middot; WHAT THIS PAGE IS</h4><div class="utxinfo">' +
+        '<p><b>EVERY TEXT PLAYERS SEND EACH OTHER, ON THE WHOLE SERVICE, IN ONE PLACE.</b> This page lets the administration read player-to-player texts so the Hall can be moderated. It is <b>read-only</b>: nothing here edits, deletes or sends a text.</p>' +
+        '<ul><li><b>WHAT YOU SEE:</b> both usernames of every text (who sent it and who got it), the exact time in Los Angeles time, whether the receiver has opened it (<b>READ</b> or <b>UNREAD</b>), banned players, and who has blocked whom. Hover a username to see the full wallet address.</li>' +
+        '<li><b>NOT ON THIS PAGE:</b> texts with HYPE (those are on the <b>HYPE TEXTS</b> page) and MIMU mail and notices.</li>' +
+        '<li><b>HOW TEXTS WORK FOR PLAYERS:</b> only players with 5 or more Mimu On Ape can text; a text is up to 280 characters; a player can send up to 20 a minute; players can block each other; banned players cannot send or receive; players cannot edit or delete a text. The Hall Rules tell players the team can read texts.</li>' +
+        '<li><b>HOW TO USE IT:</b> the left list shows the conversations, newest first. Click one to read the whole conversation on the right. The search box finds a word in any text or any username. <b>SHOW ALL OF NAME&rsquo;S TEXTS</b> filters the page to one player. <b>TEXT NAME AS HYPE</b> opens the HYPE TEXTS page with that player ready, so you can warn them. To ban a player use the ban action on a flagged run.</li>' +
+        '<li><b>LIVE:</b> this page refreshes every 3 seconds while it is open. It lists the 200 newest conversations and the 80 newest texts, and a conversation shows up to its latest 500 texts. Keep what you read here private.</li></ul></div></div>' +
+        '<div class="utxstats" id="admUtxS"></div>' +
+        '<div class="box dbox"><h4>READ AND SEARCH</h4><div class="hxnew"><input id="admUtxQ" maxlength="60" placeholder="SEARCH EVERY TEXT OR ANY USERNAME" autocomplete="off"><button class="go" type="button" id="admUtxClr">CLEAR</button></div><div class="cmsg" id="admUtxMsg"></div><div class="utxchip" id="admUtxChip"></div>' +
+        '<div class="hx"><div><div class="hint" style="margin-bottom:8px" id="admUtxListH">CONVERSATIONS</div><div class="hxlist" id="admUtxList"></div></div><div><div id="admUtxHead"></div><div class="hxlog" id="admUtxLog"></div><div class="utxacts" id="admUtxActs"></div></div></div></div>' +
+        '<div class="box dbox"><h4 id="admUtxAllH">THE NEWEST TEXTS</h4><div class="utxall" id="admUtxAll"></div></div>' +
+        '<div class="box dbox"><h4>WHO HAS BLOCKED WHOM</h4><div class="utxall" id="admUtxBlk"></div></div></section>' +
+            '<section data-p="mail"><div class="box"><h4>MIMU MAIL</h4><div class="mtabs" id="admMT"><button type="button" class="on" data-k="c">COMPOSE</button><button type="button" data-k="s">SENT</button></div><div class="hint" style="margin-bottom:12px">Announcements from MIMU to everyone signed in. Mail is outgoing only: players cannot send or reply to email, they text instead.</div>' +
       '<div class="cmp" id="admMC"><input id="admMS" maxlength="90" placeholder="SUBJECT" autocomplete="off"><textarea id="admMB" maxlength="4000" rows="7" placeholder="EMAIL FROM MIMU"></textarea><button class="go" type="button" id="admMSend">SEND TO EVERYONE SIGNED IN</button><div class="cmsg" id="admMMsg"></div></div><div class="sent" id="admML" style="display:none"></div></div></section>' +
       '<section data-p="eco"><div id="admEco"></div></section>' +
       '<section data-p="xbonus"><div id="admX"></div></section>' +
@@ -540,12 +552,69 @@
       Array.prototype.forEach.call(b.parentNode.children, function (x) { x.classList.toggle('on', x === b); });
       $('admMC').style.display = mtab === 'c' ? '' : 'none'; $('admML').style.display = mtab === 'c' ? 'none' : ''; lists();
     });
+    /* USER TEXTS: every text between players, read-only (the server sends it from /admin/texts while this page is open) */
+    var utx = { data: null, a: '', b: '', p: '', q: '', busy: false, at: 0, sig: '', msg: '', qt: 0, openKey: '' };
+    function nameTag(w) { return '<span class="utn' + (w.banned ? ' ban' : '') + '" title="' + esc(w.address) + '">' + esc(w.name) + '</span>' + (w.banned ? ' <i class="utb">BANNED</i>' : ''); }
+    function utxQs() { var q = []; if (utx.a && utx.b) q.push('a=' + utx.a, 'b=' + utx.b); if (utx.p) q.push('p=' + utx.p); if (utx.q) q.push('q=' + encodeURIComponent(utx.q)); return q.length ? '?' + q.join('&') : ''; }
+    function utxTick(force) {
+      if (curTab !== 'utx' || !handlers.texts || utx.busy) return;
+      if (!force && Date.now() - utx.at < 3000) return;
+      utx.busy = true; utx.at = Date.now();
+      handlers.texts(utxQs()).then(function (d) { utx.data = d; utx.busy = false; utx.msg = ''; paintUtx(); }, function (e) { utx.busy = false; utx.msg = 'COULD NOT LOAD THE TEXTS: ' + String((e && e.message) || 'TRY AGAIN').toUpperCase(); paintUtx(true); });
+    }
+    function paintUtx(force) {
+      var d = utx.data; if (!d || !$('admUtxS')) return;
+      var c0 = {}; for (var k0 in d) if (k0 !== 'at') c0[k0] = d[k0];
+      var sig = JSON.stringify(c0) + '|' + utx.a + '|' + utx.b + '|' + utx.p + '|' + utx.q + '|' + utx.msg;
+      if (sig === utx.sig && !force) return; utx.sig = sig;
+      var st = d.stats || {}, convs = d.conversations || [], th = d.thread, res = d.results;
+      var tile = function (n, l) { return '<div class="utxs"><b>' + n + '</b><span>' + l + '</span></div>'; }, f = function (n) { return Number(n || 0).toLocaleString('en-US'); };
+      $('admUtxS').innerHTML = tile(f(st.texts), 'TEXTS SENT IN ALL') + tile(f(st.conversations), 'CONVERSATIONS') + tile(f(st.senders), 'PLAYERS WHO HAVE TEXTED') + tile(f(st.last24h), 'LAST 24 HOURS') + tile(f(st.lastHour), 'LAST HOUR') + tile(f(st.unread), 'NOT OPENED YET') + tile(f(st.blocks), 'BLOCKS') +
+        '<div class="utxs wide"><span>BUSIEST SENDERS</span><em>' + ((st.top || []).length ? st.top.map(function (t) { return '<a data-pf="' + esc(t.address) + '">' + esc(t.name) + ' (' + f(t.texts) + ')</a>'; }).join(' &middot; ') : 'NO TEXTS YET') + '</em></div>' + (st.firstAt ? '<div class="utxs wide"><span>FIRST TEXT EVER</span><em>' + stamp(st.firstAt) + '</em></div>' : '');
+      var msg = $('admUtxMsg'); msg.className = 'cmsg' + (utx.msg ? ' bad' : ''); msg.textContent = utx.msg;
+      var chip = '', pw = utx.p && (convs.length ? (convs[0].a.address === utx.p ? convs[0].a : convs[0].b) : null);
+      if (utx.p) chip += '<span class="utxc">SHOWING ONLY ' + (pw ? esc(pw.name) : esc(utx.p.slice(0, 8))) + '&rsquo;S TEXTS</span>'; if (utx.q) chip += '<span class="utxc">SEARCH: ' + esc(utx.q) + '</span>';
+      $('admUtxChip').innerHTML = chip;
+      var lst = $('admUtxList'), lt = lst.scrollTop;
+      $('admUtxListH').textContent = (utx.p ? 'THIS PLAYER\u2019S CONVERSATIONS' : 'CONVERSATIONS') + ' \u00b7 ' + convs.length + (convs.length >= 200 ? '+ (NEWEST 200)' : '');
+      lst.innerHTML = convs.length ? convs.map(function (c) {
+        var on = utx.a === c.a.address && utx.b === c.b.address, lf = c.lastFrom === 'a' ? c.a.name : c.b.name;
+        return '<button type="button" class="hxt utc' + (on ? ' on' : '') + '" data-a="' + esc(c.a.address) + '" data-b="' + esc(c.b.address) + '"><span class="av">' + esc((c.a.name || '?').charAt(0).toUpperCase() + (c.b.name || '?').charAt(0).toUpperCase()) + '</span><span class="mid"><b>' + esc(c.a.name) + ' \u2194 ' + esc(c.b.name) + '</b><em>' + esc(lf) + ': ' + esc(c.last) + '</em></span><span class="tm">' + stamp(c.lastAt) + '<i>' + c.texts + '</i></span></button>';
+      }).join('') : '<div class="hint">NO CONVERSATIONS ' + (utx.p ? 'FOR THIS PLAYER' : 'YET') + '. PLAYERS WITH 5 OR MORE MIMU ON APE CAN TEXT EACH OTHER FROM THE MESSAGES APP.</div>';
+      lst.scrollTop = lt;
+      var head = $('admUtxHead'), log = $('admUtxLog'), acts = $('admUtxActs');
+      if (th && th.messages) {
+        var ms = th.messages, a = th.a, b = th.b, nA = ms.filter(function (m) { return m.from === a.address; }).length, nB = ms.length - nA;
+        head.innerHTML = '<div class="utxh"><b>' + nameTag(a) + ' \u2194 ' + nameTag(b) + '</b><span>' + ms.length + ' TEXT' + (ms.length === 1 ? '' : 'S') + (ms.length ? ' &middot; ' + stamp(ms[0].ts) + ' TO ' + stamp(ms[ms.length - 1].ts) : '') + '</span></div>' +
+          '<div class="utxd"><span><b>' + esc(a.name) + '</b> ' + esc(a.address) + ' &middot; SENT ' + nA + (a.lastSeen ? ' &middot; LAST SEEN ' + stamp(a.lastSeen) : '') + (th.aBlockedB ? ' &middot; <u>HAS BLOCKED ' + esc(b.name) + '</u>' : '') + '</span><span><b>' + esc(b.name) + '</b> ' + esc(b.address) + ' &middot; SENT ' + nB + (b.lastSeen ? ' &middot; LAST SEEN ' + stamp(b.lastSeen) : '') + (th.bBlockedA ? ' &middot; <u>HAS BLOCKED ' + esc(a.name) + '</u>' : '') + '</span></div>';
+        var atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40, fresh = utx.openKey !== a.address + b.address; utx.openKey = a.address + b.address;
+        log.innerHTML = ms.length ? ms.map(function (m) { var fromA = m.from === a.address; return '<div class="hxb' + (fromA ? '' : ' me') + '"><span>' + esc(m.body).replace(/\n/g, '<br>') + '</span><small>' + esc(m.fromName) + ' \u2192 ' + esc(m.toName) + ' &middot; ' + stamp(m.ts) + ' &middot; ' + (m.read ? 'READ' : 'UNREAD') + '</small></div>'; }).join('') : '<div class="hint">NO TEXTS BETWEEN THESE TWO PLAYERS.</div>';
+        if (fresh || atBottom) log.scrollTop = log.scrollHeight;
+        acts.innerHTML = '<button type="button" data-hx="' + esc(a.name) + '">TEXT ' + esc(a.name) + ' AS HYPE</button><button type="button" data-hx="' + esc(b.name) + '">TEXT ' + esc(b.name) + ' AS HYPE</button><button type="button" data-pf="' + esc(a.address) + '">SHOW ALL OF ' + esc(a.name) + '&rsquo;S TEXTS</button><button type="button" data-pf="' + esc(b.address) + '">SHOW ALL OF ' + esc(b.name) + '&rsquo;S TEXTS</button>';
+      } else { head.innerHTML = '<div class="utxh"><b>PICK A CONVERSATION</b><span>CLICK ONE ON THE LEFT TO READ ALL OF IT</span></div>'; log.innerHTML = ''; acts.innerHTML = ''; utx.openKey = ''; }
+      var row = function (m) { return '<div class="utxr" data-a="' + esc(m.from < m.to ? m.from : m.to) + '" data-b="' + esc(m.from < m.to ? m.to : m.from) + '"><div class="utxrh"><span>' + nameTag({ name: m.fromName, address: m.from, banned: m.fromBanned }) + ' <i>\u2192</i> ' + nameTag({ name: m.toName, address: m.to, banned: m.toBanned }) + '</span><em>' + stamp(m.ts) + ' &middot; ' + (m.read ? 'READ' : 'UNREAD') + '</em></div><p>' + esc(m.body).replace(/\n/g, '<br>') + '</p></div>'; };
+      var list = res ? res : (d.recent || []);
+      $('admUtxAllH').textContent = res ? 'SEARCH RESULTS FOR \u201c' + utx.q.toUpperCase() + '\u201d \u00b7 ' + res.length + (res.length >= 150 ? '+' : '') : (utx.p ? 'THIS PLAYER\u2019S NEWEST TEXTS' : 'THE NEWEST TEXTS ON THE WHOLE SERVICE');
+      $('admUtxAll').innerHTML = list.length ? list.map(row).join('') : '<div class="hint">' + (res ? 'NOTHING MATCHES THAT SEARCH.' : 'NO TEXTS YET.') + '</div>';
+      var bl = d.blocks || [];
+      $('admUtxBlk').innerHTML = bl.length ? bl.map(function (x) { return '<div class="utxr"><div class="utxrh"><span>' + nameTag(x.by) + ' <i>HAS BLOCKED</i> ' + nameTag(x.blocked) + '</span></div></div>'; }).join('') : '<div class="hint">NOBODY HAS BLOCKED ANYONE.</div>';
+    }
+    (function () {
+      var box = shade.querySelector('section[data-p="utx"]'); if (!box) return;
+      box.addEventListener('click', function (ev) {
+        var c = ev.target.closest('.utc, .utxr[data-a]'); if (c && c.getAttribute('data-a')) { utx.a = c.getAttribute('data-a'); utx.b = c.getAttribute('data-b'); utx.openKey = ''; utx.at = 0; utxTick(true); return; }
+        var hx = ev.target.closest('[data-hx]'); if (hx) { hxSel = hx.getAttribute('data-hx'); hxSig = ''; hxListSig = ''; show('msg'); paintHype(); var hb = $('admHBody'); if (hb) hb.focus(); return; }
+        var pf = ev.target.closest('[data-pf]'); if (pf) { utx.p = pf.getAttribute('data-pf'); utx.a = ''; utx.b = ''; utx.q = ''; $('admUtxQ').value = ''; utx.at = 0; utxTick(true); return; }
+      });
+      $('admUtxQ').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(utx.qt); utx.qt = setTimeout(function () { utx.q = v; utx.at = 0; utxTick(true); }, 400); });
+      $('admUtxClr').addEventListener('click', function () { utx.q = ''; utx.p = ''; utx.a = ''; utx.b = ''; utx.openKey = ''; $('admUtxQ').value = ''; utx.at = 0; utxTick(true); });
+    })();
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
     function refresh() {
       clock(); $('admPills').innerHTML = pills(); $('admSys').innerHTML = sysRows(); $('admVT').innerHTML = visTiles(); paintWNow(); $('admVis').innerHTML = visPanels(); $('admTiles').innerHTML = tiles(); paintLive('admLB2'); paintFlag(); paintBoard(); paintX(); paintEgg(); paintSec(); paintNft(); paintWanted(); $('admAct').innerHTML = activity(); var eh = ecoHtml(); if (eh !== ecoSig) { ecoSig = eh; $('admEco').innerHTML = eh; } $('admCards').innerHTML = cardBars(); paintCardsPage();
       if (feed && feed.players && !plFed) { plFed = true; $('admPl').innerHTML = feed.players.slice(0, 500).map(function (p) { return '<option value="' + esc(p.name) + '">'; }).join(''); }
-      lists(); paintHype();
+      lists(); paintHype(); utxTick();
     }
     refresh(); clearInterval(tick); tick = setInterval(refresh, 1000);
   }
