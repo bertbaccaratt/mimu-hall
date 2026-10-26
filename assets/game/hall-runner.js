@@ -157,7 +157,7 @@
   }
   function spawnItem(kind, dropId) {
     var spot = freeLane(16.5, null); S.ents.push({ k: 'item', item: kind, z: spot.z, lane: spot.lane, ph: Math.random() * 6, got: false, dropId: dropId });
-    hint(kind === 'magnet' ? 'A COIN MAGNET! RUN INTO IT!' : kind === 'multi' ? 'A COIN MULTIPLIER! RUN INTO IT!' : 'A PHONE BATTERY! JUMP IT!', 3);
+    hint(kind === 'magnet' ? 'A COIN MAGNET! RUN INTO IT!' : kind === 'multi' ? 'A COIN MULTIPLIER! RUN INTO IT!' : 'A PHONE BATTERY! RUN INTO IT!', 3);
   }
   function collectItem(e) {
     var cf = HallProfile.config.items, nr = HallProfile.netRun && HallProfile.netRun(); if (e.dropId && nr) nr.collect(e.dropId).then(function () {}, function () {});
@@ -324,7 +324,7 @@
           var cross = pz >= PZ - 0.10 && e.z <= PZ + 0.10;
           if (cross) {
             if (e.k === 'coin' && !e.got) { e.got = true; S.coins += S.mult; S.score += 25; S.shake = 0; if (window.MIMUAudio && MIMUAudio.coin) MIMUAudio.coin(); }
-            else if (e.k === 'item' && e.item !== 'battery' && !e.got) { e.got = true; collectItem(e); }   /* the magnet and the multiplier are picked up just by running through them: no jump needed */
+            else if (e.k === 'item' && !e.got) { e.got = true; collectItem(e); }   /* the magnet, the multiplier and the battery are picked up just by running through them: no jump needed */
             else if ((e.k === 'card' || e.k === 'pack' || e.k === 'item') && !e.got) { if ((S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0) >= 0.45) { e.got = true; if (e.k === 'card') collectCard(e); else if (e.k === 'item') collectItem(e); else collectPack(); } }
             else if (e.k === 'box') { var jh = S.jt >= 0 ? Math.sin(Math.PI * S.jt) : 0; if (jh < 0.42 && S.inv <= 0) { hurt(e); e.z = -1; if (S.mode !== 'run') break; } else if (jh >= 0.42 && !e.jumped) { e.jumped = true; S.boxesJumped++; } }
           }
