@@ -3,8 +3,8 @@
 (function () {
   'use strict';
   var P = window.HallProfile; if (!P) return;
-  var C = { start: Date.UTC(2026, 9, 26, 7, 0, 0), runDays: 14, giveHours: 48, off: 0, deckPct: 1000 };
-  C.runEnd = C.start + C.runDays * 86400000; C.giveEnd = C.runEnd + C.giveHours * 3600000;
+  var C = { start: Date.UTC(2026, 9, 26, 19, 0, 0), runDays: 14, giveHours: 48, off: 0, deckPct: 1000 };
+  C.runEnd = C.start + C.runDays * 86400000 + 3600000;   /* noon again on Nov 9: the clocks go back on Nov 1 */ C.giveEnd = C.runEnd + C.giveHours * 3600000;
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function now() { return Date.now() + C.off; }
