@@ -132,6 +132,10 @@
   };
   var last = '';
   setInterval(function () { var p = phase(); if (p !== last) { last = p; icons(); paint(); } if (current() === 'alarm') tickAlarm(); if (current() === 'give') tickGive(); }, 1000);
-  icons(); last = phase(); sync(); setInterval(sync, 10 * 60 * 1000);
+  icons(); last = phase();
+  /* the server clock is read as soon as the connection (net.js) is ready, again whenever the tab comes back, and every 5 minutes: the phases and countdowns follow the server, never the device clock */
+  (function first(n) { if (window.HallNet && window.HallNet.api) sync(); else if (n < 40) setTimeout(function () { first(n + 1); }, 500); })(0);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) sync(); });
+  setInterval(sync, 5 * 60 * 1000);
   P.onChange(function (what) { if (what === 'connect' || what === 'scores') { if (current() === 'give') { gv.st = null; paintGive(); } } });
 })();
