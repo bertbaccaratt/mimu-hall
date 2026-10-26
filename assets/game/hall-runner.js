@@ -83,7 +83,7 @@
   for (var q = 0; q < 26; q++) embers.push({ x: Math.random(), y: Math.random(), v: 0.03 + Math.random() * 0.08, r: 0.6 + Math.random() * 1.4, p: Math.random() * 6 });
 
   function fresh() {
-    return { mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, batt: 100, magT: 0, mult: 1, multT: 0, multCool: 0, itemReq: { magnet: 0, multi: 0, battery: 0 }, diedBy: '', battLow: 0, netFoilAt: 60, netStaggerAt: 2100, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
+    return { rh: { n: 0, last: 0, mean: 0, m2: 0, min: 1e9 }, mode: 'idle', hp: 6, inv: 0, alive: 0, climbT: 0, slowT: 0, slowF: 1, nextSight: 1e9, nextPack: 1e9, packLane: null, cards: [], runOwned: new Set(), rc: null, t: 0, dist: 0, v: 1.4, scrollZ: 0, score: 0, coins: 0, lane: 0, px: 0, vx: 0, jt: -1, sl: -1, ents: [], lastZ: 15, curve: 0, curveT: 0, curveNext: 4, sway: 0, camX: 0, flash: 0, shake: 0, run: 0, net: null, netBeat: 10, batt: 100, magT: 0, mult: 1, multT: 0, multCool: 0, itemReq: { magnet: 0, multi: 0, battery: 0 }, diedBy: '', battLow: 0, netFoilAt: 60, netStaggerAt: 2100, firstReq: [false, false], dropSeen: {}, dropGot: 0, hintUntil: 0, jumps: 0, slides: 0, lanes: 0, boxesJumped: 0, hits: 0, packs: 0 };
   }
   S = fresh();
   function showBest() { ovStart.querySelector('.hbest b').textContent = pad(bestScore, 5); }
@@ -263,7 +263,7 @@
     ovDead.querySelector('.rs').textContent = sc; ovDead.querySelector('.rc').textContent = S.coins; ovDead.querySelector('.rk').textContent = S.cards.length; ovDead.querySelector('.rb').textContent = bestScore + (isBest ? '  NEW' : '');
     showBest();
     // demo runs are not saved or ranked: this only does something once somebody is signed in
-    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive), distance: Math.round(S.dist * 2.906), jumps: S.jumps, slides: S.slides, lanes: S.lanes, boxesJumped: S.boxesJumped, hits: S.hits, packs: S.packs, extraLife: !!S.lifeUsed });
+    if (window.HallProfile) HallProfile.recordRun({ score: sc, coins: S.coins, cards: S.cards.slice(), seconds: Math.round(S.alive), distance: Math.round(S.dist * 2.906), jumps: S.jumps, slides: S.slides, lanes: S.lanes, boxesJumped: S.boxesJumped, hits: S.hits, packs: S.packs, extraLife: !!S.lifeUsed, rhythm: rhythm() });
     setTimeout(function () { if (S.mode === 'dead') ovDead.style.display = 'flex'; }, 650);
   }
   // There is no pause. Leaving the game in any way (home bar, lock, closing the phone, another browser tab, or the page stalling) ends the run.
@@ -688,9 +688,12 @@
   }
 
   /* ---------- controls ---------- */
-  function lane(d) { if (S.mode !== 'run') return; var nl = clamp(S.lane + d, -1, 1); if (nl !== S.lane) S.lanes++; S.lane = nl; }
-  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; S.jumps++; }
-  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; S.slides++; }
+  /* the rhythm of the player's moves: only counts and averages are kept (how many moves, the average gap, how much the gaps vary), sent with the run so the server can tell a person from a script */
+  function beat() { var r = S.rh, t = (window.performance && performance.now) ? performance.now() : Date.now(); if (r.last) { var g = t - r.last, d = g - (r.n ? r.mean : 0); r.n++; r.mean += d / r.n; r.m2 += d * (g - r.mean); if (g < r.min) r.min = g; } r.last = t; }
+  function rhythm() { var r = S.rh; return { n: r.n, mean: Math.round(r.mean * 10) / 10, sd: Math.round(Math.sqrt(r.n > 1 ? r.m2 / (r.n - 1) : 0) * 10) / 10, min: r.n ? Math.round(r.min) : 0 }; }
+  function lane(d) { if (S.mode !== 'run') return; var nl = clamp(S.lane + d, -1, 1); if (nl !== S.lane) { S.lanes++; beat(); } S.lane = nl; }
+  function jump() { if (S.mode !== 'run' || S.jt >= 0) return; S.sl = -1; S.jt = 0; S.jumps++; beat(); }
+  function slide() { if (S.mode !== 'run' || S.jt >= 0 || S.sl >= 0) return; S.sl = 0; S.slides++; beat(); }
   var down = null;
   root.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; down = { x: e.clientX, y: e.clientY, t: Date.now(), used: false }; });
   root.addEventListener('pointermove', function (e) {

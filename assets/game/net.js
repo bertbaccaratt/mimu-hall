@@ -90,7 +90,7 @@
   };
   function finishRun(r) {
     if (!S.run) return false; var id = S.run.runId; S.run = null;
-    var body = { runId: id, score: r.score, coins: r.coins, cards: r.cards, seconds: r.seconds, distance: r.distance, jumps: r.jumps, slides: r.slides, lanes: r.lanes, boxesJumped: r.boxesJumped, hits: r.hits, packs: r.packs, extraLife: r.extraLife };
+    var body = { runId: id, score: r.score, coins: r.coins, cards: r.cards, seconds: r.seconds, distance: r.distance, jumps: r.jumps, slides: r.slides, lanes: r.lanes, boxesJumped: r.boxesJumped, hits: r.hits, packs: r.packs, extraLife: r.extraLife, rhythm: r.rhythm };
     call('/run/finish', { body: body }).then(function (j) {
       if (j.held) return refreshMe();
       setMe({ totals: j.totals, cards: j.cards, stats: j.stats }); P.notify('scores'); P.notify('cards');
