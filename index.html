@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" as="image" href="assets/poster.webp">
-<link rel="stylesheet" href="assets/game/apps.css?v=20261027zs"><link rel="stylesheet" href="assets/game/comms.css?v=20261027zs"><link rel="stylesheet" href="assets/game/admin.css?v=20261027zs">
+<link rel="stylesheet" href="assets/game/apps.css?v=20261027zt"><link rel="stylesheet" href="assets/game/comms.css?v=20261027zt"><link rel="stylesheet" href="assets/game/admin.css?v=20261027zt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
@@ -603,10 +603,10 @@ window.MIMUAudio = (function () {
   };
 })();
 </script>
-<script src="assets/game/profile.js?v=20261027zs" defer></script>
-<script src="assets/game/itemart.js?v=20261027zs" defer></script><script src="assets/game/hall-runner.js?v=20261027zs" defer></script>
-<script src="assets/game/eyes.js?v=20261027zs" defer></script> <script src="assets/game/comms.js?v=20261027zs" defer></script> <script src="assets/game/campaign.js?v=20261027zs" defer></script> <script src="assets/game/xbonus.js?v=20261027zs" defer></script> <script src="assets/game/hunt.js?v=20261027zs" defer></script> <script src="assets/game/powerchart.js?v=20261027zs" defer></script> <script src="assets/game/net.js?v=20261027zs" defer></script> <script src="assets/game/egg.js?v=20261027zs" defer></script> <script src="assets/game/badges.js?v=20261027zs" defer></script> <script src="assets/game/apps.js?v=20261027zs" defer></script>
-<script src="assets/game/admin-docs.js?v=20261027zs" defer></script> <script src="assets/game/admin.js?v=20261027zs" defer></script>
+<script src="assets/game/profile.js?v=20261027zt" defer></script>
+<script src="assets/game/itemart.js?v=20261027zt" defer></script><script src="assets/game/hall-runner.js?v=20261027zt" defer></script>
+<script src="assets/game/eyes.js?v=20261027zt" defer></script> <script src="assets/game/comms.js?v=20261027zt" defer></script> <script src="assets/game/campaign.js?v=20261027zt" defer></script> <script src="assets/game/xbonus.js?v=20261027zt" defer></script> <script src="assets/game/hunt.js?v=20261027zt" defer></script> <script src="assets/game/powerchart.js?v=20261027zt" defer></script> <script src="assets/game/net.js?v=20261027zt" defer></script> <script src="assets/game/egg.js?v=20261027zt" defer></script> <script src="assets/game/badges.js?v=20261027zt" defer></script> <script src="assets/game/apps.js?v=20261027zt" defer></script>
+<script src="assets/game/admin-docs.js?v=20261027zt" defer></script> <script src="assets/game/admin.js?v=20261027zt" defer></script>
 <script>
 (function () {
   var A = window.MIMUAudio;
@@ -825,6 +825,7 @@ window.MIMUAudio = (function () {
     '<li><strong>The farther you go, the faster it gets.</strong> Every 30 minutes you stay alive the whole run speeds up another 3%, and it compounds. There is <strong>no top speed</strong>, so every run ends sooner or later.</li>',
     '<li><strong>Speed and distance:</strong> a small gauge at the bottom left shows your speed in miles per hour (green, and red for 60 seconds after a black pack). The bottom right shows the distance you have run, in miles.</li>',
     '<li><strong>The black pack:</strong> every 2 minutes you stay alive (the first at the 2 minute mark), a black Mudwater pack floats into a random lane, never the same lane as the last one. Run into it and the whole run slows by about 20% for 60 seconds. It gives no points and no cards, and you lose no speed progress. It is optional: skip it and keep your speed.</li><li><strong>The red heart:</strong> every 5 minutes you stay alive (the first at the 5 minute mark), a red 8-bit heart floats into a random lane. Run into it, no jump needed, and <strong>half of your health comes back</strong> (3 of the 6 segments, never above full). It is not a card and gives no points.</li></ul>',
+    '<figure class="rfig"><div class="rimg" style="aspect-ratio:712/960"><img src="assets/rules/heart.jpg" alt="A red 8-bit heart floating down the road with the health bar at three of six segments" loading="lazy"><i class="hl" style="left:42.50%;top:85.20%;width:18.50%;height:12.50%"><b>1</b></i><i class="hl" style="left:5.50%;top:24.00%;width:42.50%;height:5.00%"><b>2</b></i></div><figcaption><ol><li><b>1</b><span>The <strong>red heart</strong>: a pixel heart in a random lane. Just run into it.</span></li><li><b>2</b><span>Your <strong>health bar</strong> (6 segments). The heart fills <strong>3</strong> of them back, never above full.</span></li></ol></figcaption></figure>',
     '</div></details>',
     '<details class="rs" id="r-boxes"><summary>Boxes, health and the extra life</summary><div class="rsb">',
     '<figure class="rfig boxfig"><div class="bx3"><div><img src="assets/game/box.webp" alt="A plain black Mudwater box" loading="lazy"><span>PLAIN</span></div><div class="blue"><img src="assets/game/box.webp" alt="A black box with a blue glow" loading="lazy"><span>BLUE GLOW</span></div><div class="red"><img src="assets/game/box.webp" alt="A black box with a red glow" loading="lazy"><span>RED GLOW</span></div></div><figcaption><p><strong>This is a box.</strong> Black Mudwater boxes slide down the road toward you. Jump over them or change lane. Some glow, and the glow tells you how hard they hit:</p><ol><li><b>1</b><span><strong>Plain black</strong>: you can take 3 hits.</span></li><li><b>2</b><span><strong>Blue glow</strong>: you can take 2 hits.</span></li><li><b>3</b><span><strong>Red glow</strong>: 1 hit ends the run.</span></li></ol></figcaption></figure>',

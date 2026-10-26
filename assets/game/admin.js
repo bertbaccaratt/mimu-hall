@@ -35,7 +35,7 @@
 
   /* ---------- the control room ---------- */
   function worksCards() {
-    var c = P.config, s = c.sight, pk = c.pack, hp = c.hp;
+    var c = P.config, s = c.sight, pk = c.pack, hp = c.hp, ht = c.heart;
     var items = [
       ['SPEED CLIMB', '+' + c.climb.pct + '% every ' + hms(c.climb.everySec) + ' alive, compounding, no cap'],
       ['CARD SIGHTING', 'one every ' + hms(s.everySec) + ' alive; jump to collect'],
@@ -48,7 +48,8 @@
       ['COIN MULTIPLIER', 'a chain of ' + c.items.multi.chips + ' chips every ' + hms(c.items.multi.periodSec) + ' from ' + hms(c.items.multi.firstSec) + '; each adds a level up to x' + c.items.multi.max + ', a level lasts ' + c.items.multi.levelSec + ' s, a ' + hms(c.items.multi.cooldownSec) + ' cooldown after x' + c.items.multi.max],
       ['PHONE BATTERY', 'starts at ' + c.items.battery.start + '%, loses ' + c.items.battery.drainPerMin + '% a minute; a green battery gives +' + c.items.battery.gain + '% at ' + hms(c.items.battery.firstSec) + ', then every ' + hms(c.items.battery.everySec) + '; at 0% the run ends'],
       ['THE PACK', 'first at ' + hms(pk.firstSec) + ', then every ' + hms(pk.everySec) + '; run into it: ' + pk.slowPct + '% slower for ' + pk.slowSec + ' s, no other bonus'],
-      ['HEALTH', hp.segments + ' segments. Plain box ' + hp.dmg.plain + ' (3 hits), blue ' + hp.dmg.blue + ' (2 hits), red ' + hp.dmg.red + ' (1 hit)'],
+      ['RED HEART', 'first at ' + hms(ht.firstSec) + ', then every ' + hms(ht.everySec) + ' alive, in a random lane; run into it (no jump) to get ' + ht.restoreSeg + ' of the ' + hp.segments + ' health segments back, never above full. Not a card, no points. The server allows about 2 extra box hits per heart before TOO_MANY_HITS'],
+      ['HEALTH', hp.segments + ' segments. Plain box ' + hp.dmg.plain + ' (3 hits), blue ' + hp.dmg.blue + ' (2 hits), red ' + hp.dmg.red + ' (1 hit). It only comes back from the red heart'],
       ['DISTANCE POINTS', '20 points per game unit (one unit is about 2.9 meters), about 11,000 a mile; a 20 minute run is about 205,000'],
       ['DECK COMPLETE BONUS', 'a one-time 100,000 when the whole Regular deck (120) is collected and 250,000 when the whole Foil deck (120) is made; part of the lifetime total, not spendable points'],
       ['SCORING', 'a run scores distance points + ' + c.coinPoints + ' points per coin (a multiplier does not change that); every run adds to the lifetime total'],
@@ -57,7 +58,7 @@
       ['MARKETPLACE', 'players sell their duplicate cards face up to each other for points at a price the seller sets (never coins, up to 50 listings each)'],
       ['X BONUS', 'a player posts the picture on X (tagging @mimuonape), pastes the link, and earns 50,000 points every 12 hours; the first claim opens after their first run; the server checks each post'],
       ['THE CAMPAIGN', '14-day Hall run from Monday Oct 26, then a 48-hour Giving, then the Top 5: the five highest lifetime totals of all time'],
-      ['EXTRA LIFE', 'after a crash, one extra life per run for ' + Math.round(c.life.share * 100) + '% of the player\'s points (not coins); crash again and the run ends'],
+      ['EXTRA LIFE', 'after a crash, one extra life per run for ' + Math.round(c.life.share * 100) + '% of the player\'s points (not coins); free when the player has no points yet (a first run); crash again and the run ends'],
       ['NO PAUSE', 'leaving the game in any way ends the run'],
       ['SAVING', P.isSignedIn() ? 'signed in: runs, cards, coins and messages are saved' : 'nobody signed in: demo runs, nothing saved, nothing ranked']
     ];
