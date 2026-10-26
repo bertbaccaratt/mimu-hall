@@ -540,3 +540,12 @@ body .adminlink:hover, body .adminlink:focus-visible { opacity: 1 !important; }
 
 /* the ADMIN link steps aside while the login box or the control room is open, so it never sits on top of them */
 body:has(.adm-shade.open) .adminlink, body.phone-open:has(.adm-shade.open) .adminlink { display: none !important; }
+
+/* the Easter egg number is dialed once: the tap-to-dial button and the one-time confirm */
+.hnnum.hndial { width: 100%; padding: calc(var(--h) * .012) calc(var(--h) * .01); background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.85); border-radius: 8px; font-family: inherit; cursor: pointer; letter-spacing: .14em; }
+.hnlink { background: none; border: 0; padding: 0; margin-left: 4px; font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; letter-spacing: inherit; }
+.hnconfirm { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.78); padding: 14px; }
+.hnbox { background: linear-gradient(160deg, #8e0f16, #3a0508); border: 1px solid #ff5a52; border-radius: 10px; padding: calc(var(--h) * .022); text-align: center; box-shadow: 0 0 24px rgba(255,60,60,.6); }
+.hnbox p { margin: calc(var(--h) * .014) 0; font-weight: 700; font-size: max(11px, calc(var(--h) * .0175)); letter-spacing: .08em; line-height: 1.5; }
+.hnbox button { display: block; width: 100%; margin-top: calc(var(--h) * .008); padding: calc(var(--h) * .013); border-radius: 8px; border: 1px solid rgba(255,255,255,.8); background: rgba(255,255,255,.14); font: 800 max(11px, calc(var(--h) * .0175)) 'Cinzel', Georgia, serif; letter-spacing: .14em; cursor: pointer; } .hnbox .hngo { background: #ff2a2a; }
+.hnbox, .hnbox * { color: #fff !important; } .huntbadge .hnlink { color: #fff !important; }
