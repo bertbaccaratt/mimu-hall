@@ -532,3 +532,8 @@ body.phone-open .eggpack img { filter: brightness(.32) contrast(1.05) drop-shado
 /* the ADMIN link is always visible, on every screen, even with the phone open */
 body .adminlink, body.phone-open .adminlink { opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; z-index: 60 !important; font-size: 12px !important; font-weight: 700 !important; color: #ffe08a !important; background: rgba(12,4,6,.78) !important; border: 1px solid rgba(217,172,92,.7) !important; border-radius: 4px; padding: 6px 10px 6px 14px !important; text-shadow: 0 1px 2px #000; }
 @media (max-width: 520px), (max-height: 600px) { body .adminlink, body.phone-open .adminlink { left: max(6px, env(safe-area-inset-left, 0px)) !important; bottom: max(6px, env(safe-area-inset-bottom, 0px)) !important; font-size: 10px !important; padding: 4px 8px 4px 10px !important; opacity: .92 !important; } }
+
+/* the ADMIN link: 50% opaque, still always there */
+body .adminlink, body.phone-open .adminlink { opacity: .5 !important; }
+body .adminlink:hover, body .adminlink:focus-visible { opacity: 1 !important; }
+@media (max-width: 520px), (max-height: 600px) { body .adminlink, body.phone-open .adminlink { opacity: .5 !important; } }
