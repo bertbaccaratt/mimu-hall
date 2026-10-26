@@ -685,7 +685,7 @@
     if (TOUCH && raw < 0.5) { qEma += (raw - qEma) * 0.08; if (++qN > 12 && qEma > 0.0245 && qLevel < QS.length - 1 && S.mode !== 'dead') { qLevel = Math.min(QS.length - 1, qLevel + (qEma > 0.05 ? 2 : 1)); qN = 0; qEma = 0.0167; qUp = 0; qDropAt = now; if (qRaised && now - qRaised < 15000) qNoRaise = true; resize(); } }
     /* MAX FPS on phones and tablets: if the picture was made smaller during a rough moment but the device is now running far above 80 fps, give the sharpness back (once it has been fast for 6 seconds, never within 20 seconds of a drop, and never again if it has to drop twice) */
     if (TOUCH && raw < 0.5 && qLevel > 0 && !qNoRaise && S.mode === 'run' && qEma < 0.0125) { qUp += raw; if (qUp > 6 && now - qDropAt > 20000) { qLevel--; qUp = 0; qN = 0; qRaised = now; resize(); } } else qUp = 0;
-    if (raw > 0.5 && S.mode === 'run') leave();   // the page stalled or was frozen: no pausing by freezing it
+    if (raw > (TOUCH ? 3 : 0.5) && S.mode === 'run') leave();   // the page was frozen: no pausing by freezing it. On phones a hitch of up to 3 seconds (a notification, a busy moment) is forgiven: the game just carries on, and the lost time is not given back
     if (!W) { resize(); if (!W) return; }
     if (pending > 0) return;
     /* a slow frame no longer slows the game: the missing time is played out in small steps, so the road, jumps and boxes move at the same real speed as on a computer */
@@ -743,7 +743,12 @@
   setInterval(padTick, 33);
 
   /* ---------- the phone calls these ---------- */
-  document.addEventListener('visibilitychange', function () { if (document.hidden) leave(); });
+  var hideTimer = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (!TOUCH) { if (document.hidden) leave(); return; }   // computers: unchanged
+    clearTimeout(hideTimer);   // a phone: a notification or a pulled-down shade for a moment does not end the run; staying away for more than 2.5 seconds does
+    if (document.hidden) hideTimer = setTimeout(function () { if (document.hidden) leave(); }, 2500);
+  });
   window.addEventListener('pagehide', leave);
   window.HallRunner = {
     open: function () { leave(); root.classList.remove('phonedead'); resetBat(); active = true; resize(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } },
