@@ -9,7 +9,7 @@
   var CONFIG = {
     climb: { pct: 3, everySec: 1800 },                                   // the run gets 3% faster every 30 minutes alive, compounding, no cap
     sight: {
-      everySec: 900,                                                     // a card sighting every 15 minutes alive (the first at 15 minutes)
+      everySec: 260,                                                     // a new card (a sighting) every 4:20 alive (the first at 4:20)
       locksSec: [0, 0, 0, 7200, 10800],                                  // only Prestige (2:00) and Legendary (3:00) wait for time alive in the run; Common, Uncommon and Rare are open from the first sighting
       odds: [62, 24, 10, 3, 1]                                           // the rarity lottery: Common, Uncommon, Rare, Prestige, Legendary (a sighting is always a new card: duplicates are the stagger card's job)
     },
@@ -18,14 +18,15 @@
       multi: { firstSec: 240, periodSec: 180, chips: 5, gapSec: 6, levelSec: 15, max: 5, cooldownSec: 90 },   // a chain of 5 chips every 3 minutes from 4:00; each chip adds a level (x2 to x5), a level lasts 15 s, the top fades first; a 90 second cooldown after x5
       battery: { firstSec: 180, everySec: 180, start: 100, gain: 25, drainPerMin: 5 }   // the phone: 100% at the start, -5% a minute (a full charge lasts 20 minutes), +25% for each green battery from 3:00, then every 3 minutes; at 0% the run ends
     },
-    stagger: { firstSec: 2100, everySec: 900 },                          // a duplicate of a card you own: at 35 minutes alive, then every 15 minutes (same lottery, only rarities you own)
-    foil: { firstSec: 60, everySec: 1800, bothChance: 1 / 30 },           // a glowing foil half: after 1 minute of TOTAL play, then every 30 minutes of total play; rare cards come less often
-    pack: { firstSec: 300, everySec: 300, slowPct: 20, slowSec: 60 },  // the black pack: at 5:00, then every 5 minutes alive, in a random lane (never the same as the last); slows you 20% for 60 s
+    stagger: { firstSec: 600, everySec: 430 },                           // a duplicate of a card you own: at 10:00 alive, then every 7:10 (same lottery, only rarities you own)
+    foil: { firstSec: 60, everySec: 900, bothChance: 1 / 30 },            // a glowing foil half: after 1 minute of TOTAL play, then every 15 minutes of total play; rare cards come less often
+    pack: { firstSec: 120, everySec: 120, slowPct: 20, slowSec: 60 },  // the black pack: at 2:00, then every 2 minutes alive, in a random lane (never the same as the last); slows you 20% for 60 s
+    heart: { firstSec: 300, everySec: 300, restoreSeg: 3 },            // a red 8-bit heart: at 5:00, then every 5 minutes alive, in a random lane; run into it to get half your health back (3 of 6 segments)
     hp: { segments: 6, dmg: { plain: 2, red: 6, blue: 3 } },             // plain box 3 hits, blue 2, red 1
     coinPoints: 25,
     life: { share: 0.10 }                                                // after a crash a player may buy ONE extra life per run for 10% of their points (not coins)
   };
-  var TEST = { sight: { everySec: 12 }, pack: { firstSec: 40, everySec: 70 } };   // admin test mode: everything happens quickly, nothing is saved
+  var TEST = { sight: { everySec: 12 }, pack: { firstSec: 40, everySec: 70 }, heart: { firstSec: 30, everySec: 60 } };   // admin test mode: everything happens quickly, nothing is saved
 
   var TIERS = [
     { n: 1, key: 'common', name: 'Common', color: '#ffffff', glow: '255,255,255' },

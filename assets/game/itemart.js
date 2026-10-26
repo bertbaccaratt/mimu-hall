@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var TAU = Math.PI * 2;
-  var GLOW = { magnet: '255,70,60', multi: '190,95,255', battery: '60,255,140' };
+  var GLOW = { magnet: '255,70,60', multi: '190,95,255', battery: '60,255,140', heart: '255,40,90' };
   /* ctx is already translated to the middle of the item; iw is the item width; t is the game clock; ph a random phase; label the multiplier text (like x3) */
   function draw(ctx, kind, iw, t, ph, label) {
     var pulse = 0.8 + 0.2 * Math.sin(t * 4 + ph), glow = GLOW[kind] || GLOW.battery, g, i;
@@ -18,6 +18,7 @@
     ctx.lineCap = 'butt'; ctx.lineJoin = 'round';
     if (kind === 'magnet') magnet(ctx, iw, t, ph);
     else if (kind === 'multi') chip(ctx, iw, t, label);
+    else if (kind === 'heart') heart(ctx, iw);
     else battery(ctx, iw);
   }
 
@@ -67,6 +68,16 @@
     g = ctx.createLinearGradient(0, bh / 2, 0, -bh / 2); g.addColorStop(0, '#10c24f'); g.addColorStop(1, '#7dffb0'); ctx.fillStyle = g; ctx.shadowColor = 'rgba(60,255,140,0.95)'; ctx.shadowBlur = iw * 0.2;
     ctx.fillRect(-bw / 2 + ol * 1.2, -bh / 2 + ol * 1.2, bw - ol * 2.4, bh - ol * 2.4); ctx.shadowBlur = 0;
     ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#04120a'; ctx.lineWidth = iw * 0.02; ctx.beginPath(); ctx.moveTo(iw * 0.03, -bh * 0.36); ctx.lineTo(-bw * 0.28, iw * 0.03); ctx.lineTo(-iw * 0.01, iw * 0.03); ctx.lineTo(-iw * 0.05, bh * 0.36); ctx.lineTo(bw * 0.28, -iw * 0.04); ctx.lineTo(iw * 0.01, -iw * 0.04); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+
+  /* the red 8-bit heart: a pixel heart with a black outline, a white shine and a darker shade, so it reads at once as a life and not as a coin */
+  var HEART = ['011000110', '111101111', '111111111', '111111111', '011111110', '001111100', '000111000', '000010000'];
+  function heart(ctx, iw) {
+    var u = iw * 0.072, w = 9, h = 8, ox = -w * u / 2, oy = -h * u / 2, r, c, x, y;
+    ctx.fillStyle = '#16000a';
+    for (r = 0; r < h; r++) for (c = 0; c < w; c++) if (HEART[r].charAt(c) === '1') { x = ox + c * u; y = oy + r * u; ctx.fillRect(x - u * 0.55, y - u * 0.55, u * 2.1, u * 2.1); }
+    for (r = 0; r < h; r++) for (c = 0; c < w; c++) if (HEART[r].charAt(c) === '1') { x = ox + c * u; y = oy + r * u; ctx.fillStyle = (r >= 4 || c >= 6) ? '#c3112b' : '#ff2f4a'; ctx.fillRect(x, y, u + 0.6, u + 0.6); }
+    ctx.fillStyle = '#ffd3da'; ctx.fillRect(ox + 1 * u, oy + 1 * u, u + 0.6, u + 0.6); ctx.fillRect(ox + 2 * u, oy + 1 * u, u + 0.6, u + 0.6); ctx.fillRect(ox + 1 * u, oy + 2 * u, u + 0.6, u + 0.6);
   }
 
   /* PHONES AND TABLETS: each item is drawn once into a small picture and then just placed (and pulsed a little) every frame */
