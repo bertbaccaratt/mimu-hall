@@ -113,7 +113,7 @@
       return call('/auth/nonce', { body: {}, noAuth: true }).then(function (n) {
         var message = 'Sign in to MIMU Games\nThis only proves you own this wallet. It costs nothing, sends no transaction and cannot move your assets.\n\nDomain: ' + location.host + '\nAddress: ' + id.address + '\nNonce: ' + n.nonce + '\nIssued: ' + n.issuedAt;
         return window.MimuGlyph.signMessage(message).then(function (signature) {
-          return call('/auth/verify', { body: { address: id.address, nonce: n.nonce, issuedAt: n.issuedAt, signature: signature, name: id.name, picture: id.picture }, noAuth: true });
+          return call('/auth/verify', { body: { address: id.address, nonce: n.nonce, issuedAt: n.issuedAt, signature: signature, name: id.name, picture: id.picture }, noAuth: true, admin: gAdmin() ? admToken() : undefined });
         });
       });
     }).then(function (r) { if (refused(r.me)) { S.token = null; S.me = null; S.active = false; lsDel(SKEY); r.refused = true; S.demoOnly = true; return r; } activate(r.token, r.expiresAt, r.me); return r; });
@@ -126,8 +126,43 @@
     note.innerHTML = html; note.classList.add('on');
   }
   function hideNote() { if (note) note.classList.remove('on'); }
-  var GLYPH_LIVE = false;   // flip to true when HYPE has approved the demo and Glyph is ready: until then everyone plays the demo
+  var GLYPH_LIVE = true;   // Glyph sign-in is on. The CONNECT GLYPH button stays locked until the Hall run starts (see the lock below), and the server refuses sign-ins before then too
+
+  /* ---------- the lock on CONNECT GLYPH: locked until the start, then it opens by itself ----------
+     The time comes from the server (/schedule) and is corrected for the visitor's clock, so a wrong clock cannot open it early. If the server cannot be reached the page's own copy of the start time is used.
+     A control room admin who is signed in on this tab gets early access (the server checks the admin token), so launch day can be rehearsed. */
+  var G = { start: Date.UTC(2026, 9, 26, 19, 0, 0), off: 0, synced: false, was: null, timer: 0, syncAt: 0, syncing: false };
+  function gNow() { return Date.now() + G.off; }
+  function gAdmin() { try { return !!(adm && admToken()); } catch (e) { return false; } }   // adm is set up further down
+  function gOpen() { return gAdmin() || gNow() >= G.start; }
+  function gLeft(ms) {
+    ms = Math.max(0, ms); var d = Math.floor(ms / 86400000), h = Math.floor(ms % 86400000 / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return (d ? d + 'D ' : '') + p(h) + ':' + p(m) + ':' + p(s);
+  }
+  function gWhen() { try { return new Date(G.start).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).toUpperCase() + ' PT'; } catch (e) { return ''; } }
+  function gPaint() {
+    var b = $('enter'); if (!b) return; var open = gOpen(), lk = $('enterLock');
+    b.classList.toggle('locked', !open); b.setAttribute('aria-disabled', open ? 'false' : 'true');
+    if (lk) lk.innerHTML = open ? '' : '<span class="elt">OPENS ' + esc(gWhen()) + '</span><span class="elc">' + gLeft(G.start - gNow()) + '</span>';
+    if (G.was === false && open) { b.classList.add('opened'); setTimeout(function () { b.classList.remove('opened'); }, 2600); }   // it just opened: a golden flash
+    G.was = open;
+  }
+  function gSync() {
+    if (G.syncing) return Promise.resolve(); G.syncing = true;
+    return call('/schedule', { noAuth: true }).then(function (s) { if (s && s.start) { G.start = s.start; G.off = s.now - Date.now(); G.synced = true; } G.syncAt = Date.now(); gPaint(); }, function () {}).then(function () { G.syncing = false; });
+  }
+  function gStart() {
+    gPaint(); gSync();
+    if (!G.timer) G.timer = setInterval(function () {
+      gPaint();
+      var every = G.synced ? 60000 : 8000, near = G.start - gNow(); if (near < 15000 && near > -15000) every = 3000;   // look again right around the opening
+      if (Date.now() - G.syncAt > every) gSync();
+    }, 1000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) { gPaint(); gSync(); } });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gStart); else gStart();
   function connectThen(go) {
+    if (!gOpen() && !S.active) { gPaint(); gSync(); return; }   // still locked: nothing opens
     if (S.active || !GLYPH_LIVE || S.demoOnly) { go(); return; }   // demoOnly: signed in but under 5 NFTs, so no more sign-in windows until the page is reloaded
     var attempt = function () {
       showNote('<span class="gn">OPENING GLYPH&hellip;</span><small>APPROVE THE SIGN-IN IN THE GLYPH WINDOW</small>');
@@ -157,7 +192,7 @@
     var loader = $('loader'); if (loader && window.MutationObserver) new MutationObserver(function () { if (loader.classList.contains('done')) ev('finished'); }).observe(loader, { attributes: true, attributeFilter: ['class'] });
     var scr = $('pScreen'); if (scr && window.MutationObserver) new MutationObserver(function () { if (scr.classList.contains('unlocked')) ev('unlocked'); if (scr.classList.contains('inapp') && scr.dataset.app) ev('app:' + scr.dataset.app); }).observe(scr, { attributes: true, attributeFilter: ['class', 'data-app'] });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) { t.addEventListener('click', function () { var h = (t.getAttribute('href') || '').replace('#', ''); if (/^[a-z]{2,12}$/.test(h)) ev('tab:' + h); }); });
-    var en = $('enter'); if (en) en.addEventListener('click', function () { ev('entered'); }, true);
+    var en = $('enter'); if (en) en.addEventListener('click', function () { if (!en.classList.contains('locked')) ev('entered'); }, true);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hooks); else hooks();
 
