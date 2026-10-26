@@ -36,11 +36,11 @@
     var C = { top: 410, bot: 484 }, PY = function (v) { return C.bot - (C.bot - C.top) * v / 100; };
     o.push('<text x="' + L + '" y="374" fill="#fff" font-size="19" font-weight="700" letter-spacing="1.5">PHONE POWER</text><text x="' + L + '" y="394" fill="#fff" font-size="15" fill-opacity=".9">STARTS AT ' + ba.start + '%, LOSES ' + ba.drainPerMin + '% A MINUTE</text>');
     o.push('<line x1="' + L + '" y1="' + PY(0) + '" x2="' + R + '" y2="' + PY(0) + '" stroke="#ff6b6b" stroke-opacity=".6"/><line x1="' + L + '" y1="' + PY(20) + '" x2="' + R + '" y2="' + PY(20) + '" stroke="#ff6b6b" stroke-opacity=".25" stroke-dasharray="4 5"/><text x="' + (L + 4) + '" y="' + (PY(20) - 5) + '" fill="#ff9a8f" font-size="13">UNDER 20% IT TURNS RED</text>');
-    var pw = ba.start, pts = [], none = [], s, drain = ba.drainPerMin / 60;
-    for (s = 0; s <= MIN * 60; s += 5) { if (s > 0) pw = Math.max(0, pw - drain * 5); if (s >= ba.firstSec && (s - ba.firstSec) % ba.everySec === 0) pw = Math.min(100, pw + ba.gain); pts.push(X(s) + ',' + PY(pw)); var nn = Math.max(0, ba.start - drain * s); none.push(X(s) + ',' + PY(nn)); }
+    var pw = ba.start, pts = [], none = [], s, drain = ba.drainPerMin / 60, CATCH = [1, 1, 0, 1, 0, 1, 1, 0, 1, 0];   /* a normal player: catches 6 of every 10 batteries */
+    for (s = 0; s <= MIN * 60; s += 5) { if (s > 0) pw = Math.max(0, pw - drain * 5); if (s >= ba.firstSec && (s - ba.firstSec) % ba.everySec === 0 && CATCH[((s - ba.firstSec) / ba.everySec) % CATCH.length]) pw = Math.min(100, pw + ba.gain); pts.push(X(s) + ',' + PY(pw)); var nn = Math.max(0, ba.start - drain * s); none.push(X(s) + ',' + PY(nn)); }
     o.push('<polyline points="' + none.join(' ') + '" fill="none" stroke="#ff6b6b" stroke-width="2.4" stroke-dasharray="7 6"/>');
     o.push('<polyline points="' + pts.join(' ') + '" fill="none" stroke="#6af0a0" stroke-width="3.2"/>');
-    o.push('<text x="' + (X(8.5 * 60)) + '" y="' + (PY(26)) + '" fill="#ff9a8f" font-size="14">NO BATTERIES: DEAD AT ' + mmss(ba.start / drain) + '</text><text x="' + (X(12.5 * 60)) + '" y="' + (PY(100) - 8) + '" fill="#6af0a0" font-size="14">CATCH EVERY BATTERY: IT NEVER RUNS OUT</text>');
+    o.push('<text x="' + (X(8.5 * 60)) + '" y="' + (PY(26)) + '" fill="#ff9a8f" font-size="14">NO BATTERIES: DEAD AT ' + mmss(ba.start / drain) + '</text><text x="' + (X(12.5 * 60)) + '" y="' + (PY(100) - 8) + '" fill="#6af0a0" font-size="14">CATCH 6 OF 10 BATTERIES: YOU STAY ALIVE</text>');
     o.push('</svg>');
     return o.join('');
   }
