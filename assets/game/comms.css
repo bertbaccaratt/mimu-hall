@@ -549,3 +549,7 @@ body:has(.adm-shade.open) .adminlink, body.phone-open:has(.adm-shade.open) .admi
 .hnbox p { margin: calc(var(--h) * .014) 0; font-weight: 700; font-size: max(11px, calc(var(--h) * .0175)); letter-spacing: .08em; line-height: 1.5; }
 .hnbox button { display: block; width: 100%; margin-top: calc(var(--h) * .008); padding: calc(var(--h) * .013); border-radius: 8px; border: 1px solid rgba(255,255,255,.8); background: rgba(255,255,255,.14); font: 800 max(11px, calc(var(--h) * .0175)) 'Cinzel', Georgia, serif; letter-spacing: .14em; cursor: pointer; } .hnbox .hngo { background: #ff2a2a; }
 .hnbox, .hnbox * { color: #fff !important; } .huntbadge .hnlink { color: #fff !important; }
+
+/* the slowdown pack row under the cards infographic */
+.pstrip { display: block; line-height: 0; } .pstrip svg { display: block; width: 100%; height: auto; }
+.adm .pstrip svg { border: 1px solid rgba(232,198,115,.45); border-top: 0; }
