@@ -186,3 +186,4 @@
 .fgc.ban { border-left-color: #ff3b4e; background: rgba(120,10,20,.18); } .fgc.ban .mono { font-family: Consolas, monospace; word-break: break-all; } .fgr .bex { display: block; margin-top: 3px; font-style: normal; font-size: 11px; color: #a88a52; }
 .fgc.ban .bhd { margin: 12px 0 6px; font: 500 10px 'Cinzel', Georgia, serif; letter-spacing: .18em; color: #ff9aa4; }
 .fgc.ban .bpic { width: 34px; height: 34px; vertical-align: middle; border: 1px solid rgba(217,172,92,.4); margin-right: 8px; object-fit: cover; } .fgc.ban .bblk { color: #ff8b80; } .fgc.ban .bcn { font: 400 11px/1.7 Consolas, monospace; color: #a88a52; word-break: break-word; }
+.ftabs { margin: 0 0 14px; }

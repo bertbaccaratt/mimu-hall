@@ -262,7 +262,7 @@
     PACK_TOO_EARLY: 'A black pack was collected before the first one could appear.', TOO_MANY_CARDS: 'More cards than the sighting timetable allows.', TIER_NOT_OPEN: 'A card of a rarity that was not open yet at that time.', UNKNOWN_CARD: 'A card number that does not exist.',
     BOT_RHYTHM: 'The lane changes came at an almost perfectly even beat, like a metronome (a script, people are never this steady). Jumping and sliding are never counted, so holding a key or spamming taps cannot cause this.', BOT_REPEAT: 'The move rhythm is the same as an earlier run by this player, to the decimal (a replayed script).', LOOKS_LIKE_BANNED: 'A very steady move rhythm with the same average beat as a run by a banned player: the same script on a new account. Held for you to check.', BOT_ONE_LANE: 'WATCH ONLY: a run of a minute or more that jumps a lot but never changes lane (a script jumping in place). Not held, just noted.', BOT_NO_TIMING: 'A long run with lots of moves but no move timing sent (a result sent without playing).', BOT_PERFECT: 'WATCH ONLY: a long run with no hits at all. Not held, just noted.', NO_INPUT: 'A long run with no moves at all (a bot or an idle script).', FEW_HEARTBEATS: 'The game did not report in while it ran (a result sent without playing).', BATTERY_IMPOSSIBLE: 'A run longer than the phone battery allows (too few batteries collected).', LIFE_NOT_PURCHASED: 'An extra life was used without being bought.'
   };
-  var flagSig = '', flagTab = 'l';
+  var flagSig = '', flagTab = 'f';
   function flagCard(r, held) {
     var e = r.extra || {}, miles = ((r.distance || 0) / 1609.34).toFixed(2), reasons = (r.flags || []).map(function (f) { return '<li><b>' + esc(f.code) + '</b><span>' + esc(f.note || FLAG_TEXT[f.code] || '') + '</span></li>'; }).join('');
     return '<div class="fgc' + (held ? '' : ' done') + '"><div class="fgh"><b>' + esc(r.name) + '</b><span>' + esc(String(r.address || '').slice(0, 6) + '…' + String(r.address || '').slice(-4)) + '</span><em>' + stamp(r.ts) + (r.banned ? ' · BANNED' : '') + (held ? '' : ' · ' + String(r.status).toUpperCase()) + '</em></div>' +
@@ -294,15 +294,20 @@
   }  function paintFlag() {
     var el = $('admFlag'); if (!el) return; var f = (feed && feed.flagged) || { held: [], resolved: [], banned: [] }, n = $('admFlagN'); if (n) n.textContent = f.held.length ? '(' + f.held.length + ')' : '';
     var bans = f.banned || [];
-    var sig = JSON.stringify([f.held.map(function (r) { return r.id; }), f.resolved.map(function (r) { return r.id + r.status; }), !!feed, bans.map(function (b) { return [b.address, b.runs && b.runs.counted, b.runs && b.runs.held, b.secondRuns, (b.sources || []).map(function (s) { return s.address + (s.blocked ? 1 : 0); }), b.bannedAt, b.points, (b.log || []).length, b.mimus && b.mimus.count]; })]); if (sig === flagSig) return; flagSig = sig;
-    el.innerHTML = '<div class="box dbox"><h4>BANNED FOR CHEATING (' + bans.length + ')</h4><div class="hint" style="margin-bottom:12px">Everyone who was banned, and why. The reasons come from the checks the server ran on their runs. A banned player cannot play, text or trade, is hidden from every leaderboard and the Top 5, and the Mimu On Ape wallets behind the account are blocked, so the same Mimus cannot be moved to a new account.</div>' +
-      (bans.length ? bans.map(banCard).join('') : '<div class="rk none">' + (feed ? 'NOBODY HAS BEEN BANNED.' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div>' +
-      '<div class="box dbox"><h4>WAITING FOR YOUR REVIEW (' + f.held.length + ')</h4><div class="hint" style="margin-bottom:12px">A run is held, and does not count toward points, cards or badges, when the server finds a reason below. Decide from the run details on each card: APPROVE to count it, DENY to throw it away, or BAN the player.</div>' +
-      (f.held.length ? f.held.map(function (r) { return flagCard(r, true); }).join('') : '<div class="rk none">' + (feed ? 'NO FLAGGED RUNS. EVERYTHING LOOKS CLEAN.' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div>' +
-      '<div class="box dbox"><h4>RECENTLY REVIEWED</h4>' + (f.resolved.length ? f.resolved.map(function (r) { return flagCard(r, false); }).join('') : '<div class="rk none">NOTHING REVIEWED YET</div>') + '</div>' +
-      '<div class="box dbox"><h4>WHAT GETS A RUN FLAGGED</h4><ul class="fgl">' + Object.keys(FLAG_TEXT).map(function (k) { return '<li><b>' + k + '</b><span>' + esc(FLAG_TEXT[k]) + '</span></li>'; }).join('') + '</ul></div>';
+    var sig = JSON.stringify([flagTab, f.held.map(function (r) { return r.id; }), f.resolved.map(function (r) { return r.id + r.status; }), !!feed, bans.map(function (b) { return [b.address, b.runs && b.runs.counted, b.runs && b.runs.held, b.secondRuns, (b.sources || []).map(function (s) { return s.address + (s.blocked ? 1 : 0); }), b.bannedAt, b.points, (b.log || []).length, b.mimus && b.mimus.count]; })]); if (sig === flagSig) return; flagSig = sig;
+    var tabs = '<div class="cfilt ftabs">' + [['f', 'FLAGGED RUNS (' + f.held.length + ')'], ['b', 'BANNED (' + bans.length + ')'], ['w', 'WHAT GETS FLAGGED']].map(function (x) { return '<button type="button" data-ft="' + x[0] + '"' + (flagTab === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>', body;
+    if (flagTab === 'b') {
+      body = '<div class="box dbox"><h4>BANNED FOR CHEATING (' + bans.length + ')</h4><div class="hint" style="margin-bottom:12px">Everyone who was banned, and why. The reasons come from the checks the server ran on their runs. A banned player cannot play, text or trade, is hidden from every leaderboard and the Top 5, and the Mimu On Ape wallets behind the account are blocked, so the same Mimus cannot be moved to a new account.</div>' +
+        (bans.length ? bans.map(banCard).join('') : '<div class="rk none">' + (feed ? 'NOBODY HAS BEEN BANNED.' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div>';
+    } else if (flagTab === 'w') {
+      body = '<div class="box dbox"><h4>WHAT GETS A RUN FLAGGED</h4><ul class="fgl">' + Object.keys(FLAG_TEXT).map(function (k) { return '<li><b>' + k + '</b><span>' + esc(FLAG_TEXT[k]) + '</span></li>'; }).join('') + '</ul></div>';
+    } else {
+      body = '<div class="box dbox"><h4>WAITING FOR YOUR REVIEW (' + f.held.length + ')</h4><div class="hint" style="margin-bottom:12px">A run is held, and does not count toward points, cards or badges, when the server finds a reason below. Decide from the run details on each card: APPROVE to count it, DENY to throw it away, or BAN the player.</div>' +
+        (f.held.length ? f.held.map(function (r) { return flagCard(r, true); }).join('') : '<div class="rk none">' + (feed ? 'NO FLAGGED RUNS. EVERYTHING LOOKS CLEAN.' : 'WAITING FOR THE LIVE FEED') + '</div>') + '</div>' +
+        '<div class="box dbox"><h4>RECENTLY REVIEWED</h4>' + (f.resolved.length ? f.resolved.map(function (r) { return flagCard(r, false); }).join('') : '<div class="rk none">NOTHING REVIEWED YET</div>') + '</div>';
+    }
+    var keep = el.scrollTop; el.innerHTML = tabs + body; el.scrollTop = keep;
   }
-
   /* ---------- WANTED CARD: pick a card in the deck, choose how long, launch ---------- */
   var wsel = null, wSig = '', wHours = 6, wMsg = '';
   function wantedStatus(w) { return w.status === 'collected' ? 'FOUND BY ' + esc(String(w.winner || 'A PLAYER').toUpperCase()) : w.status === 'ended' ? 'ENDED BY THE TEAM' : w.status === 'expired' ? 'EXPIRED, NOBODY FOUND IT' : 'LIVE'; }
@@ -529,6 +534,7 @@
       var c = ev.target.closest('.cth[data-cn]'); if (c) { wsel = +c.getAttribute('data-cn'); wMsg = ''; wSig = ''; paintWanted(); return; }
       if (ev.target.closest('#admWLaunch')) { if (!wsel) return; wantedAct(handlers.wantedLaunch ? handlers.wantedLaunch(wsel, wHours) : Promise.reject(new Error('Not connected yet')), 'LAUNCHED. THE EMAIL IS ON ITS WAY TO EVERY PLAYER'); return; }
       if (ev.target.closest('#admWEnd')) { wantedAct(handlers.wantedEnd ? handlers.wantedEnd() : Promise.reject(new Error('Not connected yet')), 'THE WANTED CARD WAS ENDED'); return; }
+      var ft = ev.target.closest('[data-ft]'); if (ft) { flagTab = ft.getAttribute('data-ft'); flagSig = ''; paintFlag(); return; }
       var fb = ev.target.closest('[data-fa]'); if (fb && handlers.flag) { fb.disabled = true; flagSig = ''; handlers.flag(fb.getAttribute('data-r'), fb.getAttribute('data-fa')).then(function () { flagSig = ''; paintFlag(); }, function () { fb.disabled = false; }); return; }
     });
     root.addEventListener('click', function (ev) { var g = ev.target.closest('[data-go]'); if (g) show(g.getAttribute('data-go')); });
