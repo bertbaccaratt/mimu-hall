@@ -493,14 +493,14 @@
       '<section data-p="board"><div class="box dbox"><h4 id="admBoardH">PLAYER BOARD</h4><div class="hint" style="margin-bottom:10px">Every signed-in player with their <b>lifetime total</b> (distance points + coin points + coins + Regular deck % + Foil deck % + X bonus; the points part is shown underneath), their coins and how complete their Regular and Foil decks are. Press a column title to sort.</div><div class="bsearch"><input id="admBq" maxlength="40" placeholder="SEARCH A PLAYER" autocomplete="off"></div><div id="admBoardList"></div></div></section>' +
       '<section data-p="msg"><div class="hx"><div class="box hxl"><h4>CONVERSATIONS</h4><div class="hxnew"><input id="admHTo" list="admPl" maxlength="40" placeholder="START A NEW TEXT: PLAYER USERNAME" autocomplete="off"><datalist id="admPl"></datalist><button type="button" class="go" id="admHNew">NEW</button></div><div class="hxlist" id="admHT"></div></div><div class="box hxr"><h4 id="admHTitle">PICK A CONVERSATION</h4><div class="hint">HYPE is the account you text players from. Players can and will text HYPE back, so their replies land here. Players can also text HYPE first.</div><div class="hxlog" id="admHLog"></div><div class="cmp"><textarea id="admHBody" maxlength="280" rows="3" placeholder="MESSAGE FROM HYPE"></textarea><button class="go" type="button" id="admHSend">SEND AS HYPE</button><div class="cmsg" id="admHMsg"></div></div></div></div></section>' +
       '<section data-p="utx"><div class="box dbox"><h4>USER TEXTS &middot; WHAT THIS PAGE IS</h4><div class="utxinfo">' +
-        '<p><b>EVERY TEXT PLAYERS SEND EACH OTHER, ON THE WHOLE SERVICE, IN ONE PLACE.</b> This page lets the administration read player-to-player texts so the Hall can be moderated. It is <b>read-only</b>: nothing here edits, deletes or sends a text.</p>' +
+        '<p><b>EVERY TEXT ON THE WHOLE SERVICE, IN ONE PLACE.</b> This page lets the administration read the texts players send each other, and the notices and HYPE texts, so the Hall can be moderated. It is <b>read-only</b>: nothing here edits, deletes or sends a text.</p>' +
         '<ul><li><b>WHAT YOU SEE:</b> both usernames of every text (who sent it and who got it), the exact time in Los Angeles time, whether the receiver has opened it (<b>READ</b> or <b>UNREAD</b>), banned players, and who has blocked whom. Hover a username to see the full wallet address.</li>' +
-        '<li><b>NOT ON THIS PAGE:</b> texts with HYPE (those are on the <b>HYPE TEXTS</b> page) and MIMU mail and notices.</li>' +
+        '<li><b>THE FOUR VIEWS:</b> <b>ALL TEXTS</b> (the default) is every text on the service, newest first. <b>PLAYER TO PLAYER</b> is only what players write to each other. <b>MIMU NOTICES</b> are the automatic texts MIMU sends players (card bought, card sold, X bonus, wanted card found). <b>HYPE</b> is every text with the HYPE account (you can also answer those on the <b>HYPE TEXTS</b> page). MIMU <b>mail</b> (announcements) is on the MIMU MAIL page.</li>' +
         '<li><b>HOW TEXTS WORK FOR PLAYERS:</b> only players with 5 or more Mimu On Ape can text; a text is up to 280 characters; a player can send up to 20 a minute; players can block each other; banned players cannot send or receive; players cannot edit or delete a text. The Hall Rules tell players the team can read texts.</li>' +
         '<li><b>HOW TO USE IT:</b> the left list shows the conversations, newest first. Click one to read the whole conversation on the right. The search box finds a word in any text or any username. <b>SHOW ALL OF NAME&rsquo;S TEXTS</b> filters the page to one player. <b>TEXT NAME AS HYPE</b> opens the HYPE TEXTS page with that player ready, so you can warn them. To ban a player use the ban action on a flagged run.</li>' +
         '<li><b>LIVE:</b> this page refreshes every 3 seconds while it is open. It lists the 200 newest conversations and the 80 newest texts, and a conversation shows up to its latest 500 texts. Keep what you read here private.</li></ul></div></div>' +
         '<div class="utxstats" id="admUtxS"></div>' +
-        '<div class="box dbox"><h4>READ AND SEARCH</h4><div class="hxnew"><input id="admUtxQ" maxlength="60" placeholder="SEARCH EVERY TEXT OR ANY USERNAME" autocomplete="off"><button class="go" type="button" id="admUtxClr">CLEAR</button></div><div class="cmsg" id="admUtxMsg"></div><div class="utxchip" id="admUtxChip"></div>' +
+        '<div class="box dbox"><h4>READ AND SEARCH</h4><div class="cfilt utxscope" id="admUtxScope"></div><div class="hxnew"><input id="admUtxQ" maxlength="60" placeholder="SEARCH EVERY TEXT OR ANY USERNAME" autocomplete="off"><button class="go" type="button" id="admUtxClr">CLEAR</button></div><div class="cmsg" id="admUtxMsg"></div><div class="utxchip" id="admUtxChip"></div>' +
         '<div class="hx"><div><div class="hint" style="margin-bottom:8px" id="admUtxListH">CONVERSATIONS</div><div class="hxlist" id="admUtxList"></div></div><div><div id="admUtxHead"></div><div class="hxlog" id="admUtxLog"></div><div class="utxacts" id="admUtxActs"></div></div></div></div>' +
         '<div class="box dbox"><h4 id="admUtxAllH">THE NEWEST TEXTS</h4><div class="utxall" id="admUtxAll"></div></div>' +
         '<div class="box dbox"><h4>WHO HAS BLOCKED WHOM</h4><div class="utxall" id="admUtxBlk"></div></div></section>' +
@@ -584,9 +584,9 @@
       $('admMC').style.display = mtab === 'c' ? '' : 'none'; $('admML').style.display = mtab === 'c' ? 'none' : ''; lists();
     });
     /* USER TEXTS: every text between players, read-only (the server sends it from /admin/texts while this page is open) */
-    var utx = { data: null, a: '', b: '', p: '', q: '', busy: false, at: 0, sig: '', msg: '', qt: 0, openKey: '' };
+    var utx = { data: null, s: 'all', a: '', b: '', p: '', q: '', busy: false, at: 0, sig: '', msg: '', qt: 0, openKey: '' };
     function nameTag(w) { return '<span class="utn' + (w.banned ? ' ban' : '') + '" title="' + esc(w.address) + '">' + esc(w.name) + '</span>' + (w.banned ? ' <i class="utb">BANNED</i>' : ''); }
-    function utxQs() { var q = []; if (utx.a && utx.b) q.push('a=' + utx.a, 'b=' + utx.b); if (utx.p) q.push('p=' + utx.p); if (utx.q) q.push('q=' + encodeURIComponent(utx.q)); return q.length ? '?' + q.join('&') : ''; }
+    function utxQs() { var q = ['s=' + utx.s]; if (utx.a && utx.b) q.push('a=' + utx.a, 'b=' + utx.b); if (utx.p) q.push('p=' + utx.p); if (utx.q) q.push('q=' + encodeURIComponent(utx.q)); return '?' + q.join('&'); }
     function utxTick(force) {
       if (curTab !== 'utx' || !handlers.texts || utx.busy) return;
       if (!force && Date.now() - utx.at < 3000) return;
@@ -596,12 +596,14 @@
     function paintUtx(force) {
       var d = utx.data; if (!d || !$('admUtxS')) return;
       var c0 = {}; for (var k0 in d) if (k0 !== 'at') c0[k0] = d[k0];
-      var sig = JSON.stringify(c0) + '|' + utx.a + '|' + utx.b + '|' + utx.p + '|' + utx.q + '|' + utx.msg;
+      var sig = JSON.stringify(c0) + '|' + utx.s + '|' + utx.a + '|' + utx.b + '|' + utx.p + '|' + utx.q + '|' + utx.msg;
       if (sig === utx.sig && !force) return; utx.sig = sig;
       var st = d.stats || {}, convs = d.conversations || [], th = d.thread, res = d.results;
       var tile = function (n, l) { return '<div class="utxs"><b>' + n + '</b><span>' + l + '</span></div>'; }, f = function (n) { return Number(n || 0).toLocaleString('en-US'); };
-      $('admUtxS').innerHTML = tile(f(st.texts), 'TEXTS SENT IN ALL') + tile(f(st.conversations), 'CONVERSATIONS') + tile(f(st.senders), 'PLAYERS WHO HAVE TEXTED') + tile(f(st.last24h), 'LAST 24 HOURS') + tile(f(st.lastHour), 'LAST HOUR') + tile(f(st.unread), 'NOT OPENED YET') + tile(f(st.blocks), 'BLOCKS') +
+      $('admUtxS').innerHTML = tile(f(st.texts), utx.s === 'all' ? 'TEXTS IN ALL' : utx.s === 'players' ? 'TEXTS BETWEEN PLAYERS' : utx.s === 'mimu' ? 'MIMU NOTICES' : 'TEXTS WITH HYPE') + tile(f(st.conversations), 'CONVERSATIONS') + tile(f(st.senders), 'DIFFERENT SENDERS') + tile(f(st.last24h), 'LAST 24 HOURS') + tile(f(st.lastHour), 'LAST HOUR') + tile(f(st.unread), 'NOT OPENED YET') + tile(f(st.blocks), 'BLOCKS') +
         '<div class="utxs wide"><span>BUSIEST SENDERS</span><em>' + ((st.top || []).length ? st.top.map(function (t) { return '<a data-pf="' + esc(t.address) + '">' + esc(t.name) + ' (' + f(t.texts) + ')</a>'; }).join(' &middot; ') : 'NO TEXTS YET') + '</em></div>' + (st.firstAt ? '<div class="utxs wide"><span>FIRST TEXT EVER</span><em>' + stamp(st.firstAt) + '</em></div>' : '');
+      var kd = d.kinds || {}, SC = [['all', 'ALL TEXTS'], ['players', 'PLAYER TO PLAYER'], ['mimu', 'MIMU NOTICES'], ['hype', 'HYPE']];
+      $('admUtxScope').innerHTML = SC.map(function (x) { return '<button type="button" data-s="' + x[0] + '"' + (utx.s === x[0] ? ' class="on"' : '') + '>' + x[1] + ' (' + f(kd[x[0]]) + ')</button>'; }).join('');
       var msg = $('admUtxMsg'); msg.className = 'cmsg' + (utx.msg ? ' bad' : ''); msg.textContent = utx.msg;
       var chip = '', pw = utx.p && (convs.length ? (convs[0].a.address === utx.p ? convs[0].a : convs[0].b) : null);
       if (utx.p) chip += '<span class="utxc">SHOWING ONLY ' + (pw ? esc(pw.name) : esc(utx.p.slice(0, 8))) + '&rsquo;S TEXTS</span>'; if (utx.q) chip += '<span class="utxc">SEARCH: ' + esc(utx.q) + '</span>';
@@ -611,7 +613,7 @@
       lst.innerHTML = convs.length ? convs.map(function (c) {
         var on = utx.a === c.a.address && utx.b === c.b.address, lf = c.lastFrom === 'a' ? c.a.name : c.b.name;
         return '<button type="button" class="hxt utc' + (on ? ' on' : '') + '" data-a="' + esc(c.a.address) + '" data-b="' + esc(c.b.address) + '"><span class="av">' + esc((c.a.name || '?').charAt(0).toUpperCase() + (c.b.name || '?').charAt(0).toUpperCase()) + '</span><span class="mid"><b>' + esc(c.a.name) + ' \u2194 ' + esc(c.b.name) + '</b><em>' + esc(lf) + ': ' + esc(c.last) + '</em></span><span class="tm">' + stamp(c.lastAt) + '<i>' + c.texts + '</i></span></button>';
-      }).join('') : '<div class="hint">NO CONVERSATIONS ' + (utx.p ? 'FOR THIS PLAYER' : 'YET') + '. PLAYERS WITH 5 OR MORE MIMU ON APE CAN TEXT EACH OTHER FROM THE MESSAGES APP.</div>';
+      }).join('') : '<div class="hint">NO CONVERSATIONS ' + (utx.p ? 'FOR THIS PLAYER' : 'YET') + '.</div>';
       lst.scrollTop = lt;
       var head = $('admUtxHead'), log = $('admUtxLog'), acts = $('admUtxActs');
       if (th && th.messages) {
@@ -625,7 +627,7 @@
       } else { head.innerHTML = '<div class="utxh"><b>PICK A CONVERSATION</b><span>CLICK ONE ON THE LEFT TO READ ALL OF IT</span></div>'; log.innerHTML = ''; acts.innerHTML = ''; utx.openKey = ''; }
       var row = function (m) { return '<div class="utxr" data-a="' + esc(m.from < m.to ? m.from : m.to) + '" data-b="' + esc(m.from < m.to ? m.to : m.from) + '"><div class="utxrh"><span>' + nameTag({ name: m.fromName, address: m.from, banned: m.fromBanned }) + ' <i>\u2192</i> ' + nameTag({ name: m.toName, address: m.to, banned: m.toBanned }) + '</span><em>' + stamp(m.ts) + ' &middot; ' + (m.read ? 'READ' : 'UNREAD') + '</em></div><p>' + esc(m.body).replace(/\n/g, '<br>') + '</p></div>'; };
       var list = res ? res : (d.recent || []);
-      $('admUtxAllH').textContent = res ? 'SEARCH RESULTS FOR \u201c' + utx.q.toUpperCase() + '\u201d \u00b7 ' + res.length + (res.length >= 150 ? '+' : '') : (utx.p ? 'THIS PLAYER\u2019S NEWEST TEXTS' : 'THE NEWEST TEXTS ON THE WHOLE SERVICE');
+      $('admUtxAllH').textContent = res ? 'SEARCH RESULTS FOR \u201c' + utx.q.toUpperCase() + '\u201d \u00b7 ' + res.length + (res.length >= 150 ? '+' : '') : (utx.p ? 'THIS PLAYER\u2019S NEWEST TEXTS' : utx.s === 'players' ? 'THE NEWEST TEXTS BETWEEN PLAYERS' : utx.s === 'mimu' ? 'THE NEWEST MIMU NOTICES' : utx.s === 'hype' ? 'THE NEWEST TEXTS WITH HYPE' : 'THE NEWEST TEXTS ON THE WHOLE SERVICE');
       $('admUtxAll').innerHTML = list.length ? list.map(row).join('') : '<div class="hint">' + (res ? 'NOTHING MATCHES THAT SEARCH.' : 'NO TEXTS YET.') + '</div>';
       var bl = d.blocks || [];
       $('admUtxBlk').innerHTML = bl.length ? bl.map(function (x) { return '<div class="utxr"><div class="utxrh"><span>' + nameTag(x.by) + ' <i>HAS BLOCKED</i> ' + nameTag(x.blocked) + '</span></div></div>'; }).join('') : '<div class="hint">NOBODY HAS BLOCKED ANYONE.</div>';
@@ -635,10 +637,11 @@
       box.addEventListener('click', function (ev) {
         var c = ev.target.closest('.utc, .utxr[data-a]'); if (c && c.getAttribute('data-a')) { utx.a = c.getAttribute('data-a'); utx.b = c.getAttribute('data-b'); utx.openKey = ''; utx.at = 0; utxTick(true); return; }
         var hx = ev.target.closest('[data-hx]'); if (hx) { hxSel = hx.getAttribute('data-hx'); hxSig = ''; hxListSig = ''; show('msg'); paintHype(); var hb = $('admHBody'); if (hb) hb.focus(); return; }
+        var sb = ev.target.closest('[data-s]'); if (sb) { utx.s = sb.getAttribute('data-s'); utx.a = ''; utx.b = ''; utx.p = ''; utx.openKey = ''; utx.at = 0; utx.sig = ''; utxTick(true); return; }
         var pf = ev.target.closest('[data-pf]'); if (pf) { utx.p = pf.getAttribute('data-pf'); utx.a = ''; utx.b = ''; utx.q = ''; $('admUtxQ').value = ''; utx.at = 0; utxTick(true); return; }
       });
       $('admUtxQ').addEventListener('input', function () { var v = this.value.trim(); clearTimeout(utx.qt); utx.qt = setTimeout(function () { utx.q = v; utx.at = 0; utxTick(true); }, 400); });
-      $('admUtxClr').addEventListener('click', function () { utx.q = ''; utx.p = ''; utx.a = ''; utx.b = ''; utx.openKey = ''; $('admUtxQ').value = ''; utx.at = 0; utxTick(true); });
+      $('admUtxClr').addEventListener('click', function () { utx.q = ''; utx.p = ''; utx.a = ''; utx.b = ''; utx.s = 'all'; utx.openKey = ''; $('admUtxQ').value = ''; utx.at = 0; utxTick(true); });
     })();
     function clock() { try { $('admClock').textContent = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).toUpperCase() + ' · LOS ANGELES'; } catch (e) {} }
     var plFed = false, ecoSig = '';
