@@ -10,7 +10,7 @@
   var ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
 
   /* ---------- COLLECTED ---------- */
-  var HOWTO_COLLECTED = '<div class="howto"><div class="hth"><b>HOW TO USE COLLECTED</b></div>' +
+  var HOWTO_COLLECTED = '<div class="ahow"><div class="hth"><b>HOW TO USE COLLECTED</b></div>' +
     '<div class="hex"><figure><div class="hcard"><img src="assets/game/card-back.webp" alt="A card you do not have yet, face down"></div><figcaption>NOT COLLECTED<br>FACE DOWN</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a collected card, flipped face up"></div><figcaption>COLLECTED<br>FLIPPED &middot; #049</figcaption></figure></div>' +
     '<div class="hsub">ALL 120 CARDS START FACE DOWN. WHEN YOU EARN OR BUY ONE, IT FLIPS OVER AND SHOWS ITS PICTURE.</div>' +
     '<ol class="hsteps"><li><b>READ A CARD</b> THE DIAMONDS AT THE TOP SHOW HOW RARE IT IS (ONE TO FIVE), THE BADGE IN THE CORNER IS ITS FAMILY, AND THE NUMBER AT THE BOTTOM IS ITS PLACE FROM 1 TO 120.</li>' +
@@ -22,7 +22,7 @@
   var cBuilt = false, cEl, f = { tier: 0, family: '', view: 'all' }, seen = new Set(), cMode = 'reg', ff = { view: 'all' };
   function tierDot(t) { return t.grad ? '<i class="dm" style="background:' + t.grad + '"></i>' : '<i class="dm" style="background:' + t.color + '"></i>'; }
   /* ---------- the foil page: 120 cards, each in two glowing halves ---------- */
-  var HOWTO_FOIL = '<div class="howto foilhow"><div class="hth"><b>HOW FOIL WORKS</b></div><div class="hsub">EVERY CARD CAN BE RIPPED DOWN THE MIDDLE INTO TWO GLOWING FOIL HALVES: 240 PIECES IN ALL. COLLECT BOTH HALVES OF A CARD TO MAKE ITS FOIL CARD.</div>' +
+  var HOWTO_FOIL = '<div class="ahow foilhow"><div class="hth"><b>HOW FOIL WORKS</b></div><div class="hsub">EVERY CARD CAN BE RIPPED DOWN THE MIDDLE INTO TWO GLOWING FOIL HALVES: 240 PIECES IN ALL. COLLECT BOTH HALVES OF A CARD TO MAKE ITS FOIL CARD.</div>' +
     '<div class="hex fx3">' +
     '<figure><div class="fc fxs some hl"><div class="fcf"><div class="fcb"><img src="assets/game/card-back.webp" alt=""></div><div class="fh fl"><img src="assets/game/cards/ex/049.webp" alt="The left half of a foil card, glowing gold"></div><i class="fshine"></i></div></div><figcaption>ONE HALF<br>HALF A CARD</figcaption></figure>' +
     '<span class="har">&rsaquo;</span>' +

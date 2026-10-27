@@ -140,23 +140,24 @@
 
   /* ---------- MARKETPLACE ---------- */
   /* players sell their DUPLICATE cards, face up, to other signed-in players, for points (never coins) at a price the seller sets */
-  var mk = { tab: 'buy', msg: '' };
+  var mk = { tab: 'buy', msg: '', how: false };
   function drawMarket() {
     var el = $('mktApp'); if (!el) return; el.classList.add('page');
     var A = P.market ? P.market() : null, t = P.totals ? P.totals() : {}, on = P.isSignedIn() && A;
     var tabs = [['buy', 'BUY &middot; FACE UP'], ['sell', 'SELL &middot; DUPLICATES'], ['mine', 'MY LISTINGS']];
     var lockSub = { buy: 'FACE UP CARDS FROM PLAYERS, FOR POINTS', sell: 'SELL YOUR DUPLICATE CARDS FOR POINTS', mine: 'THE CARDS YOU HAVE LISTED' }[mk.tab];
     el.innerHTML = '<div class="pg cm"><div class="pgh"><h2 class="gold">MARKETPLACE</h2><div class="pgsub">DUPLICATE CARDS &middot; FACE UP &middot; FOR POINTS</div></div>' +
-      '<div class="howto"><div class="hth"><b>HOW TO USE THE MARKETPLACE</b></div>' +
+      '<details class="ahow mkhow" id="mkHow"' + (mk.how ? ' open' : '') + '><summary class="hth"><b>HOW TO USE THE MARKETPLACE</b><i>TAP TO OPEN OR CLOSE</i></summary>' +
       '<div class="hex"><figure><div class="hcard own"><img src="assets/game/cards/ex/049.webp" alt="Good Boy Gary, a duplicate card listed face up"></div><figcaption>A DUPLICATE<br>LISTED FACE UP<br>#049</figcaption></figure><span class="har">&rsaquo;</span><figure><div class="hcard own pts"><b>5,000</b><small>POINTS</small></div><figcaption>THE PRICE THE<br>SELLER SETS<br>IN POINTS</figcaption></figure></div>' +
       '<ol class="hsteps"><li><b>ONLY DUPLICATES CAN BE SOLD.</b> YOU ALWAYS KEEP ONE COPY OF EVERY CARD. ONLY THE EXTRA COPIES CAN GO ON SALE, SO NOBODY EVER SELLS A CARD OUT OF THEIR DECK.</li>' +
       '<li><b>DISTANCE POINTS ONLY.</b> BUYERS PAY WITH THEIR DISTANCE POINTS, THE POINTS FROM RUNNING. COINS, DECK PERCENTAGES, X POINTS AND POINTS FROM SELLING CANNOT BUY. THE SELLER CHOOSES ANY PRICE. THE PRICE COMES OFF THE BUYER&rsquo;S SCORE AND IS ADDED TO THE SELLER&rsquo;S SCORE AS MARKETPLACE POINTS, WHICH COUNT FOR THE LEADERBOARD BUT CANNOT BE SPENT.</li>' +
       '<li><b>SELL.</b> OPEN THE SELL TAB, TYPE YOUR PRICE UNDER A DUPLICATE AND PRESS LIST. IT SHOWS FACE UP TO EVERY SIGNED-IN PLAYER. CANCEL IT ANY TIME FROM MY LISTINGS.</li>' +
       '<li><b>BUY.</b> OPEN THE BUY TAB AND PRESS THE PRICE ON ANY CARD. PRESS TEXT TO MESSAGE THE SELLER FIRST AND ASK FOR A BETTER PRICE.</li>' +
-      '<li><b>SALES ARE FINAL.</b> ONLY POINTS CHANGE HANDS, NEVER MONEY. YOU MUST BE SIGNED IN TO BUY OR SELL.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></div>' +
+      '<li><b>SALES ARE FINAL.</b> ONLY POINTS CHANGE HANDS, NEVER MONEY. YOU MUST BE SIGNED IN TO BUY OR SELL.</li></ol><div class="hsub" style="margin-top:8px"><b>IN-GAME CARDS ONLY.</b> THEY ARE PICTURES THAT STAND FOR REAL CARDS, NOT THE REAL CARDS, AND ARE NOT REAL-WORLD ASSETS.</div></details>' +
       '<div class="mkstats one"><div><small>YOUR DISTANCE POINTS TO SPEND</small><b>' + fmt(t.spendable != null ? t.spendable : (t.points != null ? t.points : t.lifetime)) + '</b></div></div>' +
       '<div class="tabs3 t3" id="mkTabs">' + tabs.map(function (x) { return '<button' + (mk.tab === x[0] ? ' class="on"' : '') + ' data-k="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>' +
       '<div class="cmerr" id="mkMsg">' + esc(mk.msg) + '</div><div class="sec" id="mkList">' + (on ? '<div class="empty">LOADING</div>' : '<div class="empty">' + LOCK + '<br>THE MARKETPLACE OPENS WITH SIGN-IN<br><span style="opacity:.7">' + lockSub + '</span></div>') + '</div></div>';
+    $('mkHow').addEventListener('toggle', function () { mk.how = this.open; });
     $('mkTabs').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b) return; mk.tab = b.getAttribute('data-k'); mk.msg = ''; drawMarket(); });
     if (!on) return;
     var tab = mk.tab;
