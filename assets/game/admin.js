@@ -545,7 +545,8 @@
     var mtab = 'c';
     function lists() {
       var m = (feed && feed.mails) || [];
-      var box = $('admML'); if (mtab === 's') box.innerHTML = m.length ? m.slice(0, 12).map(function (x) { return '<div class="srow2"><b>' + esc(x.subject) + '</b><span>' + esc(x.body) + '</span><em>' + stamp(x.ts) + '</em></div>'; }).join('') : '<div class="srow2 none">NO MAIL SENT YET</div>';
+      var box = $('admML'), tabS = document.querySelector('#admMT button[data-k="s"]'); if (tabS) tabS.textContent = 'SENT' + (m.length ? ' (' + m.length + ')' : '');
+      if (mtab === 's') box.innerHTML = m.length ? '<div class="hint" style="margin-bottom:10px">Every email that went out, newest first: your own mail and the wanted card emails sent when you launch a card. Each one is in every signed-in player&rsquo;s Mail app. OPENED shows how many players have opened it so far (out of ' + fmt((feed && feed.signedIn) || 0) + ' signed in).</div>' + m.map(function (x) { var wanted = x.kind === 'wanted'; return '<div class="srow2 sent"><div class="sh"><i class="' + (wanted ? 'wk' : 'mk') + '">' + (wanted ? 'WANTED CARD' : 'MIMU MAIL') + '</i><em>' + stamp(x.ts) + '</em><em>OPENED BY ' + fmt(x.opened || 0) + '</em></div><b>' + esc(x.subject) + '</b><span class="sb">' + esc(x.body) + '</span></div>'; }).join('') : '<div class="srow2 none">NO MAIL SENT YET</div>';
     }
     function done(el, p, okText) {
       el.className = 'cmsg'; if (!p) { el.textContent = 'NOT CONNECTED YET · NOTHING WAS SENT'; el.classList.add('bad'); return; }
