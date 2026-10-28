@@ -140,7 +140,7 @@
         var rows = todo.map(function (w) { return { address: String(w.address).toLowerCase(), type: String(w.type || '').replace(/_/g, ' '), ok: false }; });
         function paint(msg, manual) {
           var enough = st.eligible === true;
-          showNote('<span class="gn">MIMU ON APE IN ANOTHER WALLET?</span>' +
+          showNote('<span class="gn">USE MY LINKED WALLET</span>' +
             '<small>YOU LINKED THESE WALLETS IN GLYPH. SIGN ONE SENTENCE IN EACH WALLET AND ITS MIMUS COUNT. IT COSTS NOTHING AND NOTHING MOVES.</small>' +
             '<div class="lkn">' + (enough ? 'YOU ARE IN: ' : 'YOU NEED ' + (nft.need || 5) + ' TO PLAY: ') + '<b>' + st.count + '</b> MIMU' + (st.count === 1 ? '' : 'S') + ' COUNTED</div>' +
             '<div class="lkl">' + rows.map(function (w, i) { return '<div class="lkr' + (w.ok ? ' ok' : '') + '"><span class="lka" title="' + esc(w.address) + '">' + esc(shortAddr(w.address)) + (w.type ? ' <em>' + esc(w.type.toUpperCase()) + '</em>' : '') + '</span>' + (w.ok ? '<span class="lkd">&#10003; COUNTED</span>' : '<button type="button" class="lkv" data-i="' + i + '">VERIFY</button>') + '</div>'; }).join('') + '</div>' +
