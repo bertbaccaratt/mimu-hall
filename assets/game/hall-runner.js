@@ -116,27 +116,31 @@
 
   /* ---------- card sightings and the pack ---------- */
   function cardImg(n) { var im = cardImgs[n]; if (!im) { im = new Image(); im.src = HallProfile.card(n).file; cardImgs[n] = im; } return im; }
-  // which card a sighting is: a lottery with no time limit for Common, Uncommon and Rare (always a card you do not have yet); Prestige joins at 2:00 alive and Legendary at 3:00, at their small odds. A sighting is never a duplicate
+  // which card a sighting is: ALL their cards, in order. A sighting is always a card you do not have yet and goes up the rarities in order: every Common first, then every Uncommon, then every Rare, then every Prestige, then every Legendary (which card inside the rarity is random).
+  // Once you own all 120 different cards the sightings carry on and give duplicates, by the lottery. Stagger cards are separate and keep doing their own thing.
+  // It is still a lottery: the rarity odds (62, 24, 10, 3, 1) are the weights. The timing stays as it was: after 2:00 alive in one run a Prestige joins the lottery and after 3:00 a Legendary, even before the lower rarities are finished.
   function pickCard() {
     var P = HallProfile, cfg = P.config.sight, list = P.cards(); if (!list.length) return null;
-    var test = S.rc.test, own = P.owned(), byTier = [[], [], [], [], [], []], i, t;
+    var test = S.rc.test, own = P.owned(), byTier = [[], [], [], [], [], []], t;
     function have(c) { return own.has(c.n) || S.runOwned.has(c.n); }
     list.forEach(function (c) { byTier[c.tier].push(c); });
-    function complete(tr) { return byTier[tr].every(have); }
-    var tier = 0, open = [], w = [], total = 0, r;
-    for (t = 1; t <= 5; t++) {
-      if (!(test || S.alive >= cfg.locksSec[t - 1])) continue;
-      if (complete(t)) continue;   // a sighting is never a duplicate, so a finished tier drops out
-      open.push(t); w.push(cfg.odds[t - 1]);
+    function missing(tr) { return byTier[tr].filter(function (c) { return !have(c); }); }
+    var ladder = 0; for (t = 1; t <= 5; t++) if (missing(t).length) { ladder = t; break; }   // the lowest rarity you have not finished
+    if (!ladder) {   // you own all 120 different cards: sightings carry on, giving duplicates by the lottery (Prestige and Legendary keep their 2:00 and 3:00 timing)
+      var dt = [], dw = [], dsum = 0, k, rr, dtier;
+      for (t = 1; t <= 5; t++) if (test || S.alive >= cfg.locksSec[t - 1]) { dt.push(t); dw.push(cfg.odds[t - 1]); dsum += cfg.odds[t - 1]; }
+      rr = Math.random() * dsum; dtier = dt[dt.length - 1];
+      for (k = 0; k < dt.length; k++) { rr -= dw[k]; if (rr <= 0) { dtier = dt[k]; break; } }
+      return byTier[dtier][(Math.random() * byTier[dtier].length) | 0];
     }
-    if (!open.length) return null;   // every card is collected
+    var open = [ladder], w = [cfg.odds[ladder - 1]], total = 0, i, r, tier = ladder;
+    if (ladder < 4 && (test || S.alive >= cfg.locksSec[3]) && missing(4).length) { open.push(4); w.push(cfg.odds[3]); }
+    if (ladder < 5 && (test || S.alive >= cfg.locksSec[4]) && missing(5).length) { open.push(5); w.push(cfg.odds[4]); }
     w.forEach(function (x) { total += x; }); r = Math.random() * total;
     for (i = 0; i < open.length; i++) { r -= w[i]; if (r <= 0) { tier = open[i]; break; } }
-    if (!tier) tier = open[open.length - 1];
-    var cand = byTier[tier].filter(function (c) { return !have(c); });
+    var cand = missing(tier);
     return cand[(Math.random() * cand.length) | 0];
-  }
-    // a lane for something floating ahead: never on top of a box, and (for the pack) never the lane the last pack used
+  }    // a lane for something floating ahead: never on top of a box, and (for the pack) never the lane the last pack used
   function freeLane(z, avoid) {
     var lanes = [-1, 0, 1].filter(function (l) { return l !== avoid; }).sort(function () { return Math.random() - 0.5; }), i, j, bad;
     for (var dz = 0; dz < 12; dz += 1.4) for (i = 0; i < lanes.length; i++) { bad = false; for (j = 0; j < S.ents.length; j++) { var e = S.ents[j]; if (e.lane === lanes[i] && Math.abs(e.z - (z + dz)) < 1.8) bad = true; } if (!bad) return { lane: lanes[i], z: z + dz }; }
