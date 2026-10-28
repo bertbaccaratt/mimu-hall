@@ -541,14 +541,14 @@
     ctx.save(); ctx.globalAlpha = clamp((s - 0.05) / 0.08, 0, 1);
     shadow(x, y, cw * 0.5);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; if (dk === 'wanted') pulse = 0.9 + 0.3 * Math.sin(S.t * 7);
-    var cols = dk === 'wanted' ? [['255,190,50', 0]] : dk === 'foil' ? [['255,205,90', 0]] : dk === 'stagger' ? [['190,140,255', 0]] : e.tier === 5 ? [['71,209,255', -0.28], ['195,88,209', 0.28]] : [[tr.glow, 0]];
+    var cols = dk === 'foil' ? [['255,205,90', 0]] : e.tier === 5 ? [['255,45,60', -0.28], ['255,95,70', 0.28]] : e.tier === 4 ? [[tr.glow, 0]] : dk === 'wanted' ? [['255,190,50', 0]] : dk === 'stagger' ? [['190,140,255', 0]] : [[tr.glow, 0]];   /* any Prestige glows purple and any Legendary red, however it arrives */
     if (TOUCH) cols.forEach(function (cc) { glowAt(cc[0], x + cc[1] * cw, cy, gr, gr, 0.62 * pulse); }); else cols.forEach(function (cc) { g = ctx.createRadialGradient(x + cc[1] * cw, cy, ch * 0.1, x + cc[1] * cw, cy, gr); g.addColorStop(0, 'rgba(' + cc[0] + ',' + (0.5 * pulse) + ')'); g.addColorStop(0.6, 'rgba(' + cc[0] + ',' + (0.2 * pulse) + ')'); g.addColorStop(1, 'rgba(' + cc[0] + ',0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + cc[1] * cw, cy, gr, 0, 6.3); ctx.fill(); });
     ctx.restore();
     if (!TOUCH) { ctx.shadowColor = 'rgba(' + tr.glow + ',' + (0.5 * pulse) + ')'; ctx.shadowBlur = Math.max(4, cw * 0.5); }
     if (dk === 'foil') drawFoil(im, e, x, cy, cw, ch);
     else if (im.naturalWidth) ctx.drawImage(im, x - cw / 2, cy - ch / 2, cw, ch); else { ctx.fillStyle = '#0b0708'; ctx.fillRect(x - cw / 2, cy - ch / 2, cw, ch); }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
-    ctx.strokeStyle = dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); if (dk !== 'foil') ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
+    ctx.strokeStyle = e.tier >= 4 && dk !== 'foil' ? 'rgba(' + tr.glow + ',' + (dk ? 0.95 : 0.55) + ')' : dk === 'wanted' ? 'rgba(255,200,70,0.95)' : dk === 'stagger' ? 'rgba(205,165,255,0.95)' : 'rgba(' + tr.glow + ',0.55)'; ctx.lineWidth = Math.max(0.8, cw * (dk ? 0.04 : 0.025)); if (dk !== 'foil') ctx.strokeRect(x - cw / 2, cy - ch / 2, cw, ch);
     if (dk === 'wanted' || dk === 'first' || dk === 'stagger' || dk === 'foil') { ctx.font = '700 ' + Math.max(8, cw * 0.2) + 'px Cinzel, Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = dk === 'wanted' || dk === 'foil' ? '#ffd45a' : dk === 'stagger' ? '#d9bcff' : '#fff3c9'; if (!TOUCH) { ctx.shadowColor = '#000'; ctx.shadowBlur = 4; } ctx.fillText(dk === 'wanted' ? 'WANTED' : dk === 'stagger' ? 'STAGGER' : dk === 'foil' ? 'FOIL' : 'FIRST', x, cy - ch / 2 - Math.max(3, cw * 0.06)); }
     ctx.restore();
   }

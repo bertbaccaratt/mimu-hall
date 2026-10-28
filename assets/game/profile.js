@@ -32,8 +32,8 @@
     { n: 1, key: 'common', name: 'Common', color: '#ffffff', glow: '255,255,255' },
     { n: 2, key: 'uncommon', name: 'Uncommon', color: '#5fd37a', glow: '95,211,122' },
     { n: 3, key: 'rare', name: 'Rare', color: '#4aa3ff', glow: '74,163,255' },
-    { n: 4, key: 'prestige', name: 'Prestige', color: '#f0c24a', glow: '240,194,74' },
-    { n: 5, key: 'legendary', name: 'Legendary', color: '#47d1ff', glow: '120,170,255', grad: 'linear-gradient(90deg,#47d1ff,#c358d1)' }
+    { n: 4, key: 'prestige', name: 'Prestige', color: '#f0c24a', glow: '165,70,255' },
+    { n: 5, key: 'legendary', name: 'Legendary', color: '#47d1ff', glow: '255,50,60', grad: 'linear-gradient(90deg,#47d1ff,#c358d1)' }
   ];
   var FAMILIES = [
     { key: 'club', name: 'Club' }, { key: 'mutant', name: 'Mutant' }, { key: 'cosmic', name: 'Cosmic' }, { key: 'arcana', name: 'Arcana' }

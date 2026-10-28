@@ -41,7 +41,7 @@
 .cb img, .cfr img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .cn { position: absolute; left: 0; right: 0; bottom: calc(var(--h) * -.012); text-align: center; font-size: max(8px, calc(var(--h) * .0088)); letter-spacing: .12em; color: #6e5630; }
 .cc.owned .cn { color: #d9ac5c; }
-.cc[data-t="1"] { --tc: #ffffff; --tg: rgba(255,255,255,.4); } .cc[data-t="2"] { --tc: #5fd37a; --tg: rgba(95,211,122,.45); } .cc[data-t="3"] { --tc: #4aa3ff; --tg: rgba(74,163,255,.45); } .cc[data-t="4"] { --tc: #f0c24a; --tg: rgba(240,194,74,.5); } .cc[data-t="5"] { --tc: #8aa8ff; --tg: rgba(120,170,255,.55); }
+.cc[data-t="1"] { --tc: #ffffff; --tg: rgba(255,255,255,.4); } .cc[data-t="2"] { --tc: #5fd37a; --tg: rgba(95,211,122,.45); } .cc[data-t="3"] { --tc: #4aa3ff; --tg: rgba(74,163,255,.45); } .cc[data-t="4"] { --tc: #f0c24a; --tg: rgba(165,70,255,.55); } .cc[data-t="5"] { --tc: #8aa8ff; --tg: rgba(255,50,60,.55); }
 .cc.fresh .cf { animation: freshpop 1.2s ease; }
 @keyframes freshpop { 0% { filter: brightness(2.4); } 100% { filter: none; } }
 
