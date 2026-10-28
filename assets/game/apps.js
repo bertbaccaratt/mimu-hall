@@ -201,6 +201,7 @@
         row('sound', 'Sound', '<i class="sw2' + (muted ? '' : ' on') + '"></i>', 'sSound', 'button') +
         row('vol', 'Volume', '<input id="sVol" type="range" min="0" max="8" step="1" value="' + vol + '"><span class="v" id="sVolV">' + vol + '</span>') +
         row('clock', 'Clock', '<span class="v">12-HOUR &middot; LOS ANGELES</span>') +
+        row('help', 'Language', '<span class="v langsw">' + [['en', 'EN'], ['es', 'ES'], ['zh', '\u4e2d\u6587']].map(function (x) { return '<button type="button" data-l="' + x[0] + '"' + (window.HallI18n && HallI18n.lang() === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</span>') +
       '</div>' +
       '<div class="sgl">ABOUT</div><div class="sgrp">' +
         row('hall', 'THE HALL', '<span class="v">v1.0</span>') +
@@ -212,6 +213,7 @@
       '<div class="sgl">ACCOUNT</div><div class="sgrp">' + row('link', 'Disconnect Glyph', '<span class="v">' + (signed ? 'SIGN OUT' : 'NOT CONNECTED') + '</span>', 'sDisc', 'button') + '</div>' +
       '<div class="sfoot">THE HALL &middot; MIMU ON APE &middot; CREATED BY @BERT_BACCARATT</div></div>';
     $('sSound').addEventListener('click', function () { if (A) A.toggleMute(); silentSwitch(); drawSettings(); });
+    sEl.querySelector('.langsw').addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b || !window.HallI18n) return; HallI18n.set(b.getAttribute('data-l')); drawSettings(); });
     var rng = $('sVol'); rng.addEventListener('input', function () { var v = parseInt(rng.value, 10); $('sVolV').textContent = v; if (A) { A.setVolume(v / 8); } silentSwitch(); var sw = sEl.querySelector('.sw2'); if (sw && A) sw.classList.toggle('on', !A.isMuted()); });
     $('sRules').addEventListener('click', function () { var a = document.querySelector('a[href="#hall"]'); if (a) a.click(); });
     $('sTos').addEventListener('click', function () { var a = document.querySelector('a[href="#about"]'); if (a) a.click(); });
