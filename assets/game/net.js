@@ -105,10 +105,71 @@
   function loadGlyph() {
     if (window.MimuGlyph) return Promise.resolve();
     if (S.glyphP) return S.glyphP;
-    S.glyphP = new Promise(function (res, rej) { var s = document.createElement('script'); s.src = 'assets/game/glyph-connect.js?v=20261023r'; s.onload = res; s.onerror = function () { S.glyphP = null; rej(new Error('Glyph could not load. Check your connection and try again.')); }; document.head.appendChild(s); });
+    S.glyphP = new Promise(function (res, rej) { var s = document.createElement('script'); s.src = 'assets/game/glyph-connect.js?v=20261027l'; s.onload = res; s.onerror = function () { S.glyphP = null; rej(new Error('Glyph could not load. Check your connection and try again.')); }; document.head.appendChild(s); });
     return S.glyphP;
   }
-  function signIn() {
+  /* ---------- linked wallets: right after the Glyph sign-in ----------
+     Glyph lists the wallets a player linked in their Glyph account. The server cannot ask Glyph to confirm that list, so each wallet signs ONE sentence that names this account
+     (a message that costs nothing and cannot move anything); the server checks the signature and counts that wallet's Mimu On Ape. Done once per wallet. A SKIP always works. */
+  function callTok(token, path, body) {
+    return fetch(API + path, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || 'SOMETHING WENT WRONG'); e.status = r.status; throw e; } return j; });
+    });
+  }
+  function shortAddr(a) { return String(a).slice(0, 6) + '\u2026' + String(a).slice(-4); }
+  function toHex(s) { var b = new TextEncoder().encode(s), h = '0x'; for (var i = 0; i < b.length; i++) h += (b[i] < 16 ? '0' : '') + b[i].toString(16); return h; }
+  function walletSign(addr, message) {   // a browser wallet (MetaMask, Rabby, Coinbase Wallet...): choose the account, sign the sentence
+    var e = window.ethereum; if (!e) return Promise.reject(new Error('NO_WALLET'));
+    var provs = e.providers && e.providers.length ? e.providers : [e], want = String(addr).toLowerCase();
+    var has = function (a) { return (a || []).some(function (x) { return String(x).toLowerCase() === want; }); };
+    var pick = function (i) { return i >= provs.length ? Promise.resolve(null) : provs[i].request({ method: 'eth_accounts' }).then(function (a) { return has(a) ? provs[i] : pick(i + 1); }, function () { return pick(i + 1); }); };
+    return pick(0).then(function (p) {
+      if (p) return p;
+      return provs[0].request({ method: 'eth_requestAccounts' }).then(function (a) { if (!has(a)) throw new Error('IN YOUR WALLET, SWITCH TO ' + shortAddr(addr) + ' AND TRY AGAIN'); return provs[0]; });
+    }).then(function (p) { return p.request({ method: 'personal_sign', params: [toHex(message), addr] }); });
+  }
+  function linkStep(r) {
+    var G = window.MimuGlyph, list = []; try { list = (G && G.linked && G.linked()) || []; } catch (e) { list = []; }
+    var me = r && r.me, nft = me && me.nft; if (!list.length || !r.token || !nft || !nft.enabled) return Promise.resolve();
+    var own = String((me && me.address) || '').toLowerCase();
+    return callTok(r.token, '/nft/links').then(function (j) {
+      var done = {}, st = { count: nft.count || 0, eligible: nft.eligible }; (j.links || []).forEach(function (l) { done[String(l.wallet).toLowerCase()] = 1; });
+      var todo = list.filter(function (w) { var a = String(w.address).toLowerCase(); return a !== own && !done[a]; });
+      var skipped = lsGet('mimu-lnk-skip'); if (!todo.length || (nft.eligible && skipped && Date.now() - skipped < 3 * 86400000)) return;
+      return new Promise(function (resolve) {
+        var rows = todo.map(function (w) { return { address: String(w.address).toLowerCase(), type: String(w.type || '').replace(/_/g, ' '), ok: false }; });
+        function paint(msg, manual) {
+          var enough = st.eligible === true;
+          showNote('<span class="gn">MIMU ON APE IN ANOTHER WALLET?</span>' +
+            '<small>YOU LINKED THESE WALLETS IN GLYPH. SIGN ONE SENTENCE IN EACH WALLET AND ITS MIMUS COUNT. IT COSTS NOTHING AND NOTHING MOVES.</small>' +
+            '<div class="lkn">' + (enough ? 'YOU ARE IN: ' : 'YOU NEED ' + (nft.need || 5) + ' TO PLAY: ') + '<b>' + st.count + '</b> MIMU' + (st.count === 1 ? '' : 'S') + ' COUNTED</div>' +
+            '<div class="lkl">' + rows.map(function (w, i) { return '<div class="lkr' + (w.ok ? ' ok' : '') + '"><span class="lka" title="' + esc(w.address) + '">' + esc(shortAddr(w.address)) + (w.type ? ' <em>' + esc(w.type.toUpperCase()) + '</em>' : '') + '</span>' + (w.ok ? '<span class="lkd">&#10003; COUNTED</span>' : '<button type="button" class="lkv" data-i="' + i + '">VERIFY</button>') + '</div>'; }).join('') + '</div>' +
+            (manual ? '<div class="lkm"><small>NO WALLET FOUND IN THIS BROWSER. COPY THE SENTENCE, SIGN IT IN THE WALLET THAT HOLDS THE MIMUS (SIGN MESSAGE), THEN PASTE THE SIGNATURE.</small><textarea id="lkTxt" readonly rows="4">' + esc(manual.message) + '</textarea><input id="lkSig" placeholder="PASTE THE SIGNATURE (0x...)" autocomplete="off"><span class="gb"><button type="button" id="lkCopy">COPY THE SENTENCE</button><button type="button" id="lkSend">SUBMIT</button></span></div>' : '') +
+            '<small class="lkmsg" id="lkMsg">' + esc(msg || '') + '</small>' +
+            '<span class="gb"><button type="button" id="lkGo">' + (rows.every(function (w) { return w.ok; }) || enough ? 'CONTINUE' : 'SKIP FOR NOW') + '</button></span>');
+          note.classList.add('lk');   // a solid panel in the middle: the CONNECT GLYPH button must not show through
+          $('lkGo').onclick = function () { if (enough) lsSet('mimu-lnk-skip', Date.now()); resolve(); };
+          Array.prototype.forEach.call(document.querySelectorAll('#glyphNote .lkv'), function (b) { b.onclick = function () { verify(+b.getAttribute('data-i')); }; });
+          if (manual) { $('lkCopy').onclick = function () { try { navigator.clipboard.writeText(manual.message); $('lkMsg').textContent = 'COPIED'; } catch (e) { $('lkTxt').select(); } }; $('lkSend').onclick = function () { send(manual.row, manual.issued, ($('lkSig').value || '').trim()); }; }
+        }
+        function send(i, issued, signature) {
+          return callTok(r.token, '/nft/link', { wallet: rows[i].address, issued: issued, signature: signature }).then(function (j) {
+            rows[i].ok = true; if (j.nft) { st.count = j.nft.count || 0; st.eligible = j.nft.eligible; nft = j.nft; r.me.nft = j.nft; } paint('');
+          }, function (e) { paint(String(e.message || 'COULD NOT LINK').toUpperCase(), null); });
+        }
+        function verify(i) {
+          var addr = rows[i].address; paint('CHECK YOUR WALLET: APPROVE THE SIGN MESSAGE REQUEST');
+          callTok(r.token, '/nft/link/challenge', { wallet: addr }).then(function (c) {
+            return walletSign(addr, c.message).then(function (sig) { return send(i, c.issued, sig); }, function (e) {
+              if (e && e.message === 'NO_WALLET') return paint('', { message: c.message, issued: c.issued, row: i });
+              paint(/rejected|denied|cancel/i.test(String(e && e.message)) ? 'NOT SIGNED. TAP VERIFY WHEN YOU ARE READY.' : String((e && e.message) || 'NOT SIGNED').toUpperCase());
+            });
+          }, function (e) { paint(String(e.message || 'COULD NOT START').toUpperCase()); });
+        }
+        paint('');
+      });
+    }, function () { /* the link list could not be read: carry on with the normal sign-in */ });
+  }  function signIn() {
     return loadGlyph().then(function () { return window.MimuGlyph.connect(); }).then(function (id) {
       return call('/auth/nonce', { body: {}, noAuth: true }).then(function (n) {
         var message = 'Sign in to MIMU Games\nThis only proves you own this wallet. It costs nothing, sends no transaction and cannot move your assets.\n\nDomain: ' + location.host + '\nAddress: ' + id.address + '\nNonce: ' + n.nonce + '\nIssued: ' + n.issuedAt;
@@ -116,14 +177,14 @@
           return call('/auth/verify', { body: { address: id.address, nonce: n.nonce, issuedAt: n.issuedAt, signature: signature, name: id.name, picture: id.picture }, noAuth: true, admin: gAdmin() ? admToken() : undefined });
         });
       });
-    }).then(function (r) { if (refused(r.me)) { S.token = null; S.me = null; S.active = false; lsDel(SKEY); r.refused = true; S.demoOnly = true; return r; } activate(r.token, r.expiresAt, r.me); return r; });
+    }).then(function (r) { return linkStep(r).then(function () { return r; }, function () { return r; }); }).then(function (r) { if (refused(r.me)) { S.token = null; S.me = null; S.active = false; lsDel(SKEY); r.refused = true; S.demoOnly = true; return r; } activate(r.token, r.expiresAt, r.me); return r; });
   }
 
   /* ---------- the entrance: CONNECT GLYPH ---------- */
   var note = null;
   function showNote(html) {
     if (!note) { note = document.createElement('div'); note.id = 'glyphNote'; note.setAttribute('role', 'status'); document.body.appendChild(note); }
-    note.innerHTML = html; note.classList.add('on');
+    note.innerHTML = html; note.classList.remove('lk'); note.classList.add('on');
   }
   function hideNote() { if (note) note.classList.remove('on'); }
   var GLYPH_LIVE = true;   // Glyph sign-in is on. The CONNECT GLYPH button stays locked until the Hall run starts (see the lock below), and the server refuses sign-ins before then too
